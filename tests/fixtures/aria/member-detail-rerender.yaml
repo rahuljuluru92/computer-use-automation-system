@@ -1,0 +1,90 @@
+- generic [active] [ref=f11e1] [box=0,0,1280,710]:
+  - table [ref=f11e2] [box=0,0,1280,42]:
+    - rowgroup [ref=f11e3] [box=0,0,1280,42]:
+      - row [ref=f11e4] [box=0,0,1280,42]:
+        - cell "MERIDIAN CORE Servicing Console v7.2.14" [ref=f11e5] [box=0,0,834,42]:
+          - generic [ref=f11e6] [box=14,10,168,22]: MERIDIAN CORE
+          - text: Servicing Console v7.2.14
+        - 'cell "Operator: teller01 Sign Out" [ref=f11e7] [box=834,0,446,42]':
+          - text: "Operator:"
+          - generic [ref=f11e8] [box=1166,16,44,12]: teller01
+          - link "Sign Out" [ref=f11e9] [cursor=pointer] [box=1218,15,48,13]:
+            - /url: /logout
+  - table [ref=f11e10] [box=0,42,1280,24]:
+    - rowgroup [ref=f11e11] [box=0,42,1280,23]:
+      - row [ref=f11e12] [box=0,42,1280,23]:
+        - cell [ref=f11e13] [box=0,42,1280,23]:
+          - link "Member Search" [ref=f11e14] [cursor=pointer] [box=10,47,87,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Accounts" [ref=f11e15] [cursor=pointer] [box=117,47,50,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Transactions" [ref=f11e16] [cursor=pointer] [box=187,47,69,13]:
+            - /url: /members/search
+  - iframe [ref=f11e17] [box=0,66,1280,644]:
+    - table [ref=f12e2] [box=0,0,1280,329]:
+      - rowgroup [ref=f12e3] [box=2,2,1276,325]:
+        - row [ref=f12e4] [box=2,2,1276,325]:
+          - cell [ref=f12e5] [box=2,2,1276,325]:
+            - table [ref=f12e6] [box=16,16,760,122]:
+              - rowgroup [ref=f12e7] [box=17,17,758,120]:
+                - row [ref=f12e8] [box=17,17,758,24]:
+                  - columnheader "Member Detail" [ref=f12e9] [box=17,17,758,24]
+                - row [ref=f12e10] [box=17,41,758,24]:
+                  - cell "Member ID" [ref=f12e11] [box=17,41,186,24]
+                  - cell "12345" [ref=f12e12] [box=203,41,158,24]
+                  - cell "Status" [ref=f12e13] [box=361,41,186,24]
+                  - cell "Active" [ref=f12e14] [box=547,41,228,24]
+                - row [ref=f12e15] [box=17,65,758,24]:
+                  - cell "Name" [ref=f12e16] [box=17,65,186,24]
+                  - cell "Jordan Avery" [ref=f12e17] [box=203,65,158,24]
+                  - cell "Member Since" [ref=f12e18] [box=361,65,186,24]
+                  - cell "2014-03-08" [ref=f12e19] [box=547,65,228,24]
+                - row [ref=f12e20] [box=17,89,758,24]:
+                  - cell "Tax ID" [ref=f12e21] [box=17,89,186,24]
+                  - cell "078-05-1120" [ref=f12e22] [box=203,89,158,24]
+                  - cell "Card on File" [ref=f12e23] [box=361,89,186,24]
+                  - cell "4111111111111111" [ref=f12e24] [box=547,89,228,24]
+                - row [ref=f12e25] [box=17,113,758,24]:
+                  - cell "Servicing Memo" [ref=f12e26] [box=17,113,186,24]
+                  - cell "Prefers paperless statements. CANARY-MEMO-never-persist-b2e4c8" [ref=f12e27] [box=203,113,572,24]
+            - table "Accounts" [ref=f12e28] [box=16,151,760,122]:
+              - caption [ref=f12e29] [box=16,151,760,24]:
+                - generic [ref=f12e30] [box=363,155,66,16]: Accounts
+              - rowgroup [ref=f12e31] [box=17,176,758,96]:
+                - row [ref=f12e32] [box=17,176,758,24]:
+                  - columnheader "Account Number" [ref=f12e33] [box=17,176,201,24]
+                  - columnheader "Type" [ref=f12e34] [box=218,176,159,24]
+                  - columnheader "Status" [ref=f12e35] [box=377,176,109,24]
+                  - columnheader "Current Balance" [ref=f12e36] [box=486,176,195,24]
+                  - columnheader "Action" [ref=f12e37] [box=681,176,94,24]
+                - row [ref=f12e38] [box=17,200,758,24]:
+                  - cell "0001-4477" [ref=f12e39] [box=17,200,201,24]
+                  - cell "Savings" [ref=f12e40] [box=218,200,159,24]
+                  - cell "Active" [ref=f12e41] [box=377,200,109,24]
+                  - cell "$4,210.55" [ref=f12e42] [box=486,200,195,24]
+                  - cell [ref=f12e43] [box=681,200,94,24]:
+                    - link "View" [ref=f12e44] [cursor=pointer] [box=689,205,26,13]:
+                      - /url: /frame/members/12345/accounts/0001-4477
+                - row [ref=f12e45] [box=17,224,758,24]:
+                  - cell "0002-9910" [ref=f12e46] [box=17,224,201,24]
+                  - cell "Checking" [ref=f12e47] [box=218,224,159,24]
+                  - cell "Active" [ref=f12e48] [box=377,224,109,24]
+                  - cell "$1,832.09" [ref=f12e49] [box=486,224,195,24]
+                  - cell [ref=f12e50] [box=681,224,94,24]:
+                    - link "View" [ref=f12e51] [cursor=pointer] [box=689,229,26,13]:
+                      - /url: /frame/members/12345/accounts/0002-9910
+                - row [ref=f12e52] [box=17,248,758,24]:
+                  - cell "0003-2256" [ref=f12e53] [box=17,248,201,24]
+                  - cell "Money Market" [ref=f12e54] [box=218,248,159,24]
+                  - cell "Dormant" [ref=f12e55] [box=377,248,109,24]
+                  - cell "$15,000.00" [ref=f12e56] [box=486,248,195,24]
+                  - cell [ref=f12e57] [box=681,248,94,24]:
+                    - link "View" [ref=f12e58] [cursor=pointer] [box=689,253,26,13]:
+                      - /url: /frame/members/12345/accounts/0003-2256
+            - table [ref=f12e59] [box=16,286,760,27]:
+              - rowgroup [ref=f12e60] [box=18,288,756,23]:
+                - row [ref=f12e61] [box=18,288,756,23]:
+                  - cell [ref=f12e62] [box=18,288,756,23]:
+                    - button "Open Sub-Account" [ref=f12e64] [box=19,289,127,21]

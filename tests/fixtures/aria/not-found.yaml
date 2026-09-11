@@ -1,0 +1,26 @@
+- table [ref=f8e2] [box=0,0,1280,208]:
+  - rowgroup [ref=f8e3] [box=2,2,1276,204]:
+    - row [ref=f8e4] [box=2,2,1276,204]:
+      - cell [ref=f8e5] [box=2,2,1276,204]:
+        - table [ref=f8e6] [box=16,16,620,109]:
+          - rowgroup [ref=f8e7] [box=17,17,618,107]:
+            - row [ref=f8e8] [box=17,17,618,24]:
+              - columnheader "Member Search" [ref=f8e9] [box=17,17,618,24]
+            - row [ref=f8e10] [box=17,41,618,83]:
+              - cell [ref=f8e11] [box=17,41,618,83]:
+                - table [ref=f8e13] [box=27,51,430,62]:
+                  - rowgroup [ref=f8e14] [box=27,51,430,62]:
+                    - row [ref=f8e15] [box=27,51,430,30]:
+                      - cell "Member ID" [ref=f8e16] [box=27,51,186,30]
+                      - cell "numeric, 5 digits" [ref=f8e17] [box=213,51,244,30]:
+                        - textbox "Member ID" [ref=f8e18] [box=221,56,136,19]
+                        - text: numeric, 5 digits
+                    - row [ref=f8e19] [box=27,81,430,32]:
+                      - cell [ref=f8e20] [box=27,81,186,32]
+                      - cell [ref=f8e21] [box=213,81,244,32]:
+                        - button "Search" [ref=f8e22] [box=221,86,62,21]
+        - table [ref=f8e23] [box=16,138,620,54]:
+          - rowgroup [ref=f8e24] [box=17,139,618,52]:
+            - row [ref=f8e25] [box=17,139,618,52]:
+              - cell [ref=f8e26] [box=17,139,618,52]:
+                - alert [ref=f8e27] [box=27,149,598,31]: No member record found for ID 99999. Verify the number and try again.

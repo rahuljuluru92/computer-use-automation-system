@@ -1,0 +1,66 @@
+- generic [active] [ref=f9e1] [box=0,0,1280,710]:
+  - table [ref=f9e2] [box=0,0,1280,42]:
+    - rowgroup [ref=f9e3] [box=0,0,1280,42]:
+      - row [ref=f9e4] [box=0,0,1280,42]:
+        - cell "MERIDIAN CORE Servicing Console v7.2.14" [ref=f9e5] [box=0,0,834,42]:
+          - generic [ref=f9e6] [box=14,10,168,22]: MERIDIAN CORE
+          - text: Servicing Console v7.2.14
+        - 'cell "Operator: teller01 Sign Out" [ref=f9e7] [box=834,0,446,42]':
+          - text: "Operator:"
+          - generic [ref=f9e8] [box=1166,16,44,12]: teller01
+          - link "Sign Out" [ref=f9e9] [cursor=pointer] [box=1218,15,48,13]:
+            - /url: /logout
+  - table [ref=f9e10] [box=0,42,1280,24]:
+    - rowgroup [ref=f9e11] [box=0,42,1280,23]:
+      - row [ref=f9e12] [box=0,42,1280,23]:
+        - cell [ref=f9e13] [box=0,42,1280,23]:
+          - link "Member Search" [ref=f9e14] [cursor=pointer] [box=10,47,87,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Accounts" [ref=f9e15] [cursor=pointer] [box=117,47,50,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Transactions" [ref=f9e16] [cursor=pointer] [box=187,47,69,13]:
+            - /url: /members/search
+  - iframe [ref=f9e17] [box=0,66,1280,644]:
+    - table [ref=f10e2] [box=0,0,1280,235]:
+      - rowgroup [ref=f10e3] [box=2,2,1276,231]:
+        - row [ref=f10e4] [box=2,2,1276,231]:
+          - cell [ref=f10e5] [box=2,2,1276,231]:
+            - table [ref=f10e6] [box=16,16,620,203]:
+              - rowgroup [ref=f10e7] [box=17,17,618,201]:
+                - row [ref=f10e8] [box=17,17,618,24]:
+                  - columnheader "Open Sub-Account — Jordan Avery (12345)" [ref=f10e9] [box=17,17,618,24]
+                - row [ref=f10e10] [box=17,41,618,177]:
+                  - cell [ref=f10e11] [box=17,41,618,177]:
+                    - table [ref=f10e13] [box=27,51,408,156]:
+                      - rowgroup [ref=f10e14] [box=27,51,408,156]:
+                        - row [ref=f10e15] [box=27,51,408,32]:
+                          - cell "Sub-Account Type" [ref=f10e16] [box=27,51,186,32]
+                          - cell "-- Select --" [ref=f10e17] [box=213,51,222,32]:
+                            - combobox "Sub-Account Type" [ref=f10e18] [box=221,56,104,21]:
+                              - option "-- Select --" [selected] [box=0,0,0,0]
+                              - option "Savings" [box=0,0,0,0]
+                              - option "Money Market" [box=0,0,0,0]
+                              - option "Certificate" [box=0,0,0,0]
+                        - row [ref=f10e19] [box=27,83,408,30]:
+                          - cell "Nickname" [ref=f10e20] [box=27,83,186,30]
+                          - cell [ref=f10e21] [box=213,83,222,30]:
+                            - textbox "Nickname" [ref=f10e22] [box=221,88,206,19]
+                        - row [ref=f10e23] [box=27,113,408,30]:
+                          - cell "Initial Deposit" [ref=f10e24] [box=27,113,186,30]
+                          - cell "minimum 25.00" [ref=f10e25] [box=213,113,222,30]:
+                            - textbox "Initial Deposit" [ref=f10e26] [box=221,118,94,19]
+                            - text: minimum 25.00
+                        - row [ref=f10e27] [box=27,143,408,32]:
+                          - cell "Funding Account" [ref=f10e28] [box=27,143,186,32]
+                          - cell "-- Select --" [ref=f10e29] [box=213,143,222,32]:
+                            - combobox "Funding Account" [ref=f10e30] [box=221,148,179,21]:
+                              - option "-- Select --" [selected] [box=0,0,0,0]
+                              - option "0001-4477 (Savings)" [box=0,0,0,0]
+                              - option "0002-9910 (Checking)" [box=0,0,0,0]
+                              - option "0003-2256 (Money Market)" [box=0,0,0,0]
+                        - row [ref=f10e31] [box=27,175,408,32]:
+                          - cell [ref=f10e32] [box=27,175,186,32]
+                          - cell [ref=f10e33] [box=213,175,222,32]:
+                            - button "Continue" [ref=f10e34] [box=221,180,73,21]

@@ -1,0 +1,56 @@
+- generic [active] [ref=f4e1] [box=0,0,1280,710]:
+  - table [ref=f4e2] [box=0,0,1280,42]:
+    - rowgroup [ref=f4e3] [box=0,0,1280,42]:
+      - row [ref=f4e4] [box=0,0,1280,42]:
+        - cell "MERIDIAN CORE Servicing Console v7.2.14" [ref=f4e5] [box=0,0,834,42]:
+          - generic [ref=f4e6] [box=14,10,168,22]: MERIDIAN CORE
+          - text: Servicing Console v7.2.14
+        - 'cell "Operator: teller01 Sign Out" [ref=f4e7] [box=834,0,446,42]':
+          - text: "Operator:"
+          - generic [ref=f4e8] [box=1166,16,44,12]: teller01
+          - link "Sign Out" [ref=f4e9] [cursor=pointer] [box=1218,15,48,13]:
+            - /url: /logout
+  - table [ref=f4e10] [box=0,42,1280,24]:
+    - rowgroup [ref=f4e11] [box=0,42,1280,23]:
+      - row [ref=f4e12] [box=0,42,1280,23]:
+        - cell [ref=f4e13] [box=0,42,1280,23]:
+          - link "Member Search" [ref=f4e14] [cursor=pointer] [box=10,47,87,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Accounts" [ref=f4e15] [cursor=pointer] [box=117,47,50,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Transactions" [ref=f4e16] [cursor=pointer] [box=187,47,69,13]:
+            - /url: /members/search
+  - iframe [ref=f4e17] [box=0,66,1280,644]:
+    - table [ref=f5e2] [box=0,0,1280,261]:
+      - rowgroup [ref=f5e3] [box=2,2,1276,257]:
+        - row [ref=f5e4] [box=2,2,1276,257]:
+          - cell [ref=f5e5] [box=2,2,1276,257]:
+            - table [ref=f5e6] [box=16,16,620,200]:
+              - rowgroup [ref=f5e7] [box=17,17,618,198]:
+                - row [ref=f5e8] [box=17,17,618,24]:
+                  - columnheader "Account Detail" [ref=f5e9] [box=17,17,618,24]
+                - row [ref=f5e10] [box=17,41,618,24]:
+                  - cell "Member" [ref=f5e11] [box=17,41,186,24]
+                  - cell "Jordan Avery (12345)" [ref=f5e12] [box=203,41,432,24]
+                - row [ref=f5e13] [box=17,65,618,24]:
+                  - cell "Account Number" [ref=f5e14] [box=17,65,186,24]
+                  - cell "0001-4477" [ref=f5e15] [box=203,65,432,24]
+                - row [ref=f5e16] [box=17,89,618,24]:
+                  - cell "Account Type" [ref=f5e17] [box=17,89,186,24]
+                  - cell "Savings" [ref=f5e18] [box=203,89,432,24]
+                - row [ref=f5e19] [box=17,113,618,24]:
+                  - cell "Status" [ref=f5e20] [box=17,113,186,24]
+                  - cell "Active" [ref=f5e21] [box=203,113,432,24]
+                - row [ref=f5e22] [box=17,137,618,30]:
+                  - cell "Current Balance" [ref=f5e23] [box=17,137,186,30]
+                  - cell "$4,210.55" [ref=f5e24] [box=203,137,432,30]
+                - row [ref=f5e26] [box=17,167,618,24]:
+                  - cell "Date Opened" [ref=f5e27] [box=17,167,186,24]
+                  - cell "2014-03-08" [ref=f5e28] [box=203,167,432,24]
+                - row [ref=f5e29] [box=17,191,618,24]:
+                  - cell "Available Balance" [ref=f5e30] [box=17,191,186,24]
+                  - cell "$4,210.55" [ref=f5e31] [box=203,191,432,24]
+            - link "« Back to Member Detail" [ref=f5e32] [cursor=pointer] [box=16,231,161,13]:
+              - /url: /frame/members/12345

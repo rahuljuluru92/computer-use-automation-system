@@ -1,0 +1,46 @@
+- generic [active] [ref=f6e1] [box=0,0,1280,710]:
+  - table [ref=f6e2] [box=0,0,1280,42]:
+    - rowgroup [ref=f6e3] [box=0,0,1280,42]:
+      - row [ref=f6e4] [box=0,0,1280,42]:
+        - cell "MERIDIAN CORE Servicing Console v7.2.14" [ref=f6e5] [box=0,0,834,42]:
+          - generic [ref=f6e6] [box=14,10,168,22]: MERIDIAN CORE
+          - text: Servicing Console v7.2.14
+        - 'cell "Operator: teller01 Sign Out" [ref=f6e7] [box=834,0,446,42]':
+          - text: "Operator:"
+          - generic [ref=f6e8] [box=1166,16,44,12]: teller01
+          - link "Sign Out" [ref=f6e9] [cursor=pointer] [box=1218,15,48,13]:
+            - /url: /logout
+  - table [ref=f6e10] [box=0,42,1280,24]:
+    - rowgroup [ref=f6e11] [box=0,42,1280,23]:
+      - row [ref=f6e12] [box=0,42,1280,23]:
+        - cell [ref=f6e13] [box=0,42,1280,23]:
+          - link "Member Search" [ref=f6e14] [cursor=pointer] [box=10,47,87,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Accounts" [ref=f6e15] [cursor=pointer] [box=117,47,50,13]:
+            - /url: /members/search
+          - text: "|"
+          - link "Transactions" [ref=f6e16] [cursor=pointer] [box=187,47,69,13]:
+            - /url: /members/search
+  - iframe [ref=f6e17] [box=0,66,1280,644]:
+    - table [ref=f7e2] [box=0,0,1280,141]:
+      - rowgroup [ref=f7e3] [box=2,2,1276,137]:
+        - row [ref=f7e4] [box=2,2,1276,137]:
+          - cell [ref=f7e5] [box=2,2,1276,137]:
+            - table [ref=f7e6] [box=16,16,620,109]:
+              - rowgroup [ref=f7e7] [box=17,17,618,107]:
+                - row [ref=f7e8] [box=17,17,618,24]:
+                  - columnheader "Member Search" [ref=f7e9] [box=17,17,618,24]
+                - row [ref=f7e10] [box=17,41,618,83]:
+                  - cell [ref=f7e11] [box=17,41,618,83]:
+                    - table [ref=f7e13] [box=27,51,430,62]:
+                      - rowgroup [ref=f7e14] [box=27,51,430,62]:
+                        - row [ref=f7e15] [box=27,51,430,30]:
+                          - cell "Member ID" [ref=f7e16] [box=27,51,186,30]
+                          - cell "numeric, 5 digits" [ref=f7e17] [box=213,51,244,30]:
+                            - textbox "Member ID" [ref=f7e18] [box=221,56,136,19]
+                            - text: numeric, 5 digits
+                        - row [ref=f7e19] [box=27,81,430,32]:
+                          - cell [ref=f7e20] [box=27,81,186,32]
+                          - cell [ref=f7e21] [box=213,81,244,32]:
+                            - button "Search" [ref=f7e22] [box=221,86,62,21]

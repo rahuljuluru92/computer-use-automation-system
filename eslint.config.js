@@ -14,6 +14,16 @@ export default [
 
   js.configs.recommended,
 
+  // Plain node scripts: same globals as the TS sources, no TS rules.
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'module',
+      globals: { console: 'readonly', process: 'readonly', URL: 'readonly', Buffer: 'readonly' },
+    },
+  },
+
   {
     files: ['**/*.ts'],
     languageOptions: {
