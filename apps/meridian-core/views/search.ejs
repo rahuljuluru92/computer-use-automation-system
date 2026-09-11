@@ -4,7 +4,7 @@
     <tr><td colspan="2"><div class="err" role="alert"><%= error %></div></td></tr>
   <% } %>
   <tr><td colspan="2" style="padding:10px">
-    <form method="get" action="/members/lookup">
+    <form method="get" action="<%= linkBase %>/members/lookup">
       <table cellpadding="4" cellspacing="0" border="0">
         <tr>
           <td class="lbl"><label for="<%= midInput %>">Member ID</label></td>

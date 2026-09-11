@@ -101,13 +101,18 @@ export async function chaosMiddleware(
     }
 
     case 'session_timeout': {
-      // Fires once, mid-flow, after the operator is already logged in - which is
-      // when it actually happens in a bank.
+      // Fires once, mid-flow, after the operator is already signed in - which
+      // is when it actually happens in a bank.
+      //
+      // It drops the session and lets the request continue rather than
+      // redirecting, so the in-frame auth gate renders the sign-in form where
+      // the member data should have been. That is what the real thing does,
+      // and it is what makes a bounded reauth subflow possible: the recovery
+      // rule can fill the form in place and retry the step, instead of having
+      // to notice that the whole window navigated somewhere else.
       if (!chaos.fired && chaos.hits >= 3 && req.session.user) {
         chaos.fired = true;
         req.session.user = null;
-        res.redirect('/?expired=1');
-        return;
       }
       return next();
     }

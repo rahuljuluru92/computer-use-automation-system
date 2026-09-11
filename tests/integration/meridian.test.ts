@@ -47,7 +47,7 @@ function client() {
 
 async function signIn(go: ReturnType<typeof client>): Promise<void> {
   await go('/');
-  const res = await go('/login', {
+  const res = await go('/frame/login', {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ username: OPERATOR.username, password: OPERATOR.password }),
@@ -59,16 +59,16 @@ describe('Meridian Core: the flows the capability will record', () => {
   it('signs in and reaches member search', async () => {
     const go = client();
     await signIn(go);
-    expect(await (await go('/members/search')).text()).toContain('Member Search');
+    expect(await (await go('/frame/members/search')).text()).toContain('Member Search');
   });
 
   it('looks up a member and reads a savings balance', async () => {
     const go = client();
     await signIn(go);
-    expect((await go('/members/lookup?memberId=12345')).status).toBe(302);
-    const detail = await (await go('/members/12345')).text();
+    expect((await go('/frame/members/lookup?memberId=12345')).status).toBe(302);
+    const detail = await (await go('/frame/members/12345')).text();
     expect(detail).toContain('Jordan Avery');
-    const account = await (await go('/members/12345/accounts/0001-4477')).text();
+    const account = await (await go('/frame/members/12345/accounts/0001-4477')).text();
     expect(account).toContain('$4,210.55');
   });
 
@@ -84,7 +84,52 @@ describe('Meridian Core: the flows the capability will record', () => {
   it('renders regulated data on the page, so redaction has something to prove', async () => {
     const go = client();
     await signIn(go);
-    expect(await (await go('/members/12345')).text()).toContain(CANARY_SSN);
+    expect(await (await go('/frame/members/12345')).text()).toContain(CANARY_SSN);
+  });
+});
+
+describe('Meridian Core: the content-frame architecture', () => {
+  it('serves chrome plus an iframe at the top level, and no screen content', async () => {
+    const go = client();
+    await signIn(go);
+    const top = await (await go('/members/12345')).text();
+    expect(top).toContain('<iframe');
+    expect(top).toContain('src="/frame/members/12345"');
+    // The member's data is NOT in the top-level document - it is in the frame.
+    expect(top).not.toContain('Jordan Avery');
+  });
+
+  it('keeps in-app navigation inside the frame', async () => {
+    const go = client();
+    await signIn(go);
+    const res = await go('/frame/members/lookup?memberId=12345');
+    // A redirect that escaped to the top level would break the shell.
+    expect(res.headers.get('location')).toBe('/frame/members/12345');
+  });
+
+  it('leaves the top-level url unchanged while work happens, which is why checkpoints are not url-based', async () => {
+    const go = client();
+    await signIn(go);
+    // Search, open a member, open an account: three screens, one top-level url.
+    await go('/frame/members/lookup?memberId=12345');
+    await go('/frame/members/12345');
+    const account = await go('/frame/members/12345/accounts/0001-4477');
+    expect(await account.text()).toContain('$4,210.55');
+    // The shell that hosts all of that still points at the member, not the account.
+    const top = await (await go('/members/12345')).text();
+    expect(top).toContain('src="/frame/members/12345"');
+  });
+
+  it('renders sign-in inside the frame when the session expires, not in the whole window', async () => {
+    const go = client();
+    await signIn(go);
+    await go('/_chaos?mode=session_timeout');
+    let body = '';
+    for (let i = 0; i < 4; i++) body = await (await go('/frame/members/search')).text();
+    // In-frame reauth: the sign-in form appears where member data should be,
+    // which is what makes a bounded reauth subflow possible.
+    expect(body).toContain('Operator ID');
+    expect(body).toContain('session has expired');
   });
 });
 
@@ -92,7 +137,7 @@ describe('Meridian Core: business outcomes (answers, not failures)', () => {
   it('reports a missing member as page content with HTTP 200', async () => {
     const go = client();
     await signIn(go);
-    const res = await go('/members/lookup?memberId=99999');
+    const res = await go('/frame/members/lookup?memberId=99999');
     // A replay keyed off HTTP status would miss this entirely, which is why
     // outcome detection is declared against the accessibility tree instead.
     expect(res.status).toBe(200);
@@ -102,7 +147,7 @@ describe('Meridian Core: business outcomes (answers, not failures)', () => {
   it('denies a restricted member that genuinely exists', async () => {
     const go = client();
     await signIn(go);
-    const body = await (await go('/members/55555')).text();
+    const body = await (await go('/frame/members/55555')).text();
     expect(body).toContain('Permission denied');
     expect(body).not.toContain('No member record found'); // not the same thing
   });
@@ -121,7 +166,7 @@ describe('Meridian Core: chaos modes', () => {
   it('not_found makes a real member report as missing', async () => {
     const go = client();
     await signIn(go); await arm(go, 'not_found');
-    expect(await (await go('/members/lookup?memberId=12345')).text())
+    expect(await (await go('/frame/members/lookup?memberId=12345')).text())
       .toContain('No member record found');
   });
 
@@ -129,27 +174,29 @@ describe('Meridian Core: chaos modes', () => {
     const go = client();
     await signIn(go); await arm(go, 'http_500');
     const codes: number[] = [];
-    for (let i = 0; i < 4; i++) codes.push((await go('/members/search')).status);
+    for (let i = 0; i < 4; i++) codes.push((await go('/frame/members/search')).status);
     expect(codes).toEqual([500, 500, 200, 200]);
   });
 
-  it('session_timeout fires mid-flow and bounces to the login page', async () => {
+  it('session_timeout fires mid-flow, not at the start', async () => {
     const go = client();
     await signIn(go); await arm(go, 'session_timeout');
-    const results: string[] = [];
+    const sawLogin: boolean[] = [];
     for (let i = 0; i < 4; i++) {
-      const r = await go('/members/search');
-      results.push(r.status === 302 ? (r.headers.get('location') ?? '') : 'ok');
+      const body = await (await go('/frame/members/search')).text();
+      sawLogin.push(body.includes('Operator ID'));
     }
-    expect(results.slice(0, 2)).toEqual(['ok', 'ok']);
-    expect(results[2]).toContain('expired=1');
+    // Expiring on the first navigation would be a different (easier) problem;
+    // the interesting case is losing the session part-way through a flow.
+    expect(sawLogin.slice(0, 2)).toEqual([false, false]);
+    expect(sawLogin[2]).toBe(true);
   });
 
   it('surprise_modal injects a blocking dialog with an accessible name', async () => {
     const go = client();
     await signIn(go); await arm(go, 'surprise_modal');
-    await go('/members/search');
-    const body = await (await go('/members/search')).text();
+    await go('/frame/members/search');
+    const body = await (await go('/frame/members/search')).text();
     expect(body).toContain('role="dialog"');
     expect(body).toContain('Scheduled Maintenance Notice');
   });
@@ -157,7 +204,7 @@ describe('Meridian Core: chaos modes', () => {
   it('validation_error rejects input the caller believes is valid', async () => {
     const go = client();
     await signIn(go); await arm(go, 'validation_error');
-    const res = await go('/members/12345/subaccount/review', {
+    const res = await go('/frame/members/12345/subaccount/review', {
       method: 'POST',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -171,7 +218,7 @@ describe('Meridian Core: chaos modes', () => {
     const go = client();
     await signIn(go); await arm(go, 'permission_denied');
     // 12345 is an ordinary active member; the denial is injected, not intrinsic.
-    const body = await (await go('/members/12345')).text();
+    const body = await (await go('/frame/members/12345')).text();
     expect(body).toContain('Permission denied');
   });
 
@@ -179,7 +226,7 @@ describe('Meridian Core: chaos modes', () => {
     const go = client();
     await signIn(go); await arm(go, 'slow_load');
     const started = Date.now();
-    const res = await go('/members/search');
+    const res = await go('/frame/members/search');
     const elapsed = Date.now() - started;
     expect(res.status).toBe(200);            // slow, not broken
     expect(elapsed).toBeGreaterThan(2_000);  // a fixed sleep would either flake or waste
@@ -189,14 +236,14 @@ describe('Meridian Core: chaos modes', () => {
     const go = client();
     await signIn(go); await arm(go, 'duplicate_guard');
     const submit = async (): Promise<Response> => {
-      await go('/members/12345/subaccount/review', {
+      await go('/frame/members/12345/subaccount/review', {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           subType: 'Savings', nickname: 'Vacation Fund', deposit: '500', funding: '0002-9910',
         }),
       });
-      return go('/members/12345/subaccount/commit', { method: 'POST' });
+      return go('/frame/members/12345/subaccount/commit', { method: 'POST' });
     };
     expect((await submit()).status).toBe(200);
     const second = await submit();

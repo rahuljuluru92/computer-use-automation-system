@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
+<html>
+<head>
+  <title><%= title %></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <%- include('_styles') %>
+  <style type="text/css"> body { background:#eef1f5; } </style>
+</head>
+<body>
+
+<table width="100%" cellpadding="14"><tr><td>
+<%- body %>
+</td></tr></table>
+
+<% if (typeof surpriseModal !== 'undefined' && surpriseModal) { %>
+  <%/* An interstitial the recorded flow never saw. A capability that only works
+       when nothing unexpected appears is not a capability. */%>
+  <div class="modal">
+    <div class="modalbox" role="dialog" aria-label="<%= surpriseModal.title %>">
+      <font size="3" color="#1f3d6b"><b><%= surpriseModal.title %></b></font>
+      <br><br>
+      <font size="2"><%= surpriseModal.body %></font>
+      <br><br>
+      <form method="post" action="<%= linkBase %>/_dismiss">
+        <input type="hidden" name="back" value="<%= currentPath %>">
+        <input type="submit" id="<%= ctl('modal','btnAck') %>" value="Acknowledge">
+      </form>
+    </div>
+  </div>
+<% } %>
+
+</body>
+</html>

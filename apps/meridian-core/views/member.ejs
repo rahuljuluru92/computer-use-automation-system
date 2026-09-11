@@ -37,7 +37,7 @@
       <%/* Every row's link is the word "View". Role+name alone is ambiguous
            here, which is precisely why the table_cell_relative strategy exists:
            the row is identified by its data, the same way a human finds it. */%>
-      <td><a href="/members/<%= member.id %>/accounts/<%= a.number %>"
+      <td><a href="<%= linkBase %>/members/<%= member.id %>/accounts/<%= a.number %>"
              id="<%= ctl('grdAccounts','lnkView', i) %>">View</a></td>
     </tr>
   <% }); %>
@@ -45,7 +45,7 @@
 
 <br>
 <table width="760"><tr><td>
-  <form method="get" action="/members/<%= member.id %>/subaccount/new">
+  <form method="get" action="<%= linkBase %>/members/<%= member.id %>/subaccount/new">
     <input type="submit" id="<%= ctl('pnlActions','btnOpenSub') %>" value="Open Sub-Account">
   </form>
 </td></tr></table>

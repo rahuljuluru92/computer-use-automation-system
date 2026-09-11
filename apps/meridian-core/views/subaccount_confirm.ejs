@@ -10,13 +10,13 @@
   <tr><td class="lbl">Initial Deposit</td><td><%= fmt(Number(pending.deposit)) %></td></tr>
   <tr><td class="lbl">Funding Account</td><td><%= pending.funding %></td></tr>
   <tr><td colspan="2" style="padding:10px">
-    <form method="post" action="/members/<%= member.id %>/subaccount/commit">
+    <form method="post" action="<%= linkBase %>/members/<%= member.id %>/subaccount/commit">
       <%/* Irreversible. The policy engine classifies this as write_irreversible,
            which means discovery will not press it without an explicit flag and
            replay will not press it unless the artifact is approved. */%>
       <input type="submit" id="<%= btnConfirm %>" value="Confirm and Open Account">
       &nbsp;
-      <a href="/members/<%= member.id %>/subaccount/new"><font size="2">Cancel</font></a>
+      <a href="<%= linkBase %>/members/<%= member.id %>/subaccount/new"><font size="2">Cancel</font></a>
     </form>
   </td></tr>
 </table>

@@ -9,7 +9,7 @@
     <tr><td colspan="2"><div class="err" role="alert"><%= error %></div></td></tr>
   <% } %>
   <tr><td colspan="2" style="padding:10px">
-    <form method="post" action="/login">
+    <form method="post" action="<%= linkBase %>/login">
       <table cellpadding="4" cellspacing="0" border="0">
         <tr>
           <td class="lbl"><label for="<%= uid %>">Operator ID</label></td>

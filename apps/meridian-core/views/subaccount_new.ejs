@@ -9,7 +9,7 @@
     </div></td></tr>
   <% } %>
   <tr><td colspan="2" style="padding:10px">
-    <form method="post" action="/members/<%= member.id %>/subaccount/review">
+    <form method="post" action="<%= linkBase %>/members/<%= member.id %>/subaccount/review">
       <table cellpadding="4" cellspacing="0" border="0">
         <tr>
           <td class="lbl"><label for="<%= f.type %>">Sub-Account Type</label></td>
