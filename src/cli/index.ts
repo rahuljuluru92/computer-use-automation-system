@@ -30,8 +30,9 @@ cua - computer-use capability system
       Drive a live surface with a model until the goal is met, then compile and
       self-verify a capability artifact. Requires ANTHROPIC_API_KEY.
 
-  cua replay --artifact <path> [--input <json>] [--tenant <id>] [--chaos <mode>]
+  cua replay --artifact <path> [--input <json>] [--tenant <id>] [--chaos <mode>] [--label <name>]
       Execute a saved artifact deterministically. Never calls a model.
+      --label names the evidence directory, so a demo run is findable later.
 
   cua explain --artifact <path>
       Render an artifact as reviewable prose.
@@ -68,6 +69,7 @@ async function main(argv: string[]): Promise<number> {
       input: { type: 'string' },
       tenant: { type: 'string' },
       chaos: { type: 'string' },
+      label: { type: 'string' },
       port: { type: 'string' },
       'max-steps': { type: 'string' },
       schema: { type: 'boolean' },
@@ -94,10 +96,22 @@ async function main(argv: string[]): Promise<number> {
       return 0;
     }
 
+    case 'replay': {
+      if (!values.artifact) fail('replay needs --artifact <path>');
+      const { runReplayCommand } = await import('./replayCommand.ts');
+      return runReplayCommand({
+        artifactPath: values.artifact,
+        inputJson: values.input ?? '{}',
+        tenant: values.tenant,
+        chaos: values.chaos,
+        label: values.label,
+        json: values.json ?? false,
+      });
+    }
+
     // Phases 4-6. Each is wired to its module as that phase lands; the CLI
     // surface is fixed now so the README's demo path never has to change.
     case 'discover':
-    case 'replay':
     case 'approve':
     case 'operator':
     case 'mcp':

@@ -1,0 +1,878 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "cap.member.read_savings_balance",
+  "version": "1.0.0",
+  "status": "draft",
+  "title": "Read a member's current savings balance",
+  "description": "Signs in to the servicing console, looks up a member by their member ID, opens their Savings account and returns the current balance. Returns the business outcome \"no_such_member\" when the member ID does not exist at this institution.",
+  "target": {
+    "surface": "web",
+    "product": {
+      "vendor": "meridian",
+      "app": "core-servicing",
+      "versionRange": "^7.2"
+    },
+    "entry": {
+      "kind": "url",
+      "template": "{baseUrl}/frame/"
+    }
+  },
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "memberId": {
+        "type": "string",
+        "description": "The five-digit member number as printed on the member record.",
+        "x-sensitivity": "pii",
+        "pattern": "^[0-9]{5}$"
+      }
+    },
+    "required": [
+      "memberId"
+    ],
+    "additionalProperties": false
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "savingsBalance": {
+        "type": "number",
+        "description": "Current balance in USD."
+      },
+      "accountNumber": {
+        "type": "string",
+        "description": "The savings account number."
+      },
+      "memberName": {
+        "type": "string",
+        "description": "Name on the member record."
+      }
+    },
+    "required": [
+      "savingsBalance"
+    ]
+  },
+  "outcomes": [
+    {
+      "code": "no_such_member",
+      "description": "No member with that ID exists at this institution.",
+      "severity": "info",
+      "terminal": true,
+      "detect": {
+        "kind": "node_present",
+        "locator": {
+          "description": "the \"no member record found\" notice",
+          "frame": {
+            "path": []
+          },
+          "strategies": [
+            {
+              "tier": 1,
+              "strategy": {
+                "kind": "role_name",
+                "role": "alert",
+                "nameMatches": "No member record found",
+                "exact": false
+              },
+              "confidence": 0.95,
+              "rationale": "The app renders this as a role=alert with HTTP 200, which is what a real servicing console does. Detecting it by status code would miss it entirely."
+            }
+          ],
+          "requireUnique": true,
+          "minAgreement": 1,
+          "allowDegraded": true
+        }
+      },
+      "returns": {
+        "memberId": "$input.memberId"
+      }
+    },
+    {
+      "code": "member_restricted",
+      "description": "The member exists but this operator may not service the record.",
+      "severity": "warn",
+      "terminal": true,
+      "detect": {
+        "kind": "node_present",
+        "locator": {
+          "description": "the permission denial notice",
+          "frame": {
+            "path": []
+          },
+          "strategies": [
+            {
+              "tier": 1,
+              "strategy": {
+                "kind": "role_name",
+                "role": "alert",
+                "nameMatches": "Permission denied",
+                "exact": false
+              },
+              "confidence": 0.95,
+              "rationale": "A denial is information the caller needs, not a crash - and it is a different answer from \"no such member\", which is why it is a separate outcome."
+            }
+          ],
+          "requireUnique": true,
+          "minAgreement": 1,
+          "allowDegraded": true
+        }
+      },
+      "returns": {
+        "memberId": "$input.memberId"
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "intent": "Enter the operator ID on the sign-in form",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "the Operator ID field",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Operator ID",
+              "exact": true
+            },
+            "confidence": 0.9,
+            "rationale": "The field has a proper <label for>, so its accessible name is the label."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Operator ID",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.7,
+            "rationale": "Survives the label association being lost, which legacy forms often do."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$secret.MERIDIAN_USERNAME",
+        "sensitivity": "secret"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s2",
+      "intent": "Enter the operator password",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "the Password field",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Password",
+              "exact": true
+            },
+            "confidence": 0.9,
+            "rationale": "Labelled field; the accessible name is stable across renders."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Password",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.7,
+            "rationale": "Fallback if the label association is lost."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$secret.MERIDIAN_PASSWORD",
+        "sensitivity": "secret"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s3",
+      "intent": "Submit the sign-in form",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "the Sign In button",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Sign In",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "Submit buttons carry their visible label as the accessible name."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 1,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "the Member Search panel",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "columnheader",
+                  "name": "Member Search",
+                  "exact": true
+                },
+                "confidence": 0.9,
+                "rationale": "The panel heading is the first thing that proves we are past sign-in."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "the Member ID search field",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Member ID",
+                  "exact": true
+                },
+                "confidence": 0.9,
+                "rationale": "Being able to search is the real postcondition of signing in."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s4",
+      "intent": "Type the member ID into the search field",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "the Member ID search field",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Member ID",
+              "exact": true
+            },
+            "confidence": 0.9,
+            "rationale": "Labelled field on the search panel."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Member ID",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.7,
+            "rationale": "Fallback if the label association is lost."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$input.memberId",
+        "sensitivity": "pii"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s5",
+      "intent": "Run the member search",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "the Search button",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Search",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "Visible label; searching commits nothing, so this is a read."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 1,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "any",
+          "of": [
+            {
+              "kind": "node_present",
+              "locator": {
+                "description": "the Accounts grid",
+                "frame": {
+                  "path": []
+                },
+                "strategies": [
+                  {
+                    "tier": 1,
+                    "strategy": {
+                      "kind": "role_name",
+                      "role": "table",
+                      "name": "Accounts",
+                      "exact": true
+                    },
+                    "confidence": 0.9,
+                    "rationale": "The grid only exists once a member record has opened."
+                  }
+                ],
+                "requireUnique": true,
+                "minAgreement": 1,
+                "allowDegraded": true
+              }
+            },
+            {
+              "kind": "node_present",
+              "locator": {
+                "description": "a notice explaining why there is no member record",
+                "frame": {
+                  "path": []
+                },
+                "strategies": [
+                  {
+                    "tier": 1,
+                    "strategy": {
+                      "kind": "role_name",
+                      "role": "alert",
+                      "nameMatches": "(No member record found|Permission denied)",
+                      "exact": false
+                    },
+                    "confidence": 0.9,
+                    "rationale": "Waiting only for success would turn a legitimate answer into a timeout."
+                  }
+                ],
+                "requireUnique": true,
+                "minAgreement": 1,
+                "allowDegraded": true
+              }
+            }
+          ]
+        }
+      ],
+      "checkpoint": [],
+      "extract": [],
+      "onOutcome": [
+        "no_such_member",
+        "member_restricted"
+      ],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s6",
+      "intent": "Open the member's Savings account from the accounts grid",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "the View link on the Savings row of the Accounts grid",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 2,
+            "strategy": {
+              "kind": "table_cell_relative",
+              "table": {
+                "role": "table",
+                "name": "Accounts"
+              },
+              "matchColumn": "Type",
+              "matchValue": "Savings",
+              "targetColumn": "Action",
+              "within": {
+                "role": "link"
+              }
+            },
+            "confidence": 0.9,
+            "rationale": "Every row has a link named \"View\", so role+name is ambiguous by construction. The row is identified by the data it holds, which is what a human reads too, and it survives re-skinning and row reordering."
+          },
+          {
+            "tier": 5,
+            "strategy": {
+              "kind": "css",
+              "selector": "#ctl00_ContentPlaceHolder1_grdAccounts_ctl03_lnkView"
+            },
+            "confidence": 0.05,
+            "rationale": "BRITTLE and recorded for forensics only. This app regenerates control ids on every render, so this selector is already wrong. If it ever matches again, that tells you the markup stopped changing - which is diagnostic information, not a way to find the link."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 1,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "the Account Detail panel",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "columnheader",
+                  "name": "Account Detail",
+                  "exact": true
+                },
+                "confidence": 0.9,
+                "rationale": "The panel heading proves the account screen opened."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "text_matches",
+          "locator": {
+            "description": "the Account Type field",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Account Type",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.8,
+                "rationale": "Confirms we opened the Savings account and not a neighbouring row - the failure this whole step is designed to avoid."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          },
+          "pattern": "Savings"
+        }
+      ],
+      "extract": [
+        {
+          "name": "savingsBalance",
+          "from": {
+            "description": "the Current Balance value",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Current Balance",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.85,
+                "rationale": "The page shows the same figure twice, as Current Balance and as Available Balance, so matching on the value is genuinely ambiguous. The label beside it is what distinguishes them, which is how a person reads this screen."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          },
+          "parse": {
+            "kind": "currency",
+            "locale": "en-US"
+          },
+          "sensitivity": "none"
+        },
+        {
+          "name": "accountNumber",
+          "from": {
+            "description": "the Account Number value",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Account Number",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.85,
+                "rationale": "Labelled row on the account detail panel."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          },
+          "parse": {
+            "kind": "text",
+            "trim": true
+          },
+          "sensitivity": "none"
+        }
+      ],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    }
+  ],
+  "recovery": [
+    {
+      "id": "dismiss-maintenance-notice",
+      "description": "dismiss a maintenance interstitial the recorded flow never saw",
+      "when": {
+        "kind": "node_present",
+        "locator": {
+          "description": "a blocking dialog",
+          "frame": {
+            "path": []
+          },
+          "strategies": [
+            {
+              "tier": 1,
+              "strategy": {
+                "kind": "role_name",
+                "role": "dialog",
+                "exact": false
+              },
+              "confidence": 0.9,
+              "rationale": "Any role=dialog is blocking by definition; the specific one does not matter."
+            }
+          ],
+          "requireUnique": true,
+          "minAgreement": 1,
+          "allowDegraded": true
+        }
+      },
+      "kind": "dismiss",
+      "do": [
+        {
+          "action": {
+            "kind": "click"
+          },
+          "target": {
+            "description": "the Acknowledge button on the dialog",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Acknowledge",
+                  "exact": true
+                },
+                "confidence": 0.9,
+                "rationale": "The dialog offers exactly one way out."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "maxAttempts": 2,
+      "budgetMs": 5000,
+      "thenRetryStep": true
+    },
+    {
+      "id": "reauth-after-session-expiry",
+      "description": "sign in again when the session expires part-way through",
+      "when": {
+        "kind": "all",
+        "of": [
+          {
+            "kind": "node_present",
+            "locator": {
+              "description": "the sign-in form, where member data should be",
+              "frame": {
+                "path": []
+              },
+              "strategies": [
+                {
+                  "tier": 1,
+                  "strategy": {
+                    "kind": "role_name",
+                    "role": "textbox",
+                    "name": "Operator ID",
+                    "exact": true
+                  },
+                  "confidence": 0.9,
+                  "rationale": "The app renders sign-in inside the content frame on expiry, so the form appearing mid-flow is the signal."
+                }
+              ],
+              "requireUnique": true,
+              "minAgreement": 1,
+              "allowDegraded": true
+            }
+          }
+        ]
+      },
+      "kind": "reauth",
+      "do": [
+        {
+          "action": {
+            "kind": "type",
+            "clearFirst": true
+          },
+          "target": {
+            "description": "the Operator ID field",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Operator ID",
+                  "exact": true
+                },
+                "confidence": 0.9,
+                "rationale": "Same field as the original sign-in step."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          },
+          "data": {
+            "value": "$secret.MERIDIAN_USERNAME",
+            "sensitivity": "secret"
+          }
+        },
+        {
+          "action": {
+            "kind": "type",
+            "clearFirst": true
+          },
+          "target": {
+            "description": "the Password field",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Password",
+                  "exact": true
+                },
+                "confidence": 0.9,
+                "rationale": "Same field as the original sign-in step."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          },
+          "data": {
+            "value": "$secret.MERIDIAN_PASSWORD",
+            "sensitivity": "secret"
+          }
+        },
+        {
+          "action": {
+            "kind": "click"
+          },
+          "target": {
+            "description": "the Sign In button",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Sign In",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "Same button as the original sign-in step."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 1,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "maxAttempts": 1,
+      "budgetMs": 5000,
+      "thenRetryStep": true
+    }
+  ],
+  "policy": {
+    "maxSteps": 20,
+    "maxWallClockMs": 60000,
+    "allowedActionClasses": [
+      "read",
+      "write_reversible"
+    ]
+  },
+  "tenancy": {
+    "canonical": true,
+    "overlays": {}
+  },
+  "provenance": {
+    "discoveryRunId": "hand-authored-seed",
+    "model": "none (hand-authored before the discovery loop existed)",
+    "promptVersion": "n/a",
+    "recordedAt": "2026-09-11T13:00:00.000Z",
+    "compilerVersion": "0.1.0",
+    "selfVerified": {
+      "passed": true,
+      "at": "2026-09-11T13:00:00.000Z",
+      "runId": "tests/integration/replay.test.ts"
+    }
+  },
+  "reliability": {
+    "runs": 0,
+    "passRate": 0,
+    "p50DurationMs": 0,
+    "p95DurationMs": 0,
+    "degradedResolutions": 0
+  },
+  "integrity": {
+    "hash": "sha256:0cfd886c822fff81b9a6014e4eddb48d8a6e323025e6698b9e9050732453a2e8"
+  }
+}

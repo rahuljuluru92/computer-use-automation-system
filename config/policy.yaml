@@ -1,0 +1,31 @@
+# Guardrails, enforced inside Executor.act() - the only place in the system
+# that touches a surface. Not in a prompt: a prompt is a request, and a request
+# can be ignored by a model that has been confused or fed a hostile string from
+# a page it is reading. This cannot be ignored, because it is the function that
+# decides whether the browser gets called at all.
+
+allowedOrigins:
+  - http://localhost:4400
+
+# Empty means "any path on an allowed origin". Narrow this per capability in
+# production; the demo target has no routes worth fencing off from each other.
+allowedPaths: []
+
+allowedActionKinds: [click, type, select, press, navigate, scroll, extract, assert]
+
+# Discovery and unapproved replay may fill a form. They may not commit it.
+maxUnapprovedActionClass: write_reversible
+
+# Always a human decision, whatever else the policy says. These are the verbs
+# that move money or destroy records in a servicing console.
+requireApprovalLabels:
+  - '\bconfirm and open\b'
+  - '\btransfer\b'
+  - '\bwire\b'
+  - '\bclose account\b'
+
+# Refused outright. Approval does not unlock these; a different capability,
+# reviewed on its own terms, would be the way to do such a thing.
+denyLabels:
+  - '\bdelete member\b'
+  - '\bpurge\b'
