@@ -1,0 +1,17 @@
+<table class="panel" width="620" cellpadding="0" cellspacing="0">
+  <tr><th colspan="2">Account Detail</th></tr>
+  <tr><td class="lbl">Member</td><td><%= member.name %> (<%= member.id %>)</td></tr>
+  <tr><td class="lbl">Account Number</td><td><%= account.number %></td></tr>
+  <tr><td class="lbl">Account Type</td><td><%= account.type %></td></tr>
+  <tr><td class="lbl">Status</td><td><%= account.status %></td></tr>
+  <tr>
+    <td class="lbl">Current Balance</td>
+    <%/* The extraction target. Labelled, so label_anchored works; in a table
+         row, so table_cell_relative works; no id worth having, so CSS does not. */%>
+    <td><font size="3" color="#1f3d6b"><b><%= fmt(account.balance) %></b></font></td>
+  </tr>
+  <tr><td class="lbl">Date Opened</td><td><%= account.opened %></td></tr>
+  <tr><td class="lbl">Available Balance</td><td><%= fmt(account.balance) %></td></tr>
+</table>
+<br>
+<a href="/members/<%= member.id %>"><font size="2">&laquo; Back to Member Detail</font></a>

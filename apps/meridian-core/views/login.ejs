@@ -1,0 +1,29 @@
+<table class="panel" width="460" cellpadding="0" cellspacing="0">
+  <tr><th colspan="2">Operator Sign In</th></tr>
+  <% if (expired) { %>
+    <tr><td colspan="2"><div class="err" role="alert">
+      Your session has expired due to inactivity. Please sign in again.
+    </div></td></tr>
+  <% } %>
+  <% if (error) { %>
+    <tr><td colspan="2"><div class="err" role="alert"><%= error %></div></td></tr>
+  <% } %>
+  <tr><td colspan="2" style="padding:10px">
+    <form method="post" action="/login">
+      <table cellpadding="4" cellspacing="0" border="0">
+        <tr>
+          <td class="lbl"><label for="<%= uid %>">Operator ID</label></td>
+          <td><input type="text" name="username" id="<%= uid %>" size="24"></td>
+        </tr>
+        <tr>
+          <td class="lbl"><label for="<%= pid %>">Password</label></td>
+          <td><input type="password" name="password" id="<%= pid %>" size="24"></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><input type="submit" id="<%= sid %>" value="Sign In"></td>
+        </tr>
+      </table>
+    </form>
+  </td></tr>
+</table>

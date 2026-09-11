@@ -1,0 +1,56 @@
+<table class="panel" width="620" cellpadding="0" cellspacing="0">
+  <tr><th colspan="2">Open Sub-Account &mdash; <%= member.name %> (<%= member.id %>)</th></tr>
+  <% if (errors && errors.length) { %>
+    <tr><td colspan="2"><div class="err" role="alert">
+      <b>Please correct the following:</b>
+      <ul style="margin:6px 0 0 16px">
+        <% errors.forEach(function (e) { %><li><%= e %></li><% }); %>
+      </ul>
+    </div></td></tr>
+  <% } %>
+  <tr><td colspan="2" style="padding:10px">
+    <form method="post" action="/members/<%= member.id %>/subaccount/review">
+      <table cellpadding="4" cellspacing="0" border="0">
+        <tr>
+          <td class="lbl"><label for="<%= f.type %>">Sub-Account Type</label></td>
+          <td>
+            <select name="subType" id="<%= f.type %>">
+              <option value="">-- Select --</option>
+              <option value="Savings"      <%= values.subType === 'Savings'      ? 'selected' : '' %>>Savings</option>
+              <option value="Money Market" <%= values.subType === 'Money Market' ? 'selected' : '' %>>Money Market</option>
+              <option value="Certificate"  <%= values.subType === 'Certificate'  ? 'selected' : '' %>>Certificate</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="lbl"><label for="<%= f.nickname %>">Nickname</label></td>
+          <td><input type="text" name="nickname" id="<%= f.nickname %>" size="28"
+                     value="<%= values.nickname || '' %>"></td>
+        </tr>
+        <tr>
+          <td class="lbl"><label for="<%= f.deposit %>">Initial Deposit</label></td>
+          <td><input type="text" name="deposit" id="<%= f.deposit %>" size="12"
+                     value="<%= values.deposit || '' %>">
+              <font size="1" color="#667">&nbsp;minimum 25.00</font></td>
+        </tr>
+        <tr>
+          <td class="lbl"><label for="<%= f.funding %>">Funding Account</label></td>
+          <td>
+            <select name="funding" id="<%= f.funding %>">
+              <option value="">-- Select --</option>
+              <% member.accounts.forEach(function (a) { %>
+                <option value="<%= a.number %>" <%= values.funding === a.number ? 'selected' : '' %>>
+                  <%= a.number %> (<%= a.type %>)
+                </option>
+              <% }); %>
+            </select>
+          </td>
+        </tr>
+        <tr><td></td><td>
+          <%/* Reversible: this only moves to a review screen, it commits nothing. */%>
+          <input type="submit" id="<%= f.submit %>" value="Continue">
+        </td></tr>
+      </table>
+    </form>
+  </td></tr>
+</table>

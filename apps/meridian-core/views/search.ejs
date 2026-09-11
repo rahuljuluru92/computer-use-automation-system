@@ -1,0 +1,31 @@
+<table class="panel" width="620" cellpadding="0" cellspacing="0">
+  <tr><th colspan="2">Member Search</th></tr>
+  <% if (error) { %>
+    <tr><td colspan="2"><div class="err" role="alert"><%= error %></div></td></tr>
+  <% } %>
+  <tr><td colspan="2" style="padding:10px">
+    <form method="get" action="/members/lookup">
+      <table cellpadding="4" cellspacing="0" border="0">
+        <tr>
+          <td class="lbl"><label for="<%= midInput %>">Member ID</label></td>
+          <td><input type="text" name="memberId" id="<%= midInput %>" size="18" maxlength="10">
+              <font size="1" color="#667">&nbsp;numeric, 5 digits</font></td>
+        </tr>
+        <tr><td></td><td><input type="submit" id="<%= btnSearch %>" value="Search"></td></tr>
+      </table>
+    </form>
+  </td></tr>
+</table>
+
+<% if (notFound) { %>
+  <%/* The load-bearing case. This is an ANSWER, not a crash: the caller asked
+       whether a member exists and the system said no. A replay that reports
+       this as a failure has destroyed the information the caller wanted. */%>
+  <br>
+  <table class="panel" width="620" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:10px"><div class="err" role="alert">
+      No member record found for ID <b><%= searchedId %></b>.
+      Verify the number and try again.
+    </div></td></tr>
+  </table>
+<% } %>
