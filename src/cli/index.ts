@@ -115,7 +115,7 @@ async function main(argv: string[]): Promise<number> {
     case 'approve':
     case 'operator':
     case 'mcp':
-      console.error(`"${command}" is not implemented yet (see CLAUDE.md for phase status).`);
+      console.error(`"${command}" is not implemented yet.`);
       return 70; // EX_SOFTWARE
   }
 }

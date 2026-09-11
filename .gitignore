@@ -13,3 +13,6 @@ blob-report/
 # Evidence is a deliverable, but raw local scratch runs are not.
 evidence/_scratch/
 evidence/**/trace.zip.tmp
+
+# Working ledger, not part of the submission.
+CLAUDE.md

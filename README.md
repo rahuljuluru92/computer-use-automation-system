@@ -1,7 +1,7 @@
 # Computer-Use Automation System
 
 > **Status: in development.** This README is a placeholder; the full setup guide,
-> demo path, and requirement map land in Phase 7. See `CLAUDE.md` for current state.
+> demo path, and requirement map land in Phase 7.
 
 An LLM discovers how to complete a task inside a legacy back-office application once.
 That run is compiled into a typed, versioned, replayable **capability**. From then on,
