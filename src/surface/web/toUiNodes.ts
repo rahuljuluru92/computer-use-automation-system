@@ -180,7 +180,16 @@ function tableContext(node: ParsedAriaNode, ancestors: ParsedAriaNode[]): TableC
   const table = tableIdx === -1 ? undefined : ancestors[tableIdx];
 
   const cells = row.children.filter((c) => c.role === 'cell' || c.role === 'columnheader');
-  const colIndex = cells.indexOf(node);
+
+  // A control usually sits *inside* a cell rather than being one - the View
+  // link in an Action column is a child of that cell, not the cell itself. It
+  // still belongs to that column, so walk out to the enclosing cell to find
+  // which column that is. Without this, every actionable control in a grid
+  // loses its column and the whole grid strategy stops working.
+  const ownCell = cells.includes(node)
+    ? node
+    : cells.find((c) => contains(c, node));
+  const colIndex = ownCell ? cells.indexOf(ownCell) : -1;
 
   const headers = table ? headerRowOf(table) : [];
   const ctx: TableContext = {
