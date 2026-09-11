@@ -124,14 +124,24 @@ function byLabel(
   const matches = (text: string): boolean =>
     re ? re.test(text) : normalise(text) === normalise(s.label);
 
-  const candidates = snapshot.nodes.filter((n) => {
-    if (s.controlRole && n.role !== s.controlRole) return false;
-    // Either the control carries the label as its accessible name (a proper
-    // <label for>), or the label is simply the text sitting next to it - which
-    // in a table-laid-out form is the previous cell.
-    return matches(n.name) || n.nearestLabels.some(matches);
-  });
-  return { candidates };
+  const pool = snapshot.nodes.filter((n) => !s.controlRole || n.role === s.controlRole);
+
+  // Two ways a node can be associated with a label, and they are not equal:
+  //
+  //   labelled - the label sits next to it (the previous cell in its row).
+  //              This is the value, which is what you almost always want.
+  //   named    - the node's own accessible name IS the label. For a proper
+  //              <label for> control that is correct; for a table this is the
+  //              label cell itself, which is the thing you want least.
+  //
+  // On "Current Balance | $4,210.55" both cells match, and returning both makes
+  // the strategy ambiguous and therefore useless. So: if anything is *labelled*
+  // by this text, prefer those and discard the merely *named*. "The thing
+  // labelled X" beats "the thing that says X".
+  const labelled = pool.filter((n) => n.nearestLabels.some(matches));
+  const named = pool.filter((n) => matches(n.name));
+
+  return { candidates: labelled.length > 0 ? labelled : named };
 }
 
 // ---------------------------------------------------------------------------

@@ -54,7 +54,8 @@ export interface ParsedAriaNode {
  */
 const DESCRIPTOR = /^(\S+)(?:\s+"((?:[^"\\]|\\.)*)")?((?:\s*\[[^\]]*\])*)\s*$/;
 const ATTR = /\[([^\]=]+?)(?:=([^\]]*))?\]/g;
-const REF = /^f(\d+)e\d+$/;
+// Refs are `e18` on a frameless page and `f3e44` once frames are involved.
+const REF = /^(?:f(\d+))?e\d+$/;
 
 export function parseAriaSnapshot(yamlText: string): ParsedAriaNode[] {
   if (!yamlText.trim()) return [];
