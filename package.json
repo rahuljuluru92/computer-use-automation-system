@@ -1,0 +1,47 @@
+{
+  "name": "cua-capability-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Computer-use automation: an LLM discovers a flow once, it is compiled into a typed replayable capability, production replays it deterministically.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "app": "tsx apps/meridian-core/server.ts",
+    "cua": "tsx src/cli/index.ts",
+    "discover": "tsx src/cli/index.ts discover",
+    "replay": "tsx src/cli/index.ts replay",
+    "approve": "tsx src/cli/index.ts approve",
+    "explain": "tsx src/cli/index.ts explain",
+    "operator": "tsx src/cli/index.ts operator",
+    "mcp": "tsx src/cli/index.ts mcp",
+    "demo": "bash scripts/demo.sh",
+    "demo:stretch": "bash scripts/demo-stretch.sh",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm run test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.0",
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "playwright": "^1.57.0",
+    "yaml": "^2.8.1",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.39.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

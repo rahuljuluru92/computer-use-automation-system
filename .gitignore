@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
+# Evidence is a deliverable, but raw local scratch runs are not.
+evidence/_scratch/
+evidence/**/trace.zip.tmp
