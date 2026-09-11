@@ -25,6 +25,19 @@ export interface Surface {
   /** Perceive current state. The only way anything learns what is on screen. */
   observe(opts?: { depth?: number }): Promise<UiSnapshot>;
 
+  /**
+   * Block until the surface has stopped moving, so the next observation is of
+   * where the action led rather than where it started.
+   *
+   * Optional because it is genuinely surface-specific: on the web it is a
+   * question about in-flight requests, and a desktop surface would answer it
+   * some entirely different way or not at all. Callers must treat its absence
+   * as "cannot tell", never as "settled".
+   *
+   * This is a state predicate - "is anything still loading" - not a duration.
+   */
+  settle?(): Promise<void>;
+
   click(node: UiNode): Promise<void>;
   type(node: UiNode, text: string, opts?: { clearFirst?: boolean }): Promise<void>;
   select(node: UiNode, option: string): Promise<void>;

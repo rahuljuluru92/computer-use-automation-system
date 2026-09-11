@@ -79,6 +79,25 @@ export class WebSurface implements Surface {
   // Perceive
   // -------------------------------------------------------------------------
 
+  /**
+   * Meridian navigates its *content frame*, not the top-level page, so a
+   * page-level load state is already satisfied and tells you nothing - this
+   * has to be a question about network activity or it answers about the wrong
+   * document. Verified against the real app: immediately after a submit the
+   * frame still reports the old URL; after this it reports the new one.
+   *
+   * A page that never goes quiet stops being waited on rather than hanging the
+   * run; the caller's own checkpoint is what decides whether that mattered.
+   */
+  async settle(): Promise<void> {
+    try {
+      await this.#page.waitForLoadState('networkidle', { timeout: 5_000 });
+    } catch {
+      // Still busy. Observing now is not wrong, only early, and the step's
+      // checkpoint is what turns "early" into a diagnosable failure.
+    }
+  }
+
   async observe(opts: { depth?: number } = {}): Promise<UiSnapshot> {
     try {
       const yaml = await this.#page.locator('body').ariaSnapshot({

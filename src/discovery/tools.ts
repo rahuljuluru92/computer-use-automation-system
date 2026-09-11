@@ -110,6 +110,15 @@ export interface ToolRunnerOptions {
    * a prompt. The model refers to them by reference and never sees them.
    */
   secretParams?: string[];
+  /**
+   * Maps a secret input name to the environment variable replay should read it
+   * from - `password` -> `MERIDIAN_PASSWORD`. A credential is a property of the
+   * environment, not a parameter every caller supplies, so the *recorded* step
+   * says `$secret.MERIDIAN_PASSWORD` even though the model wrote
+   * `$input.password`. Without this the compiled capability would demand an
+   * operator password from whoever invokes it.
+   */
+  secretEnv?: Record<string, string>;
   /** Cap on nodes rendered into one observation, to bound the context window. */
   maxNodes?: number;
 }
@@ -421,6 +430,7 @@ export class ToolRunner {
     if (kind === 'select') template = str(input.option);
     const sensitivity = template === undefined ? 'none' : this.#sensitivityOf(template);
     const resolved = template === undefined ? undefined : interpolate(template, this.o.params);
+    const recorded = template === undefined ? undefined : this.#asRecorded(template);
 
     let bundle: LocatorBundle | undefined;
     let rejected: RejectedStrategy[] = [];
@@ -461,7 +471,7 @@ export class ToolRunner {
       action,
       actionClass: classifyAction(action, node),
       ...(bundle ? { target: bundle } : {}),
-      ...(template === undefined ? {} : { data: { value: template, sensitivity } }),
+      ...(recorded === undefined ? {} : { data: { value: recorded, sensitivity } }),
       rejected,
       beforeHash: snapshot.structureHash,
       beforeUrl: snapshot.url,
@@ -682,7 +692,37 @@ export class ToolRunner {
     });
   }
 
-  async #observeAfter(snapshot: UiSnapshot): Promise<ToolResult> {
+  /**
+   * Waits for the page to stop moving, then shows it.
+   *
+   * The executor snapshots the instant its action returns, which for anything
+   * that navigates is the *old* screen - replay never notices because its
+   * `waitFor` predicates re-observe until they pass, but discovery has no
+   * predicate to wait on yet. So: observe until two consecutive observations
+   * agree on structure.
+   *
+   * That is a state predicate, not a duration (invariant #5) - it asks "has
+   * the page stopped changing", and a settled page answers on the first extra
+   * observation. Bounded, so a page that animates forever costs a known amount
+   * rather than hanging the run.
+   */
+  async #settled(first: UiSnapshot): Promise<UiSnapshot> {
+    // Ask the surface first: it can see in-flight requests, which two quick
+    // samples cannot. Without this, both samples land before the navigation
+    // even starts, agree with each other, and declare the old screen settled.
+    await this.o.surface.settle?.();
+
+    let previous = first;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const next = await this.o.surface.observe();
+      if (next.structureHash === previous.structureHash) return next;
+      previous = next;
+    }
+    return previous;
+  }
+
+  async #observeAfter(observed: UiSnapshot): Promise<ToolResult> {
+    const snapshot = await this.#settled(observed);
     this.#snapshot = snapshot;
     this.#observation += 1;
     const last = this.#steps[this.#steps.length - 1];
@@ -696,6 +736,15 @@ export class ToolRunner {
   #sensitivityOf(template: string): Sensitivity {
     const secrets = this.o.secretParams ?? [];
     return secrets.some((s) => template.includes(`$input.${s}`)) ? 'secret' : 'none';
+  }
+
+  /** What goes into the artifact, as opposed to what goes into the browser. */
+  #asRecorded(template: string): string {
+    let out = template;
+    for (const [name, env] of Object.entries(this.o.secretEnv ?? {})) {
+      out = out.split(`$input.${name}`).join(`$secret.${env}`);
+    }
+    return out;
   }
 
   // -------------------------------------------------------------------------

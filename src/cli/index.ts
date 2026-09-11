@@ -26,9 +26,11 @@ type Command = (typeof COMMANDS)[number];
 const USAGE = `
 cua - computer-use capability system
 
-  cua discover --goal <text> --target <url> [--tenant <id>] [--max-steps <n>]
+  cua discover --goal <text> --target <url> [--input <json>] [--id <cap.x.y>]
+               [--version <semver>] [--model <id>] [--max-steps <n>]
       Drive a live surface with a model until the goal is met, then compile and
       self-verify a capability artifact. Requires ANTHROPIC_API_KEY.
+      Writes nothing unless the compiled artifact replays successfully.
 
   cua replay --artifact <path> [--input <json>] [--tenant <id>] [--chaos <mode>] [--label <name>]
       Execute a saved artifact deterministically. Never calls a model.
@@ -72,6 +74,9 @@ async function main(argv: string[]): Promise<number> {
       label: { type: 'string' },
       port: { type: 'string' },
       'max-steps': { type: 'string' },
+      id: { type: 'string' },
+      version: { type: 'string' },
+      model: { type: 'string' },
       schema: { type: 'boolean' },
       result: { type: 'boolean' },
       json: { type: 'boolean' },
@@ -109,9 +114,25 @@ async function main(argv: string[]): Promise<number> {
       });
     }
 
-    // Phases 4-6. Each is wired to its module as that phase lands; the CLI
+    case 'discover': {
+      if (!values.goal) fail('discover needs --goal <text>');
+      if (!values.target) fail('discover needs --target <url>');
+      const { runDiscoverCommand } = await import('./discoverCommand.ts');
+      return runDiscoverCommand({
+        goal: values.goal,
+        target: values.target,
+        inputJson: values.input ?? '{}',
+        id: values.id,
+        version: values.version,
+        model: values.model,
+        maxTurns: values['max-steps'] ? Number(values['max-steps']) : undefined,
+        label: values.label,
+        json: values.json ?? false,
+      });
+    }
+
+    // Phases 5-6. Each is wired to its module as that phase lands; the CLI
     // surface is fixed now so the README's demo path never has to change.
-    case 'discover':
     case 'approve':
     case 'operator':
     case 'mcp':
