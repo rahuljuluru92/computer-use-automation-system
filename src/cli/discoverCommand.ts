@@ -93,7 +93,11 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
       : []),
   ];
 
-  const planner = new AnthropicPlanner(opts.model ? { model: opts.model } : {});
+  // --model wins, then the documented CUA_DISCOVERY_MODEL, then the planner's
+  // own default. Choosing a cheaper model is an operator's decision to make
+  // explicitly; it is not one to bury in a default.
+  const model = opts.model ?? process.env.CUA_DISCOVERY_MODEL;
+  const planner = new AnthropicPlanner(model ? { model } : {});
   evidence.event('run.start',
     `Discovering: ${opts.goal}`,
     { target: opts.target, model: planner.model, promptVersion: promptVersion() });

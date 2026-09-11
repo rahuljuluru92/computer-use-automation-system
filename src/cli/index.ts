@@ -16,6 +16,7 @@
  */
 
 import { parseArgs } from 'node:util';
+import { existsSync } from 'node:fs';
 import * as z from 'zod';
 import { CapabilityArtifact } from '../core/schema.ts';
 import { ReplayResult } from '../core/result.ts';
@@ -48,12 +49,33 @@ cua - computer-use capability system
   cua mcp                          Serve approved capabilities over MCP (stdio).
 `;
 
+/**
+ * Load `.env` if there is one.
+ *
+ * `.env.example` has documented an ANTHROPIC_API_KEY line since Phase 0 and
+ * nothing ever read it, so anyone following the README put their key in a file
+ * the process ignored and got an authentication error for their trouble.
+ *
+ * Real environment variables win: `process.loadEnvFile` does not overwrite what
+ * is already set, so an exported key or a CI secret still takes precedence over
+ * a stale file on a laptop.
+ */
+function loadDotEnv(): void {
+  if (!existsSync('.env')) return;
+  try {
+    process.loadEnvFile('.env');
+  } catch {
+    // A malformed .env should not stop `replay`, which needs no secrets at all.
+  }
+}
+
 function fail(message: string): never {
   console.error(`error: ${message}\n${USAGE}`);
   process.exit(2);
 }
 
 async function main(argv: string[]): Promise<number> {
+  loadDotEnv();
   const [command, ...rest] = argv;
   if (!command || command === '--help' || command === '-h') {
     console.log(USAGE.trim());
