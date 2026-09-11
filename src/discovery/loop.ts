@@ -46,7 +46,19 @@ export interface ToolCall {
 
 export type LoopMessage =
   | { role: 'user'; text?: string; results?: Array<{ id: string; text: string; isError: boolean }> }
-  | { role: 'assistant'; text?: string; toolCalls: ToolCall[] };
+  | {
+      role: 'assistant';
+      text?: string;
+      toolCalls: ToolCall[];
+      /**
+       * The planner's own representation of this turn, round-tripped verbatim.
+       * Opaque here on purpose: the loop must not rebuild an assistant turn from
+       * `text` + `toolCalls`, because that quietly drops anything else the turn
+       * contained - reasoning blocks above all, which have to be echoed back
+       * unchanged to the model that produced them.
+       */
+      raw?: unknown;
+    };
 
 export interface PlannerRequest {
   system: string;
@@ -57,7 +69,16 @@ export interface PlannerRequest {
 export interface PlannerTurn {
   text?: string;
   toolCalls: ToolCall[];
-  usage: { inputTokens: number; outputTokens: number };
+  usage: {
+    inputTokens: number;
+    outputTokens: number;
+    /** Cache accounting, when the planner reports it. Zero reads across a run
+     *  means a silent cache invalidator, which is worth noticing. */
+    cacheReadTokens?: number;
+    cacheWriteTokens?: number;
+  };
+  /** Passed back on the next request untouched. See LoopMessage.raw. */
+  raw?: unknown;
 }
 
 /**
@@ -202,6 +223,7 @@ export async function discover(opts: DiscoverOptions): Promise<DiscoveryRun> {
       role: 'assistant',
       ...(turn.text === undefined ? {} : { text: turn.text }),
       toolCalls: turn.toolCalls,
+      ...(turn.raw === undefined ? {} : { raw: turn.raw }),
     });
 
     // A turn with no tool call has not moved the run. One nudge, then stop -
@@ -224,7 +246,17 @@ export async function discover(opts: DiscoverOptions): Promise<DiscoveryRun> {
     consecutiveStalls = 0;
 
     const results: Array<{ id: string; text: string; isError: boolean }> = [];
+    let ended = false;
     for (const call of turn.toolCalls) {
+      // The model ended the run on an earlier call in this same turn. The rest
+      // were decided before it knew that, so they are not executed - but every
+      // tool call still needs an answer, or the transcript is malformed and the
+      // next request would be rejected outright.
+      if (ended) {
+        results.push({ id: call.id, text: 'Not executed: the run had already ended.', isError: true });
+        continue;
+      }
+
       const result = await runner.run(call.name, call.input);
       metrics.toolCalls += 1;
       results.push({ id: call.id, text: result.text, isError: !result.ok });
@@ -232,10 +264,7 @@ export async function discover(opts: DiscoverOptions): Promise<DiscoveryRun> {
       if (result.code === 'policy_denied' || result.code === 'needs_approval') {
         metrics.policyDenials += 1;
       }
-
-      // The model ended the run. Stop reading its remaining tool calls: they
-      // were decided before it knew this one landed.
-      if (runner.terminal) break;
+      if (runner.terminal) ended = true;
     }
 
     messages.push({ role: 'user', results });
