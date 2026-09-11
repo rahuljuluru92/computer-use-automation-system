@@ -221,23 +221,41 @@ export class WebSurface implements Surface {
   }
 
   /**
-   * Ref first, structural fallback second - but only ever for a node from the
-   * current observation.
+   * Structural first, `aria-ref` as a fallback - and only ever for a node from
+   * the current observation.
    *
    * That last clause is load-bearing, and it was added because an integration
    * test caught the alternative doing real damage. A node was captured on
    * member 12345's page, the browser then navigated to member 67890, and the
-   * stale click *succeeded*: the ref matched nothing, the structural fallback
-   * ran, and it happily found the identically-named "Open Sub-Account" button
-   * on the wrong member's page. The fallback had silently rescued a stale
-   * reference by acting on a different record entirely - which in a servicing
-   * console means opening an account for the wrong person.
+   * stale click *succeeded*: it found the identically-named "Open Sub-Account"
+   * button on the wrong member's page. In a servicing console that means
+   * opening an account for the wrong person, so a node from an older
+   * observation is refused outright.
    *
-   * So the fallback is not a rescue. It exists only for the case where
-   * `aria-ref` is unavailable (an undocumented selector engine could change
-   * under us) while the page is otherwise exactly where we left it. A node
-   * from an older observation is refused outright, and the executor's
-   * resolve-then-act cycle re-observes anyway.
+   * The ordering was the other way round until it was measured. Decision #31
+   * said "resolution in our model, action by aria-ref", on the reasoning that
+   * an exact reference beats a reconstructed selector. Acting through it turns
+   * out not to work:
+   *
+   *   Clicking a submit button through `aria-ref` fires the click event and
+   *   the form's submit event, and then performs no navigation at all - zero
+   *   network requests. The same element clicked through a role or CSS locator
+   *   in the same session at the same moment issues the request. It dispatches
+   *   events without performing default actions.
+   *
+   *   It is also not reliably resolvable: the same reference that clicked a
+   *   moment earlier can time out on the next attempt.
+   *
+   * Both were reproduced repeatedly against the real application. The reason
+   * this went unnoticed is worth recording: replay resolves a bundle and acts
+   * without re-observing first, so its references are usually stale, `count()`
+   * returns 0, and it has been falling through to the structural locator all
+   * along. Replay worked by accident. Discovery observes immediately before
+   * acting, so its references are fresh, so it took the broken path every time.
+   *
+   * `aria-ref` is kept as the fallback rather than deleted because it is exact
+   * when it does resolve, and the structural locator cannot describe a node
+   * with no accessible name.
    */
   async #locatorFor(node: UiNode): Promise<Locator> {
     if (!this.#lastSnapshot?.nodes.includes(node)) {
@@ -246,11 +264,16 @@ export class WebSurface implements Surface {
         + `observation and the page has moved since. Re-observe before acting.`,
       );
     }
+    const structural = this.#structuralLocator(node);
+    try {
+      if (await structural.count() >= 1) return structural;
+    } catch { /* an unnameable node; fall through */ }
+
     const byRef = this.#page.locator(`aria-ref=${node.ref}`);
     try {
       if (await byRef.count() === 1) return byRef;
-    } catch { /* fall through to the structural locator */ }
-    return this.#structuralLocator(node);
+    } catch { /* neither worked; let the action report the failure */ }
+    return structural;
   }
 
   #structuralLocator(node: UiNode): Locator {
