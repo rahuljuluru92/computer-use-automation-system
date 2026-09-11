@@ -86,7 +86,18 @@ export interface ToolResult {
   ok: boolean;
   /** What the model sees. The only channel back into the loop. */
   text: string;
+  /**
+   * Why it failed, for the loop's bookkeeping. The loop needs to count policy
+   * refusals to know when an agent is circling a wall, and matching on the
+   * prose would break the moment the wording improved.
+   */
+  code?: ToolFailure;
 }
+
+export type ToolFailure =
+  | 'no_observation' | 'bad_ref' | 'stale_ref' | 'unknown_ref'
+  | 'unlocatable' | 'policy_denied' | 'needs_approval' | 'action_failed'
+  | 'unknown_tool';
 
 export interface ToolRunnerOptions {
   executor: Executor;
@@ -370,7 +381,9 @@ export class ToolRunner {
           question: str(input.question),
         });
       default:
-        return fail(`No tool called "${name}". Available: ${DISCOVERY_TOOLS.map((t) => t.name).join(', ')}.`);
+        return fail(
+          `No tool called "${name}". Available: ${DISCOVERY_TOOLS.map((t) => t.name).join(', ')}.`,
+          'unknown_tool');
     }
   }
 
@@ -399,7 +412,7 @@ export class ToolRunner {
       node = found.node;
     }
     const snapshot = this.#snapshot;
-    if (!snapshot) return fail('Nothing has been observed yet. Call observe first.');
+    if (!snapshot) return fail('Nothing has been observed yet. Call observe first.', 'no_observation');
 
     // The value the model supplied, kept as written so `$input.x` survives into
     // the artifact, and resolved only on the way to the browser.
@@ -419,7 +432,7 @@ export class ToolRunner {
         // to record a locator that only ever worked once.
         return fail(
           `That control cannot be described in a way replay could find again: ${synth.reason}. `
-          + `Pick a control with a name, or one inside a table row that identifies it.`);
+          + `Pick a control with a name, or one inside a table row that identifies it.`, 'unlocatable');
       }
       bundle = synth.bundle;
       rejected = synth.rejected;
@@ -494,7 +507,7 @@ export class ToolRunner {
       params: this.o.params,
     });
     if (!synth.ok) {
-      return fail(`That value cannot be described for replay: ${synth.reason}.`);
+      return fail(`That value cannot be described for replay: ${synth.reason}.`, 'unlocatable');
     }
 
     const action: ActionSpec = { kind: 'extract' };
@@ -537,7 +550,7 @@ export class ToolRunner {
     const intent = str(input.intent);
 
     const synth = synthesizeBundle(found.node, snapshot, { description: intent, params: this.o.params });
-    if (!synth.ok) return fail(`That checkpoint cannot be described for replay: ${synth.reason}.`);
+    if (!synth.ok) return fail(`That checkpoint cannot be described for replay: ${synth.reason}.`, 'unlocatable');
 
     const expect = input.expect_text === undefined ? undefined : str(input.expect_text);
     const predicate: Predicate = expect === undefined
@@ -596,17 +609,17 @@ export class ToolRunner {
   #resolveRef(raw: unknown): { ok: true; node: UiNode } | { ok: false; result: ToolResult } {
     const snapshot = this.#snapshot;
     if (!snapshot) {
-      return { ok: false, result: fail('Nothing has been observed yet. Call observe first.') };
+      return { ok: false, result: fail('Nothing has been observed yet. Call observe first.', 'no_observation') };
     }
     if (typeof raw !== 'string' || raw.trim() === '') {
-      return { ok: false, result: fail('That tool needs a ref from the most recent observe.') };
+      return { ok: false, result: fail('That tool needs a ref from the most recent observe.', 'bad_ref') };
     }
 
     const m = /^o(\d+)#(.+)$/.exec(raw.trim());
     if (!m) {
       return { ok: false, result: fail(
         `"${raw}" is not a ref. Refs look like "o${this.#observation}#f2e14" and are printed by observe. `
-        + `${this.#refHint(snapshot)}`) };
+        + `${this.#refHint(snapshot)}`, 'bad_ref') };
     }
 
     // The stale-ref guard. Without the observation stamp this check is
@@ -617,13 +630,13 @@ export class ToolRunner {
       return { ok: false, result: fail(
         `That ref is from observation ${seen} and the screen is now at observation ${this.#observation}. `
         + `Refs do not survive a change of screen - the same name can mean a different control. `
-        + `Use a ref from the observation above, or call observe again.`) };
+        + `Use a ref from the observation above, or call observe again.`, 'stale_ref') };
     }
 
     const node = snapshot.nodes.find((n) => n.ref === m[2]);
     if (!node) {
       return { ok: false, result: fail(
-        `No control "${raw}" on this screen. ${this.#refHint(snapshot)}`) };
+        `No control "${raw}" on this screen. ${this.#refHint(snapshot)}`, 'unknown_ref') };
     }
     return { ok: true, node };
   }
@@ -643,12 +656,12 @@ export class ToolRunner {
       return fail(
         `Policy refuses this action: ${outcome.observed}. This is not something you can work `
         + `around - do not try another route to the same effect. If the task genuinely requires `
-        + `it, call request_human.`);
+        + `it, call request_human.`, 'policy_denied');
     }
     if (outcome.code === 'needs_approval') {
       return fail(
         `This action needs human approval before it can run: ${outcome.observed}. `
-        + `Call request_human and say what you are trying to do.`);
+        + `Call request_human and say what you are trying to do.`, 'needs_approval');
     }
     return fail(
       `The ${outcome.code.replace(/_/g, ' ')} - expected ${outcome.expected}, observed ${outcome.observed}.`
@@ -759,8 +772,8 @@ function parseSpecFor(as: string): ExtractSpec['parse'] {
   }
 }
 
-function fail(text: string): ToolResult {
-  return { ok: false, text };
+function fail(text: string, code: ToolFailure = 'action_failed'): ToolResult {
+  return { ok: false, text, code };
 }
 
 function str(v: unknown): string {
