@@ -1,0 +1,1782 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "cap.store.checkout_review",
+  "version": "1.0.0",
+  "status": "draft",
+  "title": "Log in to the demo store as standard_user with password secret_sauce, add the Sauce Labs Backpack to the cart, proceed to checkout, fill in the checkout information with first name Jane, last name Doe, and zip code 12345, continue to the checkout overview page, and report the total price shown there.",
+  "description": "Log in to the demo store as standard_user with password secret_sauce, add the Sauce Labs Backpack to the cart, proceed to checkout, fill in the checkout information with first name Jane, last name Doe, and zip code 12345, continue to the checkout overview page, and report the total price shown there.",
+  "target": {
+    "surface": "web",
+    "product": {
+      "vendor": "Meridian",
+      "app": "Core Servicing Console"
+    },
+    "entry": {
+      "kind": "url",
+      "template": "https://www.saucedemo.com"
+    }
+  },
+  "inputs": {
+    "type": "object",
+    "properties": {},
+    "required": [],
+    "additionalProperties": false
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "totalPrice": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "totalPrice"
+    ],
+    "additionalProperties": false
+  },
+  "outcomes": [],
+  "steps": [
+    {
+      "id": "s1",
+      "intent": "Open the demo store login page",
+      "action": {
+        "kind": "navigate",
+        "urlTemplate": "https://www.saucedemo.com"
+      },
+      "actionClass": "read",
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter the standard_user username",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Username",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Username\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Username$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Username$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "textbox",
+                    "name": "Password"
+                  },
+                  "dx": 146,
+                  "dy": -34.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 146,-34 px from \"Password\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter the standard_user username",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Username",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Username\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Username$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Username$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "textbox",
+                    "name": "Password"
+                  },
+                  "dx": 146,
+                  "dy": -34.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 146,-34 px from \"Password\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s2",
+      "intent": "Enter the standard_user username",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter the standard_user username",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Username",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Username\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Username$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Username$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "textbox",
+                "name": "Password"
+              },
+              "dx": 146,
+              "dy": -34.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 146,-34 px from \"Password\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "standard_user",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Enter the standard_user username",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Username",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Username\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Username$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Username$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "textbox",
+                    "name": "Password"
+                  },
+                  "dx": 146,
+                  "dy": -34.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 146,-34 px from \"Password\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "standard_user"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s3",
+      "intent": "Enter the password secret_sauce",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter the password secret_sauce",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Password",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Password\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Username",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.75,
+            "rationale": "The textbox labelled \"Username\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Password$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Password$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "form",
+                "name": "Login"
+              },
+              "dx": 146,
+              "dy": 73.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 146,74 px from \"Login\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "secret_sauce",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Enter the password secret_sauce",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Password",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Password\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Username",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Username\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Password$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Password$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "form",
+                    "name": "Login"
+                  },
+                  "dx": 146,
+                  "dy": 73.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 146,74 px from \"Login\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "secret_sauce"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s4",
+      "intent": "Log in to the demo store",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Log in to the demo store",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Login",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Login\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Password",
+              "controlRole": "button"
+            },
+            "confidence": 0.75,
+            "rationale": "The button labelled \"Password\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Login$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Login$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "form",
+                "name": "Login"
+              },
+              "dx": 146,
+              "dy": 172.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 146,173 px from \"Login\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Add the Sauce Labs Backpack to the cart",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "$29.99",
+                  "controlRole": "button"
+                },
+                "confidence": 0.3,
+                "rationale": "The button labelled \"$29.99\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes. Discounted: it keys on \"$29.99\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "Sauce Labs Bolt T-Shirt"
+                  },
+                  "dx": 219,
+                  "dy": -71
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 219,-71 px from \"Sauce Labs Bolt T-Shirt\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Add the Sauce Labs Backpack to the cart",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "$29.99",
+                  "controlRole": "button"
+                },
+                "confidence": 0.3,
+                "rationale": "The button labelled \"$29.99\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes. Discounted: it keys on \"$29.99\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "Sauce Labs Bolt T-Shirt"
+                  },
+                  "dx": 219,
+                  "dy": -71
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 219,-71 px from \"Sauce Labs Bolt T-Shirt\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s5",
+      "intent": "Add the Sauce Labs Backpack to the cart",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Add the Sauce Labs Backpack to the cart",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "$29.99",
+              "controlRole": "button"
+            },
+            "confidence": 0.3,
+            "rationale": "The button labelled \"$29.99\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes. Discounted: it keys on \"$29.99\", which reads as a balance, date or rate - a value that changes without the screen changing."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "generic",
+                "name": "Sauce Labs Bolt T-Shirt"
+              },
+              "dx": 219,
+              "dy": -71
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 219,-71 px from \"Sauce Labs Bolt T-Shirt\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Open the cart to proceed to checkout",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Cart, 1 items",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Cart, 1 items\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Swag Labs",
+                  "controlRole": "button"
+                },
+                "confidence": 0.75,
+                "rationale": "The button labelled \"Swag Labs\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Cart, 1 items$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Cart, 1 items$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "1"
+                  },
+                  "dx": 0,
+                  "dy": 20
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 0,20 px from \"1\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Open the cart to proceed to checkout",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Cart, 1 items",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Cart, 1 items\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Swag Labs",
+                  "controlRole": "button"
+                },
+                "confidence": 0.75,
+                "rationale": "The button labelled \"Swag Labs\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Cart, 1 items$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Cart, 1 items$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "1"
+                  },
+                  "dx": 0,
+                  "dy": 20
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 0,20 px from \"1\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s6",
+      "intent": "Open the cart to proceed to checkout",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Open the cart to proceed to checkout",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Cart, 1 items",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Cart, 1 items\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Swag Labs",
+              "controlRole": "button"
+            },
+            "confidence": 0.75,
+            "rationale": "The button labelled \"Swag Labs\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Cart, 1 items$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Cart, 1 items$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "generic",
+                "name": "1"
+              },
+              "dx": 0,
+              "dy": 20
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 0,20 px from \"1\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Proceed to checkout",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Checkout",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Checkout\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Continue Shopping",
+                  "controlRole": "button"
+                },
+                "confidence": 0.75,
+                "rationale": "The button labelled \"Continue Shopping\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Checkout$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Checkout$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "button",
+                    "name": "Remove"
+                  },
+                  "dx": 71,
+                  "dy": 132
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 71,132 px from \"Remove\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "text_matches",
+          "locator": {
+            "description": "Confirm the Sauce Labs Backpack is in the cart",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "View details for Sauce Labs Backpack",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"View details for Sauce Labs Backpack\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^View details for Sauce Labs Backpack$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^View details for Sauce Labs Backpack$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "Sauce Labs Backpack"
+                  },
+                  "dx": 577,
+                  "dy": 10
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 577,10 px from \"Sauce Labs Backpack\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "pattern": "Sauce Labs Backpack"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s7",
+      "intent": "Proceed to checkout",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Proceed to checkout",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Checkout",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Checkout\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Continue Shopping",
+              "controlRole": "button"
+            },
+            "confidence": 0.75,
+            "rationale": "The button labelled \"Continue Shopping\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Checkout$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Checkout$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "button",
+                "name": "Remove"
+              },
+              "dx": 71,
+              "dy": 132
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 71,132 px from \"Remove\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s8",
+      "intent": "Enter first name Jane",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter first name Jane",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "First Name",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"First Name\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^First Name$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^First Name$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "textbox",
+                "name": "Last Name"
+              },
+              "dx": 190,
+              "dy": -34.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 190,-34 px from \"Last Name\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "Jane",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Enter first name Jane",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "First Name",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"First Name\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^First Name$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^First Name$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "textbox",
+                    "name": "Last Name"
+                  },
+                  "dx": 190,
+                  "dy": -34.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 190,-34 px from \"Last Name\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "Jane"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s9",
+      "intent": "Enter last name Doe",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter last name Doe",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Last Name",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Last Name\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Last Name$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Last Name$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "textbox",
+                "name": "First Name"
+              },
+              "dx": 190,
+              "dy": 73.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 190,74 px from \"First Name\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "Doe",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Enter last name Doe",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Last Name",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Last Name\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Last Name$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Last Name$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "textbox",
+                    "name": "First Name"
+                  },
+                  "dx": 190,
+                  "dy": 73.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 190,74 px from \"First Name\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "Doe"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s10",
+      "intent": "Enter zip code 12345",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter zip code 12345",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Zip/Postal Code",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Zip/Postal Code\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Last Name",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.75,
+            "rationale": "The textbox labelled \"Last Name\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Zip/Postal Code$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Zip/Postal Code$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "12345",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Enter zip code 12345",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Zip/Postal Code",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Zip/Postal Code\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Last Name",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Last Name\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Zip/Postal Code$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Zip/Postal Code$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "12345"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s11",
+      "intent": "Continue to the checkout overview page",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "Continue to the checkout overview page",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Continue",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Continue\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Cancel",
+              "controlRole": "button"
+            },
+            "confidence": 0.75,
+            "rationale": "The button labelled \"Cancel\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Continue$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Continue$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "form",
+                "name": "Checkout information"
+              },
+              "dx": 1140,
+              "dy": 405.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 1140,406 px from \"Checkout information\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "value of totalPrice",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "generic",
+                  "name": "Total: $32.39",
+                  "exact": true
+                },
+                "confidence": 0.38,
+                "rationale": "role=generic name=\"Total: $32.39\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name. Discounted: it keys on \"Total: $32.39\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Tax: $2.40",
+                  "controlRole": "generic"
+                },
+                "confidence": 0.3,
+                "rationale": "The generic labelled \"Tax: $2.40\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes. Discounted: it keys on \"Tax: $2.40\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Total: \\$32\\.39$",
+                  "role": "generic"
+                },
+                "confidence": 0.22,
+                "rationale": "Matches its own visible text exactly (^Total: \\$32\\.39$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart. Discounted: it keys on \"^Total: \\\\$32\\\\.39$\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "Tax: $2.40"
+                  },
+                  "dx": 625,
+                  "dy": 40
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 625,40 px from \"Tax: $2.40\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "text_matches",
+          "locator": {
+            "description": "Confirm we reached the checkout overview page",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "banner",
+                  "name": "Checkout: Overview",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=banner name=\"Checkout: Overview\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Checkout: Overview$",
+                  "role": "banner"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Checkout: Overview$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "Checkout: Overview"
+                  },
+                  "dx": 640,
+                  "dy": 0
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 640,0 px from \"Checkout: Overview\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "pattern": "Checkout: Overview"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s12",
+      "intent": "Report the total price shown on the checkout overview page",
+      "action": {
+        "kind": "extract"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "value of totalPrice",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "generic",
+              "name": "Total: $32.39",
+              "exact": true
+            },
+            "confidence": 0.38,
+            "rationale": "role=generic name=\"Total: $32.39\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name. Discounted: it keys on \"Total: $32.39\", which reads as a balance, date or rate - a value that changes without the screen changing."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Tax: $2.40",
+              "controlRole": "generic"
+            },
+            "confidence": 0.3,
+            "rationale": "The generic labelled \"Tax: $2.40\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes. Discounted: it keys on \"Tax: $2.40\", which reads as a balance, date or rate - a value that changes without the screen changing."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Total: \\$32\\.39$",
+              "role": "generic"
+            },
+            "confidence": 0.22,
+            "rationale": "Matches its own visible text exactly (^Total: \\$32\\.39$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart. Discounted: it keys on \"^Total: \\\\$32\\\\.39$\", which reads as a balance, date or rate - a value that changes without the screen changing."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "generic",
+                "name": "Tax: $2.40"
+              },
+              "dx": 625,
+              "dy": 40
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 625,40 px from \"Tax: $2.40\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "value of totalPrice",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "generic",
+                  "name": "Total: $32.39",
+                  "exact": true
+                },
+                "confidence": 0.38,
+                "rationale": "role=generic name=\"Total: $32.39\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name. Discounted: it keys on \"Total: $32.39\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Tax: $2.40",
+                  "controlRole": "generic"
+                },
+                "confidence": 0.3,
+                "rationale": "The generic labelled \"Tax: $2.40\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes. Discounted: it keys on \"Tax: $2.40\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Total: \\$32\\.39$",
+                  "role": "generic"
+                },
+                "confidence": 0.22,
+                "rationale": "Matches its own visible text exactly (^Total: \\$32\\.39$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart. Discounted: it keys on \"^Total: \\\\$32\\\\.39$\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "Tax: $2.40"
+                  },
+                  "dx": 625,
+                  "dy": 40
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 625,40 px from \"Tax: $2.40\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [
+        {
+          "name": "totalPrice",
+          "from": {
+            "description": "value of totalPrice",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "generic",
+                  "name": "Total: $32.39",
+                  "exact": true
+                },
+                "confidence": 0.38,
+                "rationale": "role=generic name=\"Total: $32.39\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name. Discounted: it keys on \"Total: $32.39\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Tax: $2.40",
+                  "controlRole": "generic"
+                },
+                "confidence": 0.3,
+                "rationale": "The generic labelled \"Tax: $2.40\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes. Discounted: it keys on \"Tax: $2.40\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Total: \\$32\\.39$",
+                  "role": "generic"
+                },
+                "confidence": 0.22,
+                "rationale": "Matches its own visible text exactly (^Total: \\$32\\.39$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart. Discounted: it keys on \"^Total: \\\\$32\\\\.39$\", which reads as a balance, date or rate - a value that changes without the screen changing."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "generic",
+                    "name": "Tax: $2.40"
+                  },
+                  "dx": 625,
+                  "dy": 40
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 625,40 px from \"Tax: $2.40\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "parse": {
+            "kind": "currency",
+            "locale": "en-US"
+          },
+          "sensitivity": "none"
+        }
+      ],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    }
+  ],
+  "recovery": [],
+  "policy": {
+    "maxSteps": 40,
+    "maxWallClockMs": 90000,
+    "allowedActionClasses": [
+      "read",
+      "write_reversible"
+    ]
+  },
+  "escalation": {
+    "timeoutMs": 300000,
+    "maxResumes": 2,
+    "abandon": {
+      "kind": "entry"
+    }
+  },
+  "tenancy": {
+    "canonical": true,
+    "overlays": {}
+  },
+  "provenance": {
+    "discoveryRunId": "20260912T153547Z-discovery-67e14020",
+    "model": "claude-sonnet-5",
+    "promptVersion": "discovery.v1+sha256:3686038d",
+    "recordedAt": "2026-09-12T15:36:17.048Z",
+    "compilerVersion": "1.0.0",
+    "selfVerified": {
+      "passed": true,
+      "at": "2026-09-12T15:36:21.744Z",
+      "runId": "20260912T153617Z-verify-36ea4950"
+    }
+  },
+  "reliability": {
+    "runs": 1,
+    "passRate": 1,
+    "p50DurationMs": 4425,
+    "p95DurationMs": 4425,
+    "degradedResolutions": 0,
+    "lastVerifiedAt": "2026-09-12T15:36:21.744Z"
+  },
+  "integrity": {
+    "hash": "sha256:ffb1310a4a02d5a10ad783c5bb87d18c6d0d5678f62860ce3b2726359e2ce3c9"
+  }
+}

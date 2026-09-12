@@ -1,0 +1,80 @@
+{"seq":1,"t":"2026-09-12T15:36:17.302Z","kind":"run.start","message":"Replaying cap.store.checkout_review v1.0.0 (draft), with no model in the loop.","data":{"capability":"cap.store.checkout_review","version":"1.0.0","inputs":[]}}
+{"seq":2,"t":"2026-09-12T15:36:17.694Z","kind":"observe","message":"Entered at https://www.saucedemo.com/.","data":{"url":"https://www.saucedemo.com/","nodes":8,"structureHash":"54900bd6f26f09d0"}}
+{"seq":3,"t":"2026-09-12T15:36:17.694Z","kind":"step.begin","message":"Step 1: Open the demo store login page","stepId":"s1","data":{"index":1,"actionKind":"navigate","actionClass":"read"}}
+{"seq":4,"t":"2026-09-12T15:36:17.846Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s1","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":5,"t":"2026-09-12T15:36:17.856Z","kind":"action","message":"Navigated.","stepId":"s1","data":{"actionKind":"navigate","durationMs":10}}
+{"seq":6,"t":"2026-09-12T15:36:17.869Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s1","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":7,"t":"2026-09-12T15:36:17.869Z","kind":"checkpoint","message":"Checkpoint held: \"Enter the standard_user username\" is present","stepId":"s1","data":{"held":true}}
+{"seq":8,"t":"2026-09-12T15:36:17.898Z","kind":"step.end","message":"Step 1 ok.","stepId":"s1","data":{"status":"ok","durationMs":204}}
+{"seq":9,"t":"2026-09-12T15:36:17.898Z","kind":"step.begin","message":"Step 2: Enter the standard_user username","stepId":"s2","data":{"index":2,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":10,"t":"2026-09-12T15:36:17.933Z","kind":"locator.resolve","message":"Found Enter the standard_user username via tier 1.","stepId":"s2","data":{"locatorDescription":"Enter the standard_user username","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":11,"t":"2026-09-12T15:36:17.933Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s2","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":12,"t":"2026-09-12T15:36:17.953Z","kind":"action","message":"Typed into on \"Username\".","stepId":"s2","data":{"actionKind":"type","durationMs":20,"target":{"role":"textbox","name":"Username","frame":[]}}}
+{"seq":13,"t":"2026-09-12T15:36:18.290Z","kind":"checkpoint","message":"Checkpoint held: \"Enter the standard_user username\" = \"standard_user\" (wanted \"standard_user\")","stepId":"s2","data":{"held":true}}
+{"seq":14,"t":"2026-09-12T15:36:18.325Z","kind":"step.end","message":"Step 2 ok.","stepId":"s2","data":{"status":"ok","durationMs":427}}
+{"seq":15,"t":"2026-09-12T15:36:18.325Z","kind":"step.begin","message":"Step 3: Enter the password secret_sauce","stepId":"s3","data":{"index":3,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":16,"t":"2026-09-12T15:36:18.353Z","kind":"locator.resolve","message":"Found Enter the password secret_sauce via tier 1.","stepId":"s3","data":{"locatorDescription":"Enter the password secret_sauce","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":17,"t":"2026-09-12T15:36:18.353Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s3","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":18,"t":"2026-09-12T15:36:18.382Z","kind":"action","message":"Typed into on \"Password\".","stepId":"s3","data":{"actionKind":"type","durationMs":29,"target":{"role":"textbox","name":"Password","frame":[]}}}
+{"seq":19,"t":"2026-09-12T15:36:18.719Z","kind":"checkpoint","message":"Checkpoint held: \"Enter the password secret_sauce\" = \"secret_sauce\" (wanted \"secret_sauce\")","stepId":"s3","data":{"held":true}}
+{"seq":20,"t":"2026-09-12T15:36:18.763Z","kind":"step.end","message":"Step 3 ok.","stepId":"s3","data":{"status":"ok","durationMs":438}}
+{"seq":21,"t":"2026-09-12T15:36:18.763Z","kind":"step.begin","message":"Step 4: Log in to the demo store","stepId":"s4","data":{"index":4,"actionKind":"click","actionClass":"write_reversible"}}
+{"seq":22,"t":"2026-09-12T15:36:18.786Z","kind":"locator.resolve","message":"Found Log in to the demo store via tier 1.","stepId":"s4","data":{"locatorDescription":"Log in to the demo store","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":23,"t":"2026-09-12T15:36:18.787Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s4","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":24,"t":"2026-09-12T15:36:18.830Z","kind":"action","message":"Clicked on \"Login\".","stepId":"s4","data":{"actionKind":"click","durationMs":43,"target":{"role":"button","name":"Login","frame":[]}}}
+{"seq":25,"t":"2026-09-12T15:36:18.948Z","kind":"wait","message":"The expected change happened after 115ms.","stepId":"s4","data":{"held":true,"elapsedMs":115,"attempts":2}}
+{"seq":26,"t":"2026-09-12T15:36:18.948Z","kind":"checkpoint","message":"Checkpoint held: \"Add the Sauce Labs Backpack to the cart\" is present","stepId":"s4","data":{"held":true}}
+{"seq":27,"t":"2026-09-12T15:36:18.993Z","kind":"step.end","message":"Step 4 ok.","stepId":"s4","data":{"status":"ok","durationMs":230}}
+{"seq":28,"t":"2026-09-12T15:36:18.993Z","kind":"step.begin","message":"Step 5: Add the Sauce Labs Backpack to the cart","stepId":"s5","data":{"index":5,"actionKind":"click","actionClass":"write_reversible"}}
+{"seq":29,"t":"2026-09-12T15:36:19.039Z","kind":"locator.resolve","message":"Found Add the Sauce Labs Backpack to the cart via tier 3.","stepId":"s5","data":{"locatorDescription":"Add the Sauce Labs Backpack to the cart","winningTier":3,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":30,"t":"2026-09-12T15:36:19.039Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s5","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":31,"t":"2026-09-12T15:36:19.066Z","kind":"action","message":"Clicked on \"Add to cart\".","stepId":"s5","data":{"actionKind":"click","durationMs":27,"target":{"role":"button","name":"Add to cart","frame":[]}}}
+{"seq":32,"t":"2026-09-12T15:36:19.074Z","kind":"wait","message":"The expected change happened after 1ms.","stepId":"s5","data":{"held":true,"elapsedMs":1,"attempts":1}}
+{"seq":33,"t":"2026-09-12T15:36:19.074Z","kind":"checkpoint","message":"Checkpoint held: \"Open the cart to proceed to checkout\" is present","stepId":"s5","data":{"held":true}}
+{"seq":34,"t":"2026-09-12T15:36:19.121Z","kind":"step.end","message":"Step 5 ok.","stepId":"s5","data":{"status":"ok","durationMs":128}}
+{"seq":35,"t":"2026-09-12T15:36:19.121Z","kind":"step.begin","message":"Step 6: Open the cart to proceed to checkout","stepId":"s6","data":{"index":6,"actionKind":"click","actionClass":"write_reversible"}}
+{"seq":36,"t":"2026-09-12T15:36:19.170Z","kind":"locator.resolve","message":"Found Open the cart to proceed to checkout via tier 1.","stepId":"s6","data":{"locatorDescription":"Open the cart to proceed to checkout","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":37,"t":"2026-09-12T15:36:19.170Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s6","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":38,"t":"2026-09-12T15:36:19.190Z","kind":"action","message":"Clicked on \"Cart, 1 items\".","stepId":"s6","data":{"actionKind":"click","durationMs":20,"target":{"role":"button","name":"Cart, 1 items","frame":[]}}}
+{"seq":39,"t":"2026-09-12T15:36:19.303Z","kind":"wait","message":"The expected change happened after 107ms.","stepId":"s6","data":{"held":true,"elapsedMs":107,"attempts":2}}
+{"seq":40,"t":"2026-09-12T15:36:19.304Z","kind":"checkpoint","message":"Checkpoint held: \"Confirm the Sauce Labs Backpack is in the cart\" reads \"View details for Sauce Labs Backpack Sauce Labs Backpack\" (wanted /Sauce Labs Backpack/)","stepId":"s6","data":{"held":true}}
+{"seq":41,"t":"2026-09-12T15:36:19.320Z","kind":"step.end","message":"Step 6 ok.","stepId":"s6","data":{"status":"ok","durationMs":199}}
+{"seq":42,"t":"2026-09-12T15:36:19.320Z","kind":"step.begin","message":"Step 7: Proceed to checkout","stepId":"s7","data":{"index":7,"actionKind":"click","actionClass":"write_reversible"}}
+{"seq":43,"t":"2026-09-12T15:36:19.352Z","kind":"locator.resolve","message":"Found Proceed to checkout via tier 1.","stepId":"s7","data":{"locatorDescription":"Proceed to checkout","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":44,"t":"2026-09-12T15:36:19.352Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s7","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":45,"t":"2026-09-12T15:36:19.390Z","kind":"action","message":"Clicked on \"Checkout\".","stepId":"s7","data":{"actionKind":"click","durationMs":38,"target":{"role":"button","name":"Checkout","frame":[]}}}
+{"seq":46,"t":"2026-09-12T15:36:19.847Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s7","data":{"held":true}}
+{"seq":47,"t":"2026-09-12T15:36:19.872Z","kind":"step.end","message":"Step 7 ok.","stepId":"s7","data":{"status":"ok","durationMs":552}}
+{"seq":48,"t":"2026-09-12T15:36:19.872Z","kind":"step.begin","message":"Step 8: Enter first name Jane","stepId":"s8","data":{"index":8,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":49,"t":"2026-09-12T15:36:19.903Z","kind":"locator.resolve","message":"Found Enter first name Jane via tier 1.","stepId":"s8","data":{"locatorDescription":"Enter first name Jane","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":50,"t":"2026-09-12T15:36:19.903Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s8","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":51,"t":"2026-09-12T15:36:19.909Z","kind":"action","message":"Typed into on \"First Name\".","stepId":"s8","data":{"actionKind":"type","durationMs":6,"target":{"role":"textbox","name":"First Name","frame":[]}}}
+{"seq":52,"t":"2026-09-12T15:36:20.258Z","kind":"checkpoint","message":"Checkpoint held: \"Enter first name Jane\" = \"Jane\" (wanted \"Jane\")","stepId":"s8","data":{"held":true}}
+{"seq":53,"t":"2026-09-12T15:36:20.291Z","kind":"step.end","message":"Step 8 ok.","stepId":"s8","data":{"status":"ok","durationMs":418}}
+{"seq":54,"t":"2026-09-12T15:36:20.291Z","kind":"step.begin","message":"Step 9: Enter last name Doe","stepId":"s9","data":{"index":9,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":55,"t":"2026-09-12T15:36:20.318Z","kind":"locator.resolve","message":"Found Enter last name Doe via tier 1.","stepId":"s9","data":{"locatorDescription":"Enter last name Doe","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":56,"t":"2026-09-12T15:36:20.318Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s9","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":57,"t":"2026-09-12T15:36:20.323Z","kind":"action","message":"Typed into on \"Last Name\".","stepId":"s9","data":{"actionKind":"type","durationMs":5,"target":{"role":"textbox","name":"Last Name","frame":[]}}}
+{"seq":58,"t":"2026-09-12T15:36:20.668Z","kind":"checkpoint","message":"Checkpoint held: \"Enter last name Doe\" = \"Doe\" (wanted \"Doe\")","stepId":"s9","data":{"held":true}}
+{"seq":59,"t":"2026-09-12T15:36:20.707Z","kind":"step.end","message":"Step 9 ok.","stepId":"s9","data":{"status":"ok","durationMs":416}}
+{"seq":60,"t":"2026-09-12T15:36:20.708Z","kind":"step.begin","message":"Step 10: Enter zip code 12345","stepId":"s10","data":{"index":10,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":61,"t":"2026-09-12T15:36:20.736Z","kind":"locator.resolve","message":"Found Enter zip code 12345 via tier 1.","stepId":"s10","data":{"locatorDescription":"Enter zip code 12345","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":62,"t":"2026-09-12T15:36:20.736Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s10","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":63,"t":"2026-09-12T15:36:20.742Z","kind":"action","message":"Typed into on \"Zip/Postal Code\".","stepId":"s10","data":{"actionKind":"type","durationMs":6,"target":{"role":"textbox","name":"Zip/Postal Code","frame":[]}}}
+{"seq":64,"t":"2026-09-12T15:36:21.088Z","kind":"checkpoint","message":"Checkpoint held: \"Enter zip code 12345\" = \"12345\" (wanted \"12345\")","stepId":"s10","data":{"held":true}}
+{"seq":65,"t":"2026-09-12T15:36:21.125Z","kind":"step.end","message":"Step 10 ok.","stepId":"s10","data":{"status":"ok","durationMs":417}}
+{"seq":66,"t":"2026-09-12T15:36:21.125Z","kind":"step.begin","message":"Step 11: Continue to the checkout overview page","stepId":"s11","data":{"index":11,"actionKind":"click","actionClass":"read"}}
+{"seq":67,"t":"2026-09-12T15:36:21.152Z","kind":"locator.resolve","message":"Found Continue to the checkout overview page via tier 1.","stepId":"s11","data":{"locatorDescription":"Continue to the checkout overview page","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":68,"t":"2026-09-12T15:36:21.152Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s11","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":69,"t":"2026-09-12T15:36:21.191Z","kind":"action","message":"Clicked on \"Continue\".","stepId":"s11","data":{"actionKind":"click","durationMs":39,"target":{"role":"button","name":"Continue","frame":[]}}}
+{"seq":70,"t":"2026-09-12T15:36:21.304Z","kind":"wait","message":"The expected change happened after 109ms.","stepId":"s11","data":{"held":true,"elapsedMs":109,"attempts":2}}
+{"seq":71,"t":"2026-09-12T15:36:21.304Z","kind":"checkpoint","message":"Checkpoint held: \"Confirm we reached the checkout overview page\" reads \"Checkout: Overview\" (wanted /Checkout: Overview/)","stepId":"s11","data":{"held":true}}
+{"seq":72,"t":"2026-09-12T15:36:21.324Z","kind":"step.end","message":"Step 11 ok.","stepId":"s11","data":{"status":"ok","durationMs":199}}
+{"seq":73,"t":"2026-09-12T15:36:21.324Z","kind":"step.begin","message":"Step 12: Report the total price shown on the checkout overview page","stepId":"s12","data":{"index":12,"actionKind":"extract","actionClass":"read"}}
+{"seq":74,"t":"2026-09-12T15:36:21.353Z","kind":"locator.resolve","message":"Found value of totalPrice via tier 1.","stepId":"s12","data":{"locatorDescription":"value of totalPrice","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":75,"t":"2026-09-12T15:36:21.353Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s12","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":76,"t":"2026-09-12T15:36:21.353Z","kind":"action","message":"Read on \"Total: $32.39\".","stepId":"s12","data":{"actionKind":"extract","durationMs":0,"target":{"role":"generic","name":"Total: $32.39","frame":[]}}}
+{"seq":77,"t":"2026-09-12T15:36:21.697Z","kind":"checkpoint","message":"Checkpoint held: \"value of totalPrice\" is present","stepId":"s12","data":{"held":true}}
+{"seq":78,"t":"2026-09-12T15:36:21.702Z","kind":"extract","message":"Read totalPrice.","stepId":"s12","data":{"name":"totalPrice","sensitivity":"none"}}
+{"seq":79,"t":"2026-09-12T15:36:21.726Z","kind":"step.end","message":"Step 12 ok.","stepId":"s12","data":{"status":"ok","durationMs":402}}
+{"seq":80,"t":"2026-09-12T15:36:21.726Z","kind":"run.end","message":"Completed 12 steps and extracted 1 output(s).","data":{"outputs":["totalPrice"]}}

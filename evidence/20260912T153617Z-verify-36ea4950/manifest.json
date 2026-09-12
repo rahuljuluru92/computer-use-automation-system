@@ -1,0 +1,15 @@
+{
+  "runId": "20260912T153617Z-verify-36ea4950",
+  "verifying": "cap.store.checkout_review",
+  "version": "1.0.0",
+  "status": "success",
+  "outputs": [
+    "totalPrice"
+  ],
+  "events": 80,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T15:36:21.727Z"
+}

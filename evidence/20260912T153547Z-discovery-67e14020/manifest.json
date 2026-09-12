@@ -1,0 +1,23 @@
+{
+  "runId": "20260912T153547Z-discovery-67e14020",
+  "goal": "Log in to the demo store as standard_user with password secret_sauce, add the Sauce Labs Backpack to the cart, proceed to checkout, fill in the checkout information with first name Jane, last name Doe, and zip code 12345, continue to the checkout overview page, and report the total price shown there.",
+  "target": "https://www.saucedemo.com",
+  "promptVersion": "discovery.v1+sha256:3686038d",
+  "discovery": {
+    "turns": 17,
+    "toolCalls": 19,
+    "llmCalls": 17,
+    "inputTokens": 34,
+    "outputTokens": 1913,
+    "durationMs": 28614,
+    "policyDenials": 0,
+    "oscillationWarnings": 0
+  },
+  "compiled": true,
+  "events": 61,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T15:36:21.745Z"
+}
