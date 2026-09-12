@@ -61,6 +61,6 @@ about what happened to a customer's account (decision #115).
   later changes only `src/escalation/remote.ts`, not the generation-counter
   model or `Executor.act()`'s chokepoint.
 - Five of the bugs only a real handoff, in a real browser, across a real
-  process boundary, ever surfaced (recorded in CLAUDE.md's P5 gate section) -
+  process boundary, ever surfaced (recorded in [DEVELOPMENT.md](../DEVELOPMENT.md)'s P5 section) -
   a mocked lease or a synchronous single-process test harness would not have
   found any of them.

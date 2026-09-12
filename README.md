@@ -10,7 +10,8 @@ input, an injected fault, a human escalation — runs with **no key at all**.
 
 Design write-up: [REPORT.md](REPORT.md) (architecture, schema, determinism, escalation, safety,
 cuts). Deeper reasoning on the six load-bearing decisions: [docs/adr/](docs/adr/). Full decision
-log and phase-by-phase build history: [CLAUDE.md](CLAUDE.md).
+log and phase-by-phase build history, with test counts per phase:
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Setup
 
@@ -122,9 +123,9 @@ bash scripts/demo-stretch.sh
 This approves the reference capability (`draft → approved`, re-signed) and then runs a real MCP
 `Client` against a real `cua mcp` server over stdio — `tools/list` shows the catalog,
 `tools/call` invokes it and gets back typed `structuredContent`, and a made-up capability name is
-refused rather than silently attempted. See [REPORT.md §7](README.md) and `CLAUDE.md`'s P6 gate
-section for what this demo does and does not prove with the currently-shipped, model-discovered
-artifact.
+refused rather than silently attempted. See [REPORT.md §7](REPORT.md#7-cuts) and
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)'s P6 section for what this demo does and does not
+prove with the currently-shipped, model-discovered artifact.
 
 ## Project layout
 

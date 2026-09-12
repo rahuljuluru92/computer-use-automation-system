@@ -2,8 +2,8 @@
 
 An LLM discovers how to do a task once; that run compiles into a typed, versioned, replayable
 **capability**; production replays it with no model in the decision loop. Full detail, decision
-log, and phase gates live in `CLAUDE.md`; deeper reasoning on the six load-bearing decisions is
-in `docs/adr/`. This report stays at the altitude a reviewer needs to verify the claims in three
+log, and phase gates live in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md); deeper reasoning on the
+six load-bearing decisions is in `docs/adr/`. This report stays at the altitude a reviewer needs to verify the claims in three
 minutes, per the target of the brief.
 
 ## 1. Architecture
@@ -130,8 +130,8 @@ contents must never reach disk at all, redacted or not.
 The Phase 5 gate is real: the interstitial appears, the declared remedy is applied and fails, the
 run cedes the session, a human clears it by hand in the *same* browser, hands back, and the run
 re-observes and finishes the task (`evidence/gate-5-escalation/`). Five bugs were found only by
-running this against a real browser and a real cross-process handoff — logged in `CLAUDE.md`'s P5
-gate section — including one where the audit trail was silently empty for a subtle reason
+running this against a real browser and a real cross-process handoff — logged in
+`docs/DEVELOPMENT.md`'s P5 section — including one where the audit trail was silently empty for a subtle reason
 (`tsx`/esbuild compiling a script meant to run uncompiled in the page). **Honest caveat**: the
 operator in the shipped gate evidence is a script, labelled `scripted-operator (gate demo)` so it
 never reads as a person who wasn't there. A live human handoff is possible but wasn't recorded on
@@ -185,7 +185,7 @@ is invisible to a value-based redactor by construction — which is exactly why 
   against a fixture — planned, never built. The compiler is covered instead by 19 behavioral
   tests in `discoveryCompiler.test.ts`; a golden-file regression guard would still be worth adding
   next.
-- **Two open, honestly-labelled loose ends**, both in `CLAUDE.md`'s decision log rather than
+- **Two open, honestly-labelled loose ends**, both in `docs/DEVELOPMENT.md`'s decision log rather than
   hidden: (#90) a click that triggers navigation can throw `TimeoutError` from Playwright *while
   the navigation actually completes* — currently absorbed by retry/checkpoint logic downstream,
   not root-caused. (#57) URL templates and text-field values use two different interpolation

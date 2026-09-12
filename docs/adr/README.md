@@ -2,7 +2,7 @@
 
 Short-form records for the decisions REPORT.md points to instead of
 re-arguing inline, so the write-up stays within its ~1-3 page budget. Each one
-draws on the full reasoning already captured in `CLAUDE.md`'s decisions log;
+draws on the full reasoning already captured in [DEVELOPMENT.md](../DEVELOPMENT.md)'s decisions log;
 these are the load-bearing subset, organized by question rather than by the
 order they were made in.
 
