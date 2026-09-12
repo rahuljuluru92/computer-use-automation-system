@@ -2,11 +2,11 @@
 
 An LLM discovers how to do a task inside a legacy back-office app once. That run compiles into a
 typed, versioned, replayable **capability**. From then on, production invokes the capability
-deterministically — **with no model in the decision loop.**
+deterministically - **with no model in the decision loop.**
 
 That split is the whole thesis, so it's the first thing to verify: the core thread below needs an
-`ANTHROPIC_API_KEY` for exactly one step (`discover`). Every `replay` command — success, a bad
-input, an injected fault, a human escalation — runs with **no key at all**.
+`ANTHROPIC_API_KEY` for exactly one step (`discover`). Every `replay` command - success, a bad
+input, an injected fault, a human escalation - runs with **no key at all**.
 
 Design write-up: [REPORT.md](REPORT.md) (architecture, schema, determinism, escalation, safety,
 cuts). Deeper reasoning on the six load-bearing decisions: [docs/adr/](docs/adr/). Full decision
@@ -21,7 +21,7 @@ cp .env.example .env               # fill in ANTHROPIC_API_KEY; everything else 
 npm run check                      # typecheck + lint + 311 tests, ~2 min
 ```
 
-Node 20+. Nothing else to install — the target app, the engine, and the operator console are all
+Node 20+. Nothing else to install - the target app, the engine, and the operator console are all
 part of this one repo.
 
 ## Demo path (the core thread)
@@ -73,12 +73,12 @@ npm run replay -- --artifact artifacts/cap.member.read_savings_balance@1.0.0.jso
 The run pauses, prints an intervention URL, and hands the *same live browser session* to whoever
 opens it. Resolve it there; the run resumes and finishes. `npx tsx scripts/gate-p5.ts` records all
 five terminal states (success, business outcome, recovered, hard failure, escalated) into
-`evidence/gate-*/` in one pass — that's the fastest way to see every outcome without driving it by
+`evidence/gate-*/` in one pass - that's the fastest way to see every outcome without driving it by
 hand.
 
 ### Running with no live services
 
-`npm run replay` needs no `ANTHROPIC_API_KEY` — that's asserted by test, not just claimed:
+`npm run replay` needs no `ANTHROPIC_API_KEY` - that's asserted by test, not just claimed:
 `evidence/demo-replay-no-key/` is a committed replay run recorded with the key unset. If Meridian
 Core also isn't running, point `--artifact` at nothing and `explain` still works fully offline:
 
@@ -105,14 +105,14 @@ npm run explain -- --schema                                                     
 | Correctness of the core loop | `evidence/gate-1-success/`, a real Sonnet 5 discovery run in `evidence/` |
 | Robustness & error handling | `evidence/gate-2-business-outcome/`, `gate-3-recovered/`, `gate-4-hard-failure/` |
 | Human-in-the-loop escalation | `evidence/gate-5-escalation/`, [REPORT.md §5](REPORT.md#5-escalation--handoff) |
-| Generalization | [REPORT.md §4](REPORT.md#4-heterogeneity--multi-tenant), `src/replay/overlay.ts`, and a second real discovery run against [saucedemo.com](https://www.saucedemo.com) (`evidence/20260912T153547Z-discovery-67e14020/`) — which found and fixed a real perception-layer gap rather than only arguing the design generalizes |
+| Generalization | [REPORT.md §4](REPORT.md#4-heterogeneity--multi-tenant), `src/replay/overlay.ts`, and a second real discovery run against [saucedemo.com](https://www.saucedemo.com) (`evidence/20260912T153547Z-discovery-67e14020/`) - which found and fixed a real perception-layer gap rather than only arguing the design generalizes |
 | Safety & data handling | `config/policy.yaml`, `tests/safety/`, [REPORT.md §6](REPORT.md#6-safety) |
 | Code quality | `npm run check` (typecheck + lint + 311 tests) |
 | Communication | [REPORT.md](REPORT.md), [docs/adr/](docs/adr/), this table |
 
 ## Stretch goal: the MCP capability catalog
 
-Quarantined from the core demo path on purpose — a stretch-goal slip must never break the
+Quarantined from the core demo path on purpose - a stretch-goal slip must never break the
 primary thread above. Exposes approved capabilities as MCP tools an AI agent can discover and
 call by name:
 
@@ -121,7 +121,7 @@ bash scripts/demo-stretch.sh
 ```
 
 This approves the reference capability (`draft → approved`, re-signed) and then runs a real MCP
-`Client` against a real `cua mcp` server over stdio — `tools/list` shows the catalog,
+`Client` against a real `cua mcp` server over stdio - `tools/list` shows the catalog,
 `tools/call` invokes it and gets back typed `structuredContent`, and a made-up capability name is
 refused rather than silently attempted. See [REPORT.md §7](REPORT.md#7-cuts) and
 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)'s P6 section for what this demo does and does not
