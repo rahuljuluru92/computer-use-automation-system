@@ -1,0 +1,18 @@
+{
+  "runId": "gate-3-recovered",
+  "gate": "gate-3-recovered",
+  "demonstrates": "A maintenance interstitial the recorded flow never saw. A declared, bounded recovery rule dismisses it and the run carries on: recovery is not a terminal status, so this ends as success with the recovery counted.",
+  "artifact": "tests/fixtures/seedArtifact.ts (hand-authored reference capability)",
+  "chaos": "surprise_modal",
+  "status": "success",
+  "outputs": [
+    "savingsBalance",
+    "accountNumber"
+  ],
+  "events": 52,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T08:33:25.019Z"
+}

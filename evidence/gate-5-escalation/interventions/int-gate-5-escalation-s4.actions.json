@@ -1,0 +1,24 @@
+[
+  {
+    "at": "2026-09-12T08:33:26.178Z",
+    "kind": "click",
+    "target": "Acknowledge",
+    "role": "button",
+    "frame": "main"
+  },
+  {
+    "at": "2026-09-12T08:33:26.180Z",
+    "kind": "submit",
+    "target": "form",
+    "role": "form",
+    "frame": "main"
+  },
+  {
+    "at": "2026-09-12T08:33:26.198Z",
+    "kind": "navigate",
+    "target": "http://localhost:63044/frame/members/search",
+    "role": "document",
+    "frame": "main",
+    "url": "http://localhost:63044/frame/members/search"
+  }
+]

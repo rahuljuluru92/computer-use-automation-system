@@ -1,0 +1,16 @@
+{
+  "runId": "gate-4-hard-failure",
+  "gate": "gate-4-hard-failure",
+  "demonstrates": "The application breaks in a way nothing declared covers. Bounded retries are spent and it stops, with expected/observed and a screenshot.",
+  "artifact": "tests/fixtures/seedArtifact.ts (hand-authored reference capability)",
+  "chaos": "http_500",
+  "status": "failed",
+  "failedAt": "s1",
+  "code": "locator_unresolved",
+  "events": 8,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T08:33:25.094Z"
+}

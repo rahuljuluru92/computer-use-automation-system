@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Run gate-2-business-outcome</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin:0; background:#f6f7f9; color:#1c1e21;
+         font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .wrap { max-width:1100px; margin:0 auto; padding:28px 20px 80px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  h2 { font-size:15px; margin:32px 0 10px; text-transform:uppercase;
+       letter-spacing:.06em; color:#5b6270; }
+  .sub { color:#5b6270; font-size:13px; margin:0 0 20px; }
+  .card { background:#fff; border:1px solid #dfe3e8; border-radius:8px; padding:16px; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px;
+           font-size:12px; font-weight:600; letter-spacing:.02em; }
+  .b-success{background:#e4f5e9;color:#186a3b} .b-business_outcome{background:#e6effc;color:#1d4e89}
+  .b-failed{background:#fdeaea;color:#a02020} .b-escalated{background:#fdf1e0;color:#8a5a13}
+  .b-blocked_by_policy{background:#efe9fb;color:#553c9a} .b-unknown{background:#eceef1;color:#4a5160}
+  .metrics { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 0; }
+  .metric { background:#fff; border:1px solid #dfe3e8; border-radius:8px;
+            padding:10px 14px; min-width:104px; }
+  .metric .n { font-size:19px; font-weight:650; }
+  .metric .k { font-size:11px; color:#5b6270; text-transform:uppercase; letter-spacing:.05em; }
+  .metric.hero { border-color:#9ec7a6; background:#f2fbf5; }
+  .step { background:#fff; border:1px solid #dfe3e8; border-left-width:4px;
+          border-radius:8px; padding:14px 16px; margin-bottom:10px; }
+  .s-ok{border-left-color:#3fa45f} .s-recovered{border-left-color:#d79a2b}
+  .s-failed{border-left-color:#c93c3c} .s-escalated{border-left-color:#d98324}
+  .s-blocked{border-left-color:#7c5cbf} .s-skipped{border-left-color:#aab0ba}
+  .step h3 { margin:0 0 6px; font-size:14px; font-weight:600; }
+  .meta { color:#5b6270; font-size:12.5px; }
+  .meta b { color:#1c1e21; font-weight:600; }
+  .warn { color:#8a5a13; }
+  .shots { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+  .shots figure { margin:0; }
+  .shots img { max-width:250px; border:1px solid #dfe3e8; border-radius:5px; display:block; }
+  .shots figcaption { font-size:11px; color:#5b6270; margin-top:3px; }
+  table { border-collapse:collapse; width:100%; background:#fff;
+          border:1px solid #dfe3e8; border-radius:8px; overflow:hidden; font-size:12.5px; }
+  th { text-align:left; background:#f0f2f5; padding:7px 10px; font-size:11px;
+       text-transform:uppercase; letter-spacing:.05em; color:#5b6270; }
+  td { padding:6px 10px; border-top:1px solid #eef0f3; vertical-align:top; }
+  td.k { white-space:nowrap; color:#5b6270; font-variant-numeric:tabular-nums; }
+  tr.problem td { background:#fdf4f4; }
+  .kind { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px; color:#4a5160; }
+  .fail { background:#fdeaea; border:1px solid #f0c2c2; border-radius:8px; padding:14px 16px; }
+  .fail dt { font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+             color:#8a3030; margin-top:8px; }
+  .fail dd { margin:2px 0 0; font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+  .note { font-size:12.5px; color:#5b6270; margin-top:8px; }
+  .overflow { overflow-x:auto; }
+</style></head><body><div class="wrap">
+
+<h1>Read a member&#39;s current savings balance
+  <span class="badge b-business_outcome">business outcome</span></h1>
+<p class="sub">Run <code>gate-2-business-outcome</code> &middot; capability v1.0.0</p>
+
+<div class="card">
+      <b>Business outcome: <code>no_such_member</code></b>
+      <p class="meta" style="margin:6px 0 0">No member with that ID exists at this institution.</p>
+      <p class="note">This is an answer the caller asked for, not a failure. The run
+      completed successfully and reported what the application said.</p>
+    </div>
+
+<div class="metrics">
+  <div class="metric"><div class="n">5</div>
+    <div class="k">steps</div></div>
+  <div class="metric"><div class="n">0</div>
+    <div class="k">retries</div></div>
+  <div class="metric"><div class="n">0</div>
+    <div class="k">recoveries</div></div>
+  <div class="metric"><div class="n">0</div>
+    <div class="k">degraded</div></div>
+  <div class="metric"><div class="n">0</div>
+    <div class="k">interventions</div></div>
+  <div class="metric"><div class="n">1.4s</div>
+    <div class="k">duration</div></div>
+  <div class="metric hero"><div class="n">0</div>
+    <div class="k">model calls</div></div>
+</div>
+<p class="note">Model calls are zero by construction on the replay path: the module is
+forbidden from importing a model SDK, a source scan re-checks it, and this counter is
+asserted in the test suite. Determinism that is only promised is not determinism.</p>
+
+<h2>Steps</h2>
+<div class="step s-ok">
+    <h3>1. Enter the operator ID on the sign-in form
+      <span class="badge b-success"
+        >ok</span></h3>
+    <div class="meta">
+      <b>type</b> (write_reversible) &middot; 404ms
+      
+      
+    </div>
+    <div class="meta">
+      Found <b>the Operator ID field</b> at tier <b>1</b>,
+      2 strategies in agreement
+      </div>
+    <div class="shots"><figure><img src="steps/01/before.png" alt="steps/01/before.png" loading="lazy">
+        <figcaption>before.png</figcaption></figure><figure><img src="steps/01/after.png" alt="steps/01/after.png" loading="lazy">
+        <figcaption>after.png</figcaption></figure></div>
+  </div>
+<div class="step s-ok">
+    <h3>2. Enter the operator password
+      <span class="badge b-success"
+        >ok</span></h3>
+    <div class="meta">
+      <b>type</b> (write_reversible) &middot; 402ms
+      
+      
+    </div>
+    <div class="meta">
+      Found <b>the Password field</b> at tier <b>1</b>,
+      2 strategies in agreement
+      </div>
+    <div class="shots"><figure><img src="steps/02/before.png" alt="steps/02/before.png" loading="lazy">
+        <figcaption>before.png</figcaption></figure><figure><img src="steps/02/after.png" alt="steps/02/after.png" loading="lazy">
+        <figcaption>after.png</figcaption></figure></div>
+  </div>
+<div class="step s-ok">
+    <h3>3. Submit the sign-in form
+      <span class="badge b-success"
+        >ok</span></h3>
+    <div class="meta">
+      <b>click</b> (write_reversible) &middot; 119ms
+      
+      
+    </div>
+    <div class="meta">
+      Found <b>the Sign In button</b> at tier <b>1</b>,
+      1 strategy in agreement
+      </div>
+    <div class="shots"><figure><img src="steps/03/before.png" alt="steps/03/before.png" loading="lazy">
+        <figcaption>before.png</figcaption></figure><figure><img src="steps/03/after.png" alt="steps/03/after.png" loading="lazy">
+        <figcaption>after.png</figcaption></figure></div>
+  </div>
+<div class="step s-ok">
+    <h3>4. Type the member ID into the search field
+      <span class="badge b-success"
+        >ok</span></h3>
+    <div class="meta">
+      <b>type</b> (write_reversible) &middot; 391ms
+      
+      
+    </div>
+    <div class="meta">
+      Found <b>the Member ID search field</b> at tier <b>1</b>,
+      2 strategies in agreement
+      </div>
+    <div class="shots"><figure><img src="steps/04/before.png" alt="steps/04/before.png" loading="lazy">
+        <figcaption>before.png</figcaption></figure><figure><img src="steps/04/after.png" alt="steps/04/after.png" loading="lazy">
+        <figcaption>after.png</figcaption></figure></div>
+  </div>
+<div class="step s-ok">
+    <h3>5. Run the member search
+      <span class="badge b-success"
+        >ok</span></h3>
+    <div class="meta">
+      <b>click</b> (read) &middot; 103ms
+      
+      
+    </div>
+    <div class="meta">
+      Found <b>the Search button</b> at tier <b>1</b>,
+      1 strategy in agreement
+      </div>
+    <div class="shots"><figure><img src="steps/05/before.png" alt="steps/05/before.png" loading="lazy">
+        <figcaption>before.png</figcaption></figure></div>
+  </div>
+
+
+
+<h2>Event log</h2>
+<div class="overflow"><table>
+<tr><th>#</th><th>time</th><th>kind</th><th>step</th><th>what happened, and why</th></tr>
+<tr>
+    <td class="k">1</td>
+    <td class="k">08:33:21.900</td>
+    <td class="kind">note</td>
+    <td class="k"></td>
+    <td>The application answers &quot;no member record found&quot;. That is the answer the caller asked for, so it is a business outcome and it exits 0 - not a failure.</td></tr>
+<tr>
+    <td class="k">2</td>
+    <td class="k">08:33:21.900</td>
+    <td class="kind">run.start</td>
+    <td class="k"></td>
+    <td>Replaying cap.member.read_savings_balance v1.0.0 (draft), with no model in the loop.</td></tr>
+<tr>
+    <td class="k">3</td>
+    <td class="k">08:33:21.918</td>
+    <td class="kind">observe</td>
+    <td class="k"></td>
+    <td>Entered at http://localhost:63044/frame/.</td></tr>
+<tr>
+    <td class="k">4</td>
+    <td class="k">08:33:21.918</td>
+    <td class="kind">step.begin</td>
+    <td class="k">s1</td>
+    <td>Step 1: Enter the operator ID on the sign-in form</td></tr>
+<tr>
+    <td class="k">5</td>
+    <td class="k">08:33:21.932</td>
+    <td class="kind">locator.resolve</td>
+    <td class="k">s1</td>
+    <td>Found the Operator ID field via tier 1.</td></tr>
+<tr>
+    <td class="k">6</td>
+    <td class="k">08:33:21.932</td>
+    <td class="kind">policy.check</td>
+    <td class="k">s1</td>
+    <td>Policy allows this write_reversible action.</td></tr>
+<tr>
+    <td class="k">7</td>
+    <td class="k">08:33:21.937</td>
+    <td class="kind">action</td>
+    <td class="k">s1</td>
+    <td>Typed into on &quot;Operator ID&quot;.</td></tr>
+<tr>
+    <td class="k">8</td>
+    <td class="k">08:33:22.271</td>
+    <td class="kind">checkpoint</td>
+    <td class="k">s1</td>
+    <td>Checkpoint held: (nothing asserted)</td></tr>
+<tr>
+    <td class="k">9</td>
+    <td class="k">08:33:22.322</td>
+    <td class="kind">step.end</td>
+    <td class="k">s1</td>
+    <td>Step 1 ok.</td></tr>
+<tr>
+    <td class="k">10</td>
+    <td class="k">08:33:22.322</td>
+    <td class="kind">step.begin</td>
+    <td class="k">s2</td>
+    <td>Step 2: Enter the operator password</td></tr>
+<tr>
+    <td class="k">11</td>
+    <td class="k">08:33:22.353</td>
+    <td class="kind">locator.resolve</td>
+    <td class="k">s2</td>
+    <td>Found the Password field via tier 1.</td></tr>
+<tr>
+    <td class="k">12</td>
+    <td class="k">08:33:22.353</td>
+    <td class="kind">policy.check</td>
+    <td class="k">s2</td>
+    <td>Policy allows this write_reversible action.</td></tr>
+<tr>
+    <td class="k">13</td>
+    <td class="k">08:33:22.359</td>
+    <td class="kind">action</td>
+    <td class="k">s2</td>
+    <td>Typed into on &quot;Password&quot;.</td></tr>
+<tr>
+    <td class="k">14</td>
+    <td class="k">08:33:22.700</td>
+    <td class="kind">checkpoint</td>
+    <td class="k">s2</td>
+    <td>Checkpoint held: (nothing asserted)</td></tr>
+<tr>
+    <td class="k">15</td>
+    <td class="k">08:33:22.724</td>
+    <td class="kind">step.end</td>
+    <td class="k">s2</td>
+    <td>Step 2 ok.</td></tr>
+<tr>
+    <td class="k">16</td>
+    <td class="k">08:33:22.724</td>
+    <td class="kind">step.begin</td>
+    <td class="k">s3</td>
+    <td>Step 3: Submit the sign-in form</td></tr>
+<tr>
+    <td class="k">17</td>
+    <td class="k">08:33:22.772</td>
+    <td class="kind">locator.resolve</td>
+    <td class="k">s3</td>
+    <td>Found the Sign In button via tier 1.</td></tr>
+<tr>
+    <td class="k">18</td>
+    <td class="k">08:33:22.772</td>
+    <td class="kind">policy.check</td>
+    <td class="k">s3</td>
+    <td>Policy allows this write_reversible action.</td></tr>
+<tr>
+    <td class="k">19</td>
+    <td class="k">08:33:22.814</td>
+    <td class="kind">action</td>
+    <td class="k">s3</td>
+    <td>Clicked on &quot;Sign In&quot;.</td></tr>
+<tr>
+    <td class="k">20</td>
+    <td class="k">08:33:22.831</td>
+    <td class="kind">wait</td>
+    <td class="k">s3</td>
+    <td>The expected change happened after 0ms.</td></tr>
+<tr>
+    <td class="k">21</td>
+    <td class="k">08:33:22.832</td>
+    <td class="kind">checkpoint</td>
+    <td class="k">s3</td>
+    <td>Checkpoint held: &quot;the Member ID search field&quot; is present</td></tr>
+<tr>
+    <td class="k">22</td>
+    <td class="k">08:33:22.843</td>
+    <td class="kind">step.end</td>
+    <td class="k">s3</td>
+    <td>Step 3 ok.</td></tr>
+<tr>
+    <td class="k">23</td>
+    <td class="k">08:33:22.844</td>
+    <td class="kind">step.begin</td>
+    <td class="k">s4</td>
+    <td>Step 4: Type the member ID into the search field</td></tr>
+<tr>
+    <td class="k">24</td>
+    <td class="k">08:33:22.857</td>
+    <td class="kind">locator.resolve</td>
+    <td class="k">s4</td>
+    <td>Found the Member ID search field via tier 1.</td></tr>
+<tr>
+    <td class="k">25</td>
+    <td class="k">08:33:22.857</td>
+    <td class="kind">policy.check</td>
+    <td class="k">s4</td>
+    <td>Policy allows this write_reversible action.</td></tr>
+<tr>
+    <td class="k">26</td>
+    <td class="k">08:33:22.861</td>
+    <td class="kind">action</td>
+    <td class="k">s4</td>
+    <td>Typed into on &quot;Member ID&quot;.</td></tr>
+<tr>
+    <td class="k">27</td>
+    <td class="k">08:33:23.196</td>
+    <td class="kind">checkpoint</td>
+    <td class="k">s4</td>
+    <td>Checkpoint held: (nothing asserted)</td></tr>
+<tr>
+    <td class="k">28</td>
+    <td class="k">08:33:23.235</td>
+    <td class="kind">step.end</td>
+    <td class="k">s4</td>
+    <td>Step 4 ok.</td></tr>
+<tr>
+    <td class="k">29</td>
+    <td class="k">08:33:23.235</td>
+    <td class="kind">step.begin</td>
+    <td class="k">s5</td>
+    <td>Step 5: Run the member search</td></tr>
+<tr>
+    <td class="k">30</td>
+    <td class="k">08:33:23.281</td>
+    <td class="kind">locator.resolve</td>
+    <td class="k">s5</td>
+    <td>Found the Search button via tier 1.</td></tr>
+<tr>
+    <td class="k">31</td>
+    <td class="k">08:33:23.281</td>
+    <td class="kind">policy.check</td>
+    <td class="k">s5</td>
+    <td>Policy allows this read action.</td></tr>
+<tr>
+    <td class="k">32</td>
+    <td class="k">08:33:23.321</td>
+    <td class="kind">action</td>
+    <td class="k">s5</td>
+    <td>Clicked on &quot;Search&quot;.</td></tr>
+<tr>
+    <td class="k">33</td>
+    <td class="k">08:33:23.338</td>
+    <td class="kind">wait</td>
+    <td class="k">s5</td>
+    <td>The expected change happened after 0ms.</td></tr>
+<tr>
+    <td class="k">34</td>
+    <td class="k">08:33:23.338</td>
+    <td class="kind">outcome.detected</td>
+    <td class="k"></td>
+    <td>The application answered &quot;no_such_member&quot;: No member with that ID exists at this institution. This is a legitimate result, not a failure.</td></tr>
+<tr>
+    <td class="k">35</td>
+    <td class="k">08:33:23.339</td>
+    <td class="kind">run.end</td>
+    <td class="k"></td>
+    <td>Run ended with business outcome &quot;no_such_member&quot;.</td></tr>
+</table></div>
+
+</div></body></html>

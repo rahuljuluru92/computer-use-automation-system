@@ -1,0 +1,73 @@
+{
+  "id": "int-gate-5-escalation-s4",
+  "runId": "gate-5-escalation",
+  "capability": {
+    "id": "cap.member.read_savings_balance",
+    "version": "1.0.0"
+  },
+  "reason": "recovery_exhausted",
+  "detail": "\"Scheduled Maintenance Notice\" is open",
+  "stepId": "s4",
+  "stepIntent": "Type the member ID into the search field",
+  "actionKind": "type",
+  "actionClass": "write_reversible",
+  "url": "http://localhost:63044/frame/members/search",
+  "title": "Member Search",
+  "screenshotPath": "steps/04/escalation.png",
+  "evidenceDir": "evidence/gate-5-escalation",
+  "state": "resolved",
+  "raisedAt": "2026-09-12T08:33:26.055Z",
+  "expiresAt": "2026-09-12T08:38:26.200Z",
+  "claimedBy": "scripted-operator (gate demo)",
+  "claimedAt": "2026-09-12T08:33:26.152Z",
+  "resolution": "resolved",
+  "note": "Acknowledged the maintenance notice by hand and handed the session back.",
+  "resolvedAt": "2026-09-12T08:33:26.201Z",
+  "humanActions": [
+    {
+      "at": "2026-09-12T08:33:26.178Z",
+      "kind": "click",
+      "target": "Acknowledge",
+      "role": "button",
+      "frame": "main"
+    },
+    {
+      "at": "2026-09-12T08:33:26.180Z",
+      "kind": "submit",
+      "target": "form",
+      "role": "form",
+      "frame": "main"
+    },
+    {
+      "at": "2026-09-12T08:33:26.198Z",
+      "kind": "navigate",
+      "target": "http://localhost:63044/frame/members/search",
+      "role": "document",
+      "frame": "main",
+      "url": "http://localhost:63044/frame/members/search"
+    }
+  ],
+  "leaseTransfers": [
+    {
+      "generation": 2,
+      "at": "2026-09-12T08:33:26.052Z",
+      "from": "automation",
+      "to": "none",
+      "reason": "escalated: recovery_exhausted"
+    },
+    {
+      "generation": 3,
+      "at": "2026-09-12T08:33:26.208Z",
+      "from": "none",
+      "to": "operator",
+      "reason": "operator claimed the session"
+    },
+    {
+      "generation": 4,
+      "at": "2026-09-12T08:33:26.208Z",
+      "from": "operator",
+      "to": "automation",
+      "reason": "operator resolved"
+    }
+  ]
+}

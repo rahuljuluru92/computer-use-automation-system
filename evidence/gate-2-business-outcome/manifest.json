@@ -1,0 +1,14 @@
+{
+  "runId": "gate-2-business-outcome",
+  "gate": "gate-2-business-outcome",
+  "demonstrates": "The application answers \"no member record found\". That is the answer the caller asked for, so it is a business outcome and it exits 0 - not a failure.",
+  "artifact": "tests/fixtures/seedArtifact.ts (hand-authored reference capability)",
+  "status": "business_outcome",
+  "outcome": "no_such_member",
+  "events": 35,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T08:33:23.339Z"
+}

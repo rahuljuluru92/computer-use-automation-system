@@ -1,0 +1,20 @@
+{
+  "runId": "gate-5-escalation",
+  "gate": "gate-5-escalation",
+  "demonstrates": "The interstitial appears, the declared remedy is applied and fails, and the run stops and asks for a human. The operator takes the session, clears it by hand in the same browser, and hands control back; the run re-observes, resumes, and finishes the task.",
+  "artifact": "tests/fixtures/seedArtifact.ts (hand-authored reference capability)",
+  "chaos": "surprise_modal",
+  "operator": "scripted-operator (gate demo)",
+  "status": "escalated",
+  "outputs": [
+    "savingsBalance",
+    "accountNumber"
+  ],
+  "intervention": "int-gate-5-escalation-s4",
+  "events": 57,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T08:33:26.861Z"
+}
