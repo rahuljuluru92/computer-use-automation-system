@@ -77,7 +77,7 @@ describe('replay: an environment that cannot run the capability', () => {
     // configuration mistake into a stack trace.
     const redactor = buildRedactor({ secrets: {} });
     const evidence = new EvidenceWriter({
-      runId: newRunId('nosecrets'), root: EVIDENCE_ROOT, redactor,
+      runId: newRunId('replay'), root: EVIDENCE_ROOT, redactor,
     });
     const result = await replay({
       artifact: seedArtifact(),
