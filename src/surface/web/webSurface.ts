@@ -208,15 +208,40 @@ export class WebSurface implements Surface {
 
   // -------------------------------------------------------------------------
 
+  /**
+   * Perform an action, and do not mistake a successful one for a failure.
+   *
+   * A click that submits a form destroys the element it clicked. Playwright's
+   * post-action checks then run against a document that no longer exists and
+   * time out - on an action that worked. Verified against the real app: the
+   * click threw `TimeoutError: locator.click: Timeout 5000ms exceeded` while
+   * the request went out and the page arrived on the next screen.
+   *
+   * Reported as a failure, that is worse than a crash. The executor returns
+   * `surface_error`, replay retries a step that already happened, and on a
+   * form that moves money "it timed out, try again" is how you submit twice.
+   *
+   * So navigation is watched for the duration of the action. If a frame moved,
+   * the action did what it was asked and the timeout was an artefact of it
+   * succeeding. Any other failure is still a failure.
+   */
   async #act(node: UiNode, run: (l: Locator) => Promise<void>, what: string): Promise<void> {
     const locator = await this.#locatorFor(node);
+
+    let navigated = false;
+    const onNavigate = (): void => { navigated = true; };
+    this.#page.on('framenavigated', onNavigate);
+
     try {
       await run(locator);
     } catch (cause) {
+      if (navigated && isTimeout(cause)) return;
       throw new SurfaceError(
         `could not ${what} "${node.name || node.role}" - the node may have gone stale`,
         { cause },
       );
+    } finally {
+      this.#page.off('framenavigated', onNavigate);
     }
   }
 
@@ -294,4 +319,10 @@ export class WebSurface implements Surface {
       : scope.getByRole(node.role as Parameters<Page['getByRole']>[0]);
     return matches.length > 1 ? base.nth(index) : base;
   }
+}
+
+/** Playwright's timeout, however it happens to be surfaced. */
+function isTimeout(cause: unknown): boolean {
+  return cause instanceof Error
+    && (cause.name === 'TimeoutError' || /Timeout .*exceeded/.test(cause.message));
 }
