@@ -1069,6 +1069,13 @@
       "write_reversible"
     ]
   },
+  "escalation": {
+    "timeoutMs": 300000,
+    "maxResumes": 2,
+    "abandon": {
+      "kind": "entry"
+    }
+  },
   "tenancy": {
     "canonical": true,
     "overlays": {}
@@ -1094,6 +1101,6 @@
     "lastVerifiedAt": "2026-09-12T04:23:39.664Z"
   },
   "integrity": {
-    "hash": "sha256:c415e9915b636982fe384b7055141a211c77a6dfeeb65c963bdcdf9da0a8d19a"
+    "hash": "sha256:2167b59f53cb8e54e3fc193efd7766ffd892ba036f29fce120d9ba0d3e43fee1"
   }
 }

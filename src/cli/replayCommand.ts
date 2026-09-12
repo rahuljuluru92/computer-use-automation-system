@@ -18,6 +18,10 @@ import { EvidenceWriter } from '../evidence/writer.ts';
 import { buildRedactor } from '../core/redact.ts';
 import { newRunId } from '../core/ids.ts';
 import { replay } from '../replay/replay.ts';
+import { SessionLease } from '../exec/lease.ts';
+import { RemoteBus } from '../escalation/remote.ts';
+import { HumanActionCapture } from '../escalation/capture.ts';
+import { createHandoff, type EscalationChannel } from '../escalation/handoff.ts';
 
 export interface ReplayCommandOptions {
   artifactPath: string;
@@ -26,6 +30,8 @@ export interface ReplayCommandOptions {
   chaos?: string | undefined;
   /** Names the evidence directory instead of using a timestamped run id. */
   label?: string | undefined;
+  /** Base URL of a running `cua operator` console to escalate into. */
+  operator?: string | undefined;
   json: boolean;
 }
 
@@ -46,9 +52,17 @@ export async function runReplayCommand(opts: ReplayCommandOptions): Promise<numb
     JSON.parse(await readFile(opts.artifactPath, 'utf8')) as unknown,
   );
   if (artifact.integrity && !verifyIntegrity(artifact)) {
+    // Two very different causes, and the message has to name both or the
+    // second one reads as an accusation. An edited artifact is the case the
+    // hash exists for; a schema that has grown a defaulted field since the
+    // artifact was signed produces an identical symptom and is nobody's fault.
     console.error(
-      `refusing to run: ${opts.artifactPath} has been edited since it was signed.\n`
-      + `Its recorded hash no longer matches its content.`,
+      `refusing to run: ${opts.artifactPath} does not match its recorded hash.\n`
+      + `Either it was edited since it was signed, or the capability schema has\n`
+      + `changed under it - a new field with a default is enough to do this, and\n`
+      + `the hash covers the whole artifact.\n`
+      + `If the change was intentional, re-sign it deliberately:\n`
+      + `  npx tsx scripts/resign-artifacts.ts ${opts.artifactPath}`,
     );
     return 4;
   }
@@ -76,7 +90,36 @@ export async function runReplayCommand(opts: ReplayCommandOptions): Promise<numb
     meta: { capability: artifact.id, version: artifact.version, tenant: opts.tenant },
   });
 
-  const surface = await WebSurface.launch({ headless: process.env.CUA_HEADED !== '1' });
+  // A run that can escalate must be watchable. Handing a human control of a
+  // browser they cannot see is not a handoff, and defaulting to headless here
+  // would produce a demo where the operator clicks "Take control" and is given
+  // nothing. An explicit CUA_HEADED=0 still wins, for CI.
+  const headed = process.env.CUA_HEADED === '1'
+    || (opts.operator !== undefined && process.env.CUA_HEADED !== '0');
+  const surface = await WebSurface.launch({ headless: !headed });
+
+  const lease = new SessionLease(evidence.runId);
+  let escalation: EscalationChannel | undefined;
+  if (opts.operator) {
+    const bus = new RemoteBus({ url: opts.operator });
+    if (!await bus.reachable()) {
+      await surface.close();
+      console.error(
+        `no operator console is listening at ${opts.operator}.\n`
+        + `Start one first:  npm run operator\n`
+        + `Refusing to start a run that says it can escalate but cannot.`);
+      return 4;
+    }
+    escalation = createHandoff({
+      bus, lease, evidence,
+      runId: evidence.runId,
+      capability: { id: artifact.id, version: artifact.version },
+      tenant: opts.tenant,
+      capture: await HumanActionCapture.attach(surface.page),
+    });
+    console.log(`escalations for this run go to ${opts.operator}`);
+  }
+
   try {
     // Chaos is armed through the app's own control route, so the run itself is
     // an ordinary run. Injecting faults through the automation would prove
@@ -94,6 +137,8 @@ export async function runReplayCommand(opts: ReplayCommandOptions): Promise<numb
       secrets: new SecretResolver(redactor),
       baseUrl,
       tenant: opts.tenant,
+      lease,
+      escalation,
     });
 
     if (opts.json) console.log(JSON.stringify(result, null, 2));
@@ -127,6 +172,9 @@ function printHuman(r: ReplayResult, dir: string): void {
     case 'escalated':
       console.log(`ESCALATED  ${r.escalation.reason}`);
       console.log(`  ${r.escalation.detail}`);
+      console.log(`  intervention: ${r.escalation.interventionId}`);
+      console.log(`  claimed: ${r.escalation.claimed ? r.escalation.claimedBy ?? 'yes' : 'no one came'}`);
+      console.log(`  human actions: ${r.escalation.humanActionCount}`);
       console.log(`  resolution: ${r.escalation.resolution ?? 'pending'}`);
       break;
     case 'blocked_by_policy':
