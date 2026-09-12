@@ -158,7 +158,19 @@ export class Executor {
     // 4. Refuse to act behind a dialog nobody has accounted for. Clicking
     //    something underneath a modal is how automation ends up doing the
     //    right thing to the wrong screen.
-    if (req.snapshot.blockingDialog && req.action.kind !== 'assert' && req.action.kind !== 'extract') {
+    //
+    //    `navigate` is exempt, and the exemption is load-bearing rather than
+    //    convenient. This guard is about hitting the wrong *element*, and a
+    //    navigate has no element - it leaves the page entirely, which is what
+    //    a person does when they want out of a modal. Without the exemption
+    //    the declared safe-abandon path cannot run in the one case it most
+    //    needs to: a run stuck behind an interstitial it does not recognise.
+    //    Found by the escalation gate, which timed out abandoning and then
+    //    reported that it had not.
+    const dialogExempt = req.action.kind === 'assert'
+      || req.action.kind === 'extract'
+      || req.action.kind === 'navigate';
+    if (req.snapshot.blockingDialog && !dialogExempt) {
       const d = req.snapshot.blockingDialog;
       if (!node || !isInsideDialog(node, d.name)) {
         evidence.event('locator.fail',

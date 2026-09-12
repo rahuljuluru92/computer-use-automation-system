@@ -47,6 +47,7 @@ import { artifactHash } from '../core/integrity.ts';
 import { applyOverlay } from './overlay.ts';
 import type { SecretResolver } from '../policy/secrets.ts';
 import { renderReport } from '../evidence/reportHtml.ts';
+import type { EscalationChannel, EscalationRequest } from '../escalation/handoff.ts';
 
 export interface ReplayOptions {
   artifact: CapabilityArtifact;
@@ -61,26 +62,19 @@ export interface ReplayOptions {
   /** Resolves `$secret.NAME` references in step data. Without one, a step that
    *  needs a credential fails cleanly rather than typing the literal text. */
   secrets?: SecretResolver | undefined;
-  /** Raised when the run cannot safely continue on its own. Phase 5 wires a
-   *  real operator to this; without one, escalation fails cleanly. */
-  onEscalate?: ((req: EscalationRequest) => Promise<EscalationResolution>) | undefined;
-}
-
-export interface EscalationRequest {
-  interventionId: string;
-  reason: 'locator_unresolved' | 'unknown_dialog' | 'recovery_exhausted'
-        | 'irreversible_action_needs_approval' | 'policy_requires_approval' | 'not_safely_abandonable';
-  detail: string;
-  stepId: string;
-  stepIntent: string;
-  snapshot: UiSnapshot;
-  screenshotPath?: string;
-}
-
-export interface EscalationResolution {
-  resolution: 'resolved' | 'aborted' | 'skipped' | 'timed_out';
-  claimedBy?: string;
-  humanActionCount?: number;
+  /**
+   * Where a stuck run goes to ask for a human.
+   *
+   * Optional, and the absence is designed behaviour rather than a gap: with no
+   * channel wired, an escalation fails cleanly and says there was nobody to
+   * ask. Escalating into a void nobody is watching would look like working and
+   * be worse than failing honestly.
+   *
+   * The import is type-only on purpose. Replay depends on the *shape* of a
+   * channel and on none of its machinery - no bus, no console, no browser
+   * hooks - so the deterministic path carries none of that weight.
+   */
+  escalation?: EscalationChannel | undefined;
 }
 
 /**
@@ -128,6 +122,24 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
   let retries = 0;
   let recoveries = 0;
   let degradedResolutions = 0;
+  let interventions = 0;
+  /**
+   * Set when a human actually held this session and the run carried on
+   * afterwards.
+   *
+   * It changes the terminal status, and that is the point. The same reasoning
+   * that keeps `business_outcome` out of `failed` applies here: a run a person
+   * had to take over is not the same event as a run that completed on its own,
+   * and a caller who cannot tell them apart will treat them the same. Recovery
+   * stays invisible in the status because recovery is the machine working
+   * within declared bounds (#10); a human taking control of a customer's
+   * session is the thing the audit trail exists for.
+   */
+  // A holder rather than a bare `let`: the assignments happen inside nested
+  // closures, which TypeScript's flow analysis does not look into, so a plain
+  // variable narrows to `null` at the check below and the whole branch becomes
+  // unreachable in the type system while being perfectly reachable at runtime.
+  const humanHeld: { detail: EscalationDetail | null } = { detail: null };
 
   const envelope = () => ({
     runId: evidence.runId,
@@ -144,6 +156,7 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
       stepsExecuted: steps.length, retries, recoveries, degradedResolutions,
       // Not a hopeful comment: asserted in tests/determinism.
       llmCalls: 0,
+      interventions,
     },
     evidenceDir: evidence.dir,
   });
@@ -198,6 +211,12 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
 
   // ---- Steps --------------------------------------------------------------
   for (const [index, step] of artifact.steps.entries()) {
+    // The artifact's own run budget, enforced before the step rather than
+    // reported after it. A budget that is only checked on the way out is a
+    // description of what happened, not a limit on it.
+    const overBudget = await checkRunBudget(step, index);
+    if (overBudget) return overBudget;
+
     evidence.event('step.begin', `Step ${index + 1}: ${step.intent}`,
       { index: index + 1, actionKind: step.action.kind, actionClass: step.actionClass }, step.id);
 
@@ -244,6 +263,24 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
   }
 
   // ---- Done ---------------------------------------------------------------
+  if (humanHeld.detail) {
+    evidence.event('run.end',
+      `Completed all ${artifact.steps.length} steps, but only because `
+      + `${humanHeld.detail.claimedBy ?? 'an operator'} took the session at `
+      + `${humanHeld.detail.raisedAtStepId}. Reporting this as escalated rather than a `
+      + `clean success: the outputs are good, and a caller still needs to know a person `
+      + `was required to get them.`,
+      { outputs: Object.keys(outputs), intervention: humanHeld.detail.interventionId });
+    const escalatedResult: ReplayResult = {
+      ...envelope(), status: 'escalated', escalation: humanHeld.detail, outputs,
+    };
+    evidence.close({
+      status: escalatedResult.status, outputs: Object.keys(outputs),
+      intervention: humanHeld.detail.interventionId,
+    });
+    return escalatedResult;
+  }
+
   evidence.event('run.end',
     `Completed ${artifact.steps.length} steps and extracted `
     + `${Object.keys(outputs).length} output(s).`, { outputs: Object.keys(outputs) });
@@ -299,10 +336,21 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
       evidence: evidenceRefs,
     });
 
-    const maxAttempts = step.budget.retries + 1;
+    // `let`, because a human who resolves an intervention buys the step one
+    // more attempt. Without that, a step declared with `retries: 0` would have
+    // no attempt left to resume into and the handoff would be theatre: the
+    // operator fixes the problem and the run fails anyway.
+    let maxAttempts = step.budget.retries + 1;
+    let humanResumes = 0;
+    let justResumed = false;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      if (attempt > 1) { stepRetries += 1; retries += 1; }
+      // A resumed attempt is not a retry. The step is not being re-tried
+      // because it failed on its own; it is being re-checked because somebody
+      // changed the world underneath it, and counting that as a retry would
+      // make the reliability numbers quietly wrong.
+      if (attempt > 1 && !justResumed) { stepRetries += 1; retries += 1; }
+      justResumed = false;
 
       // --- has a recovery already done this step's job? ---
       //
@@ -345,8 +393,16 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
           evidence.event('precondition', `Preconditions do not hold: ${pre.detail}`, {}, step.id);
           const rec = await tryRecover(step, `precondition: ${pre.detail}`);
           if (rec === 'recovered') continue;
-          if (rec === 'escalated') return escalate(step, 'recovery_exhausted', pre.detail, trace);
+          // The step's own retry budget comes first. A declared remedy being
+          // spent does not mean the page was not simply slow, and escalating
+          // over a retry the artifact already asked for would put a person in
+          // the loop for something the machine was about to handle.
           if (attempt < maxAttempts) continue;
+          if (rec === 'escalated') {
+            const e = await escalateStep(step, 'recovery_exhausted', pre.detail, trace);
+            if (e.kind === 'retry') { justResumed = true; maxAttempts += 1; continue; }
+            return e.result;
+          }
           return { kind: 'failed', trace: trace('failed'), failure: {
             code: 'precondition_failed', stepId: step.id,
             message: `the step's preconditions did not hold`,
@@ -374,12 +430,18 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
               reason: acted.observed };
           }
           if (acted.code === 'needs_approval') {
-            return escalate(step, 'irreversible_action_needs_approval', acted.observed, trace);
+            const e = await escalateStep(step, 'irreversible_action_needs_approval', acted.observed, trace);
+            if (e.kind === 'retry') { justResumed = true; maxAttempts += 1; continue; }
+            return e.result;
           }
           const rec = await tryRecover(step, `${acted.code}: ${acted.observed}`);
           if (rec === 'recovered') continue;
-          if (rec === 'escalated') return escalate(step, 'recovery_exhausted', acted.observed, trace);
           if (acted.retryable && attempt < maxAttempts) continue;
+          if (rec === 'escalated') {
+            const e = await escalateStep(step, 'recovery_exhausted', acted.observed, trace);
+            if (e.kind === 'retry') { justResumed = true; maxAttempts += 1; continue; }
+            return e.result;
+          }
 
           // Before calling it a failure: did the app answer the question?
           const late = await detectOutcome(artifact.outcomes, snapshot, params, surface);
@@ -417,8 +479,12 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
           }
           const rec = await tryRecover(step, `wait: ${w.detail}`);
           if (rec === 'recovered') continue;
-          if (rec === 'escalated') return escalate(step, 'recovery_exhausted', w.detail, trace);
           if (attempt < maxAttempts) continue;
+          if (rec === 'escalated') {
+            const e = await escalateStep(step, 'recovery_exhausted', w.detail, trace);
+            if (e.kind === 'retry') { justResumed = true; maxAttempts += 1; continue; }
+            return e.result;
+          }
           const shot = await captureShot(index, 'failure');
           if (shot) evidenceRefs.push(shot);
           return { kind: 'failed', trace: trace('failed'), failure: {
@@ -449,8 +515,12 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
       if (!cp.held) {
         const rec = await tryRecover(step, `checkpoint: ${cp.detail}`);
         if (rec === 'recovered') continue;
-        if (rec === 'escalated') return escalate(step, 'recovery_exhausted', cp.detail, trace);
         if (attempt < maxAttempts) continue;
+        if (rec === 'escalated') {
+          const e = await escalateStep(step, 'recovery_exhausted', cp.detail, trace);
+          if (e.kind === 'retry') { justResumed = true; maxAttempts += 1; continue; }
+          return e.result;
+        }
         const shot = await captureShot(index, 'failure');
         if (shot) evidenceRefs.push(shot);
         return { kind: 'failed', trace: trace('failed'), failure: {
@@ -499,12 +569,33 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
      * Bounded recovery. Every rule has a cap, every attempt is counted, and
      * nothing loops. "Recoverable" means a declared rule fired and worked -
      * not that we kept trying until something happened.
+     *
+     * The three return values are three genuinely different situations, and the
+     * difference between the last two is where escalation earns its place:
+     *
+     *   recovered  a declared rule matched and fixed it. Carry on.
+     *   none       nothing matched. We have never seen this before, so there is
+     *              no remedy to be out of - it is an unknown failure, and a
+     *              plain `failed` with expected/observed is the honest answer.
+     *   escalated  a rule matched and could not fix it, either because it
+     *              failed or because it is out of attempts. That is different
+     *              in kind: the condition was recognised, the declared remedy
+     *              was applied, and it did not work. Retrying the raw action
+     *              after that is just doing the same thing again more quietly.
+     *              It is a person's problem now.
+     *
+     * Collapsing those last two is how "bounded recovery" quietly becomes
+     * "gives up", and it is why this function returns a verdict rather than a
+     * boolean.
      */
     async function tryRecover(s: Step, why: string): Promise<'recovered' | 'none' | 'escalated'> {
       const rules: RecoveryRule[] = [...s.recovery, ...artifact.recovery];
+      /** Did anything declared claim this condition? */
+      let recognised = false;
       for (const rule of rules) {
         const applies = await evaluate(rule.when, { snapshot, params, surface });
         if (!applies.held) continue;
+        recognised = true;
 
         const used = recoveryTraces.filter((r) => r.ruleId === rule.id).length;
         if (used >= rule.maxAttempts) {
@@ -545,57 +636,292 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
         if (ok && rule.thenRetryStep) return 'recovered';
         if (ok) return 'recovered';
       }
+
+      if (recognised) {
+        evidence.event('recovery',
+          `Every declared recovery for this condition has been tried or is capped, `
+          + `and ${why} is still true. Asking for a human rather than retrying.`,
+          { recognised: true, exhausted: true }, s.id);
+        return 'escalated';
+      }
       return 'none';
     }
 
-    async function escalate(
+    /**
+     * Stop, ask for a human, and turn what they decided into what this step
+     * does next.
+     *
+     * The translation is the interesting part, because "a human dealt with it"
+     * is not one outcome, it is three, and collapsing them is how escalation
+     * becomes a fancy way to fail:
+     *
+     *   resolved  they cleared the obstacle. The step re-checks itself and
+     *             carries on - and critically, it re-checks *before* acting,
+     *             because the thing they did may well be the thing the step
+     *             was trying to do. That guard already exists at the top of
+     *             the attempt loop and this reuses it rather than inventing a
+     *             second, subtly different one.
+     *   skipped   they handled it outside the flow, or it does not apply. The
+     *             step is marked skipped and the run moves on.
+     *   aborted   stop. Ends the run as `escalated`, with the record attached.
+     *   timed_out nobody came. The run leaves the screen safely and stops.
+     *
+     * Resumes are bounded by the artifact. An unbounded resume loop is an
+     * operator and an automation taking turns failing at the same step, which
+     * costs a person's afternoon and produces nothing.
+     */
+    async function escalateStep(
       s: Step,
       reason: EscalationRequest['reason'],
       detail: string,
       mkTrace: (status: StepTrace['status']) => StepTrace,
-    ): Promise<StepResult> {
+    ): Promise<{ kind: 'retry' } | { kind: 'stop'; result: StepResult }> {
       const interventionId = `int-${evidence.runId}-${s.id}`;
       const shot = await captureShot(index, 'escalation');
       if (shot) evidenceRefs.push(shot);
 
+      interventions += 1;
       evidence.event('escalation.raised',
         `Stopping and asking for a human: ${detail}`,
-        { interventionId, reason, stepId: s.id }, s.id);
+        { interventionId, reason, stepId: s.id, intent: s.intent }, s.id);
 
-      if (!opts.onEscalate) {
-        // No operator wired in. Failing cleanly and saying so is the honest
-        // behaviour; pretending to escalate into the void is not.
-        evidence.event('escalation.timeout',
-          `No operator channel is configured, so the run cannot be handed over.`,
-          { interventionId }, s.id);
-        return { kind: 'escalated', trace: mkTrace('escalated'), escalation: {
+      const terminal = (
+        res: { resolution: EscalationDetail['resolution']; claimedBy?: string; humanActionCount: number },
+      ): { kind: 'stop'; result: StepResult } => ({
+        kind: 'stop',
+        result: { kind: 'escalated', trace: mkTrace('escalated'), escalation: {
           interventionId, reason, detail, raisedAtStepId: s.id,
-          claimed: false, humanActionCount: 0, resolution: 'timed_out',
+          claimed: res.resolution !== 'timed_out',
+          ...(res.claimedBy !== undefined ? { claimedBy: res.claimedBy } : {}),
+          humanActionCount: res.humanActionCount,
+          ...(res.resolution !== undefined ? { resolution: res.resolution } : {}),
+          resumedAt: new Date().toISOString(),
           evidence: evidenceRefs,
-        }};
-      }
-
-      const res = await opts.onEscalate({
-        interventionId, reason, detail, stepId: s.id, stepIntent: s.intent, snapshot,
-        ...(shot ? { screenshotPath: shot } : {}),
+        }},
       });
-      executor.syncGeneration();
-      snapshot = await surface.observe();
 
-      evidence.event('escalation.resumed',
-        `Control returned to automation; the operator ${res.resolution} the intervention.`,
-        { interventionId, ...res }, s.id);
-
-      return { kind: 'escalated', trace: mkTrace('escalated'), escalation: {
-        interventionId, reason, detail, raisedAtStepId: s.id,
-        claimed: res.resolution !== 'timed_out',
-        ...(res.claimedBy !== undefined ? { claimedBy: res.claimedBy } : {}),
-        humanActionCount: res.humanActionCount ?? 0,
-        resolution: res.resolution,
+      /** One shape for "a human was here", used by both continuing outcomes. */
+      const detailFor = (
+        resolution: 'resolved' | 'skipped',
+        r: { claimedBy?: string; humanActionCount: number; note?: string },
+        id: string, why: EscalationRequest['reason'], what: string, stepId: string,
+      ): EscalationDetail => ({
+        interventionId: id, reason: why, detail: what, raisedAtStepId: stepId,
+        claimed: true,
+        ...(r.claimedBy !== undefined ? { claimedBy: r.claimedBy } : {}),
+        humanActionCount: r.humanActionCount,
+        resolution,
         resumedAt: new Date().toISOString(),
         evidence: evidenceRefs,
-      }};
+      });
+
+      if (!opts.escalation) {
+        // Nobody is wired in. Failing cleanly and saying so is the honest
+        // behaviour; pretending to hand over to an empty room is not.
+        evidence.event('escalation.timeout',
+          `No operator channel is configured, so this run cannot be handed over. `
+          + `Start one with "cua operator" and pass --operator to route to it.`,
+          { interventionId }, s.id);
+        await abandonSafely(interventionId, s);
+        return terminal({ resolution: 'timed_out', humanActionCount: 0 });
+      }
+
+      const res = await opts.escalation.raise({
+        interventionId, reason, detail,
+        stepId: s.id, stepIntent: s.intent,
+        actionKind: s.action.kind, actionClass: s.actionClass,
+        url: snapshot.url, title: snapshot.title,
+        timeoutMs: artifact.escalation.timeoutMs,
+        ...(shot ? { screenshotPath: shot } : {}),
+      });
+
+      // Whatever they did, the run's picture of the page is now stale, and the
+      // generation it planned under is two transfers old. Both are refreshed
+      // before anything else happens - re-observing is not a nicety here, it
+      // is the difference between resuming and acting on a screen that is no
+      // longer there.
+      executor.syncGeneration();
+      snapshot = await surface.observe();
+      evidence.event('observe',
+        `Re-observed after the handoff: ${snapshot.url}.`,
+        { url: snapshot.url, structureHash: snapshot.structureHash }, s.id);
+
+      const humanActionCount = res.humanActionCount;
+
+      switch (res.resolution) {
+        case 'resolved': {
+          if (humanResumes >= artifact.escalation.maxResumes) {
+            evidence.event('escalation.timeout',
+              `This step has already been resumed ${humanResumes} time(s), which is its `
+              + `limit. Stopping rather than handing the same problem back again.`,
+              { interventionId, maxResumes: artifact.escalation.maxResumes }, s.id);
+            return terminal({ resolution: 'aborted', humanActionCount,
+              ...(res.claimedBy !== undefined ? { claimedBy: res.claimedBy } : {}) });
+          }
+          humanResumes += 1;
+          humanHeld.detail = detailFor('resolved', res, interventionId, reason, detail, s.id);
+          evidence.event('escalation.resumed',
+            `Resuming ${s.id}. The step re-checks its own postconditions before acting, `
+            + `because the operator may already have done what it was about to do.`,
+            { interventionId, resume: humanResumes }, s.id);
+          return { kind: 'retry' };
+        }
+
+        case 'skipped': {
+          humanHeld.detail = detailFor('skipped', res, interventionId, reason, detail, s.id);
+          evidence.event('step.end',
+            `Skipping ${s.id} at the operator's instruction.`,
+            { status: 'skipped', interventionId }, s.id);
+          return { kind: 'stop', result: { kind: 'ok', trace: mkTrace('skipped'), snapshot } };
+        }
+
+        case 'timed_out':
+          await abandonSafely(interventionId, s);
+          return terminal({ resolution: 'timed_out', humanActionCount,
+            ...(res.claimedBy !== undefined ? { claimedBy: res.claimedBy } : {}) });
+
+        case 'aborted':
+        default:
+          return terminal({ resolution: 'aborted', humanActionCount,
+            ...(res.claimedBy !== undefined ? { claimedBy: res.claimedBy } : {}) });
+      }
     }
+  }
+
+  /**
+   * Leaving the screen, when nobody came.
+   *
+   * The half of escalation that is easy to skip and expensive to omit. A run
+   * that raises an intervention and then simply stops has left a half-filled
+   * servicing form open in a live session - which is not "safe by default", it
+   * is an unattended browser sitting on a page that commits money if anything
+   * touches it.
+   *
+   * So the artifact declares where to go, and the run goes there. Returning to
+   * the entry screen is safe by construction: it is where the flow begins, so
+   * nothing is in flight there, and getting to it discards an in-progress form
+   * without submitting it - the same thing a person does when they give up on
+   * a form.
+   *
+   * Note it goes through the executor. The abandon path is an action like any
+   * other, so it is policy-checked against its destination like any other. An
+   * escape hatch that skipped policy would be the most attractive place in the
+   * system to hide a navigation.
+   */
+  async function abandonSafely(interventionId: string, step: Step): Promise<void> {
+    const spec = artifact.escalation.abandon;
+
+    if (spec.kind === 'none') {
+      const detail = 'this capability declares no safe abandon path, so the session has been '
+        + 'left exactly as it is for whoever arrives';
+      evidence.event('escalation.timeout',
+        `Not touching anything: ${detail}.`, { interventionId, abandon: 'none' }, step.id);
+      opts.escalation?.noteAbandon?.(interventionId, { kind: 'none', performed: false, detail });
+      return;
+    }
+
+    const url = interpolateUrl(
+      spec.kind === 'entry' ? artifact.target.entry.template : spec.urlTemplate, params);
+
+    const res = await executor.act({
+      stepId: step.id, action: { kind: 'navigate', urlTemplate: url }, params, snapshot,
+      declaredClass: 'read',
+    });
+
+    if (res.ok) {
+      snapshot = res.snapshot;
+      const detail = `navigated to ${url}, leaving nothing in flight`;
+      evidence.event('escalation.timeout',
+        `Abandoned safely: ${detail}.`, { interventionId, abandon: spec.kind, url }, step.id);
+      opts.escalation?.noteAbandon?.(interventionId, { kind: spec.kind, performed: true, detail });
+      return;
+    }
+
+    // The abandon path itself failed. This is the state the taxonomy calls
+    // `not_safely_abandonable`, and it is worth saying loudly rather than
+    // quietly returning: the session is stuck on a screen the run could not
+    // leave, and a person has to look at it.
+    const detail = `could not reach ${url}: ${res.observed}`;
+    evidence.event('escalation.timeout',
+      `Could not abandon safely. ${detail}. The session has been left where it is.`,
+      { interventionId, abandon: spec.kind, url, failed: true }, step.id);
+    opts.escalation?.noteAbandon?.(interventionId, { kind: spec.kind, performed: false, detail });
+  }
+
+  /**
+   * The run's own budget, checked before each step.
+   *
+   * Two limits with two different meanings. Exceeding `maxSteps` means the
+   * artifact is longer than it says it is - a contract violation, and a plain
+   * failure. Exceeding `maxWallClockMs` means the app went slow enough that the
+   * run should stop, and whether that is safe depends entirely on where it
+   * stopped: mid-flow on a capability with no declared abandon path, it is not,
+   * and that is the one case the taxonomy has a dedicated escalation reason
+   * for. Failing there would be the wrong answer - it would report a stuck
+   * session as a closed matter.
+   */
+  async function checkRunBudget(step: Step, index: number): Promise<ReplayResult | null> {
+    const elapsed = Date.now() - t0;
+    const overSteps = index >= artifact.policy.maxSteps;
+    const overClock = elapsed > artifact.policy.maxWallClockMs;
+    if (!overSteps && !overClock) return null;
+
+    const message = overSteps
+      ? `the run reached its ${artifact.policy.maxSteps}-step limit`
+      : `the run exceeded its ${artifact.policy.maxWallClockMs}ms wall-clock budget after ${elapsed}ms`;
+
+    const strandedMidFlow = overClock
+      && index > 0
+      && artifact.escalation.abandon.kind === 'none';
+
+    if (strandedMidFlow && opts.escalation) {
+      interventions += 1;
+      evidence.event('escalation.raised',
+        `Out of time at ${step.id}, and this capability cannot be abandoned unattended. `
+        + `Asking for a human rather than walking away from a live screen.`,
+        { reason: 'not_safely_abandonable', elapsed }, step.id);
+      const interventionId = `int-${evidence.runId}-budget`;
+      const res = await opts.escalation.raise({
+        interventionId, reason: 'not_safely_abandonable', detail: message,
+        stepId: step.id, stepIntent: step.intent,
+        actionKind: step.action.kind, actionClass: step.actionClass,
+        url: snapshot.url, title: snapshot.title,
+        timeoutMs: artifact.escalation.timeoutMs,
+      });
+      executor.syncGeneration();
+      const result: ReplayResult = {
+        ...envelope(), status: 'escalated',
+        escalation: {
+          interventionId, reason: 'not_safely_abandonable', detail: message,
+          raisedAtStepId: step.id,
+          claimed: res.resolution !== 'timed_out',
+          ...(res.claimedBy !== undefined ? { claimedBy: res.claimedBy } : {}),
+          humanActionCount: res.humanActionCount,
+          resolution: res.resolution === 'skipped' ? 'resolved' : res.resolution,
+          resumedAt: new Date().toISOString(),
+          evidence: [],
+        },
+      };
+      evidence.event('run.end', `Run stopped on its budget at ${step.id}.`, { elapsed });
+      evidence.close({ status: result.status, intervention: interventionId });
+      return result;
+    }
+
+    evidence.event('run.end', `Refusing to continue: ${message}.`,
+      { code: 'budget_exceeded', elapsed, stepIndex: index }, step.id);
+    const result: ReplayResult = {
+      ...envelope(), status: 'failed',
+      failure: {
+        code: 'budget_exceeded', stepId: step.id, message,
+        expected: overSteps
+          ? `at most ${artifact.policy.maxSteps} steps`
+          : `the run to finish within ${artifact.policy.maxWallClockMs}ms`,
+        observed: overSteps ? `step ${index + 1}` : `${elapsed}ms`,
+        evidence: [],
+      },
+    };
+    evidence.close({ status: result.status, code: 'budget_exceeded' });
+    return result;
   }
 
   async function captureShot(index: number, label: string): Promise<string | null> {

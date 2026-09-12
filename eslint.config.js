@@ -61,7 +61,8 @@ export default [
   // "deterministic replay" is a promise rather than a property. These two rules
   // make the promise unbreakable without an explicit, visible eslint-disable.
   {
-    files: ['src/replay/**/*.ts', 'src/exec/**/*.ts', 'src/surface/**/*.ts', 'src/policy/**/*.ts'],
+    files: ['src/replay/**/*.ts', 'src/exec/**/*.ts', 'src/surface/**/*.ts',
+            'src/policy/**/*.ts', 'src/escalation/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         paths: [

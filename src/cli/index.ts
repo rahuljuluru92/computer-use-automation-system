@@ -34,8 +34,12 @@ cua - computer-use capability system
       Writes nothing unless the compiled artifact replays successfully.
 
   cua replay --artifact <path> [--input <json>] [--tenant <id>] [--chaos <mode>] [--label <name>]
+             [--operator <url>]
       Execute a saved artifact deterministically. Never calls a model.
       --label names the evidence directory, so a demo run is findable later.
+      --operator routes escalations to a running console, and runs headed so a
+      human can actually be handed the session. Without it, a run that gets
+      stuck fails cleanly and says there was nobody to ask.
 
   cua explain --artifact <path>
       Render an artifact as reviewable prose.
@@ -45,7 +49,10 @@ cua - computer-use capability system
   cua approve --artifact <path>
       Move draft -> approved. Required before unattended invocation over MCP.
 
-  cua operator [--port <n>]        Escalation console.
+  cua operator [--port <n>] [--timeout <ms>]
+      The escalation console. Start it before a run that might need a human.
+      Loopback only. --timeout is how long an intervention tolerates silence
+      before the run abandons; any operator activity resets it.
   cua mcp                          Serve approved capabilities over MCP (stdio).
 `;
 
@@ -95,6 +102,8 @@ async function main(argv: string[]): Promise<number> {
       chaos: { type: 'string' },
       label: { type: 'string' },
       port: { type: 'string' },
+      operator: { type: 'string' },
+      timeout: { type: 'string' },
       'max-steps': { type: 'string' },
       id: { type: 'string' },
       version: { type: 'string' },
@@ -132,7 +141,16 @@ async function main(argv: string[]): Promise<number> {
         tenant: values.tenant,
         chaos: values.chaos,
         label: values.label,
+        operator: values.operator,
         json: values.json ?? false,
+      });
+    }
+
+    case 'operator': {
+      const { runOperatorCommand } = await import('./operatorCommand.ts');
+      return runOperatorCommand({
+        port: values.port ? Number(values.port) : undefined,
+        timeoutMs: values.timeout ? Number(values.timeout) : undefined,
       });
     }
 
@@ -153,10 +171,9 @@ async function main(argv: string[]): Promise<number> {
       });
     }
 
-    // Phases 5-6. Each is wired to its module as that phase lands; the CLI
-    // surface is fixed now so the README's demo path never has to change.
+    // Phase 6. Wired to its module as that phase lands; the CLI surface was
+    // fixed at Phase 0 so the README's demo path never has to change.
     case 'approve':
-    case 'operator':
     case 'mcp':
       console.error(`"${command}" is not implemented yet.`);
       return 70; // EX_SOFTWARE

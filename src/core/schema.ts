@@ -395,6 +395,38 @@ export const CapabilityArtifact = z.object({
     allowedActionClasses: z.array(ActionClass).default(['read', 'write_reversible']),
   }).default({ maxSteps: 40, maxWallClockMs: 90_000, allowedActionClasses: ['read', 'write_reversible'] }),
 
+  /**
+   * What happens when the run stops and asks for a human.
+   *
+   * Both fields exist because "escalate" is not a plan on its own. A run that
+   * raises an intervention and then waits forever has not handed over to
+   * anybody; it has hung, and it is still holding a half-filled form open in a
+   * banking console. So the artifact has to declare two things: how long a
+   * human gets, and what to do when nobody comes.
+   *
+   * The abandon path is the important half. Walking away from a servicing
+   * screen is only safe if you first leave it - returning to the entry screen
+   * discards an in-progress form without submitting it, which is exactly what
+   * a person would do. `none` says the opposite: this flow cannot be
+   * abandoned unattended, so time out loudly and leave the session where it
+   * is for the human who eventually arrives.
+   */
+  escalation: z.object({
+    /** How long a raised intervention waits to be claimed before abandoning. */
+    timeoutMs: z.number().int().positive().default(300_000),
+    /** How many times one step may be resumed by a human before it gives up. */
+    maxResumes: z.number().int().min(0).max(5).default(2),
+    abandon: z.discriminatedUnion('kind', [
+      /** Go back to the capability's own entry screen. Safe by construction:
+       *  it is where the flow starts, so nothing is in flight there. */
+      z.object({ kind: z.literal('entry') }),
+      /** Somewhere else that is known to be read-only. */
+      z.object({ kind: z.literal('navigate'), urlTemplate: z.string().min(1) }),
+      /** Nothing may be touched unattended. Times out in place, and says so. */
+      z.object({ kind: z.literal('none') }),
+    ]).default({ kind: 'entry' }),
+  }).default({ timeoutMs: 300_000, maxResumes: 2, abandon: { kind: 'entry' } }),
+
   tenancy: z.object({
     canonical: z.boolean().default(true),
     overlays: z.record(z.string(), TenantOverlay).default({}),

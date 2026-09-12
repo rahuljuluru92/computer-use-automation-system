@@ -23,8 +23,16 @@ import { join, relative } from 'node:path';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 
-/** Modules that execute a saved artifact. None may reach a model. */
-const EXECUTION_PATH = ['src/replay', 'src/exec', 'src/surface', 'src/policy'];
+/**
+ * Modules that execute a saved artifact. None may reach a model.
+ *
+ * `src/escalation` is on this list for a reason that is easy to miss: handing
+ * control to a human happens *during* a replay, so a model consulted there
+ * would be a model consulted on the replay path. "Ask a model what the operator
+ * probably meant" is exactly the kind of helpful idea this boundary exists to
+ * refuse.
+ */
+const EXECUTION_PATH = ['src/replay', 'src/exec', 'src/surface', 'src/policy', 'src/escalation'];
 
 /** Imports that would break determinism. */
 const FORBIDDEN: Array<{ pattern: RegExp; why: string }> = [

@@ -96,6 +96,7 @@ ${renderSummary(result)}
   ${metric('retries', result?.metrics.retries ?? 0)}
   ${metric('recoveries', result?.metrics.recoveries ?? 0)}
   ${metric('degraded', result?.metrics.degradedResolutions ?? 0)}
+  ${metric('interventions', result?.metrics.interventions ?? 0)}
   ${metric('duration', result ? `${(result.durationMs / 1000).toFixed(1)}s` : '-')}
   ${metric('model calls', result?.metrics.llmCalls ?? 0, true)}
 </div>
@@ -143,13 +144,31 @@ function renderSummary(r?: ReplayResult): string {
       </dl></div>`;
   }
   if (r.status === 'escalated') {
+    // Outputs are present exactly when a human unstuck the run and it went on
+    // to finish. Showing them matters: without them the report reads as a run
+    // that stopped, when in fact the task was completed - just not unaided.
+    const finished = r.outputs && Object.keys(r.outputs).length > 0
+      ? `<div class="overflow"><table style="margin-top:8px">
+          ${Object.entries(r.outputs).map(([k, v]) =>
+            `<tr><td class="k">${esc(k)}</td><td>${esc(JSON.stringify(v))}</td></tr>`).join('')}
+        </table></div>
+        <p class="note">The task did complete and these outputs are good. It is reported
+        as escalated rather than as a clean success because a person had to take the
+        session to get here, and a caller that cannot tell those apart will treat them
+        the same.</p>`
+      : `<p class="note">The run stopped here. ${r.escalation.resolution === 'timed_out'
+          ? 'Nobody claimed the intervention, so the declared abandon path ran and the '
+            + 'session was left somewhere safe.'
+          : 'The operator ended the run deliberately.'}</p>`;
     return `<div class="card"><b>Escalated to a human</b>
       <p class="meta" style="margin:6px 0 0">${esc(r.escalation.detail)}</p>
       <p class="note">Reason <code>${esc(r.escalation.reason)}</code> &middot;
+      intervention <code>${esc(r.escalation.interventionId)}</code> &middot;
       ${r.escalation.claimed ? `claimed by ${esc(r.escalation.claimedBy ?? 'an operator')}`
                              : 'never claimed'} &middot;
       resolution <code>${esc(r.escalation.resolution ?? 'pending')}</code> &middot;
-      ${r.escalation.humanActionCount} human action(s) recorded.</p></div>`;
+      ${r.escalation.humanActionCount} human action(s) recorded.</p>
+      ${finished}</div>`;
   }
   return `<div class="card"><b>Blocked by policy</b>
     <p class="meta" style="margin:6px 0 0">${esc(r.policy.reason)}</p>

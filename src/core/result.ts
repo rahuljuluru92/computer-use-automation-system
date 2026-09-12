@@ -191,6 +191,18 @@ const envelope = {
      * eslint enforces statically: replay does not consult a model.
      */
     llmCalls: z.number().int().min(0),
+    /**
+     * How many times this run stopped and asked for a person.
+     *
+     * Here rather than only on the `escalated` variant because a run can need
+     * a human and still end as something else - an operator unsticks it, the
+     * run carries on, and the app then gives a perfectly good business answer.
+     * The status tells you what the run *concluded*; this tells you what it
+     * cost to get there, and an unattended caller watching for "did this need
+     * hands?" can read one number on every outcome instead of destructuring
+     * five.
+     */
+    interventions: z.number().int().min(0).default(0),
   }),
   evidenceDir: z.string(),
 };

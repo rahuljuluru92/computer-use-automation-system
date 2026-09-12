@@ -96,7 +96,7 @@ const succeeds: Verifier = async () => ({
   durationMs: 1000,
   steps: [], drift: [],
   outputs: { savingsBalance: 4210.55 },
-  metrics: { stepsExecuted: 3, retries: 0, recoveries: 0, degradedResolutions: 0, llmCalls: 0 },
+  metrics: { stepsExecuted: 3, retries: 0, recoveries: 0, degradedResolutions: 0, llmCalls: 0, interventions: 0 },
   evidenceDir: 'evidence/verify-1',
 } as ReplayResult);
 
@@ -114,7 +114,7 @@ const fails: Verifier = async () => ({
     expected: 'the View link', observed: 'nothing matched', retryable: false,
     evidence: [],
   },
-  metrics: { stepsExecuted: 1, retries: 0, recoveries: 0, degradedResolutions: 0, llmCalls: 0 },
+  metrics: { stepsExecuted: 1, retries: 0, recoveries: 0, degradedResolutions: 0, llmCalls: 0, interventions: 0 },
   evidenceDir: 'evidence/verify-2',
 } as ReplayResult);
 
