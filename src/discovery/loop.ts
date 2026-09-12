@@ -178,6 +178,7 @@ export async function discover(opts: DiscoverOptions): Promise<DiscoveryRun> {
   const seenStates = new Map<string, number>();
   const stateCount = new Map<string, number>();
   let consecutiveStalls = 0;
+  let previousHash: string | undefined;
 
   const finish = (reason: StopReason): DiscoveryRun => {
     metrics.durationMs = Date.now() - started;
@@ -277,8 +278,15 @@ export async function discover(opts: DiscoverOptions): Promise<DiscoveryRun> {
     }
 
     // Oscillation, on the state the run is actually in now.
+    //
+    // Only a *change* of state counts. The structure hash covers roles, names
+    // and nesting but never values (decision #26), so typing into a field
+    // leaves it identical - and counting that as "we are back where we were"
+    // ends every form-filling run as a cycle. A live run died here after three
+    // keystrokes on a login form. prune.ts already knew this (#72); the loop
+    // did not. Standing still is standing still.
     const hash = runner.snapshot?.structureHash;
-    if (hash !== undefined) {
+    if (hash !== undefined && hash !== previousHash) {
       const times = (stateCount.get(hash) ?? 0) + 1;
       stateCount.set(hash, times);
 
@@ -303,5 +311,6 @@ export async function discover(opts: DiscoverOptions): Promise<DiscoveryRun> {
       }
       if (!seenStates.has(hash)) seenStates.set(hash, metrics.turns);
     }
+    if (hash !== undefined) previousHash = hash;
   }
 }

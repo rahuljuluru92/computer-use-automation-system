@@ -12,7 +12,7 @@ import { rmSync } from 'node:fs';
 import {
   discover, type Planner, type PlannerRequest, type PlannerTurn, type LoopMessage,
 } from '../../src/discovery/loop.ts';
-import { buildHarness, scratchRoot, type Harness } from '../fixtures/discoveryHarness.ts';
+import { buildHarness, snap, scratchRoot, type Harness } from '../fixtures/discoveryHarness.ts';
 
 const ROOT = scratchRoot('discovery-loop');
 afterAll(() => rmSync(ROOT, { recursive: true, force: true }));
@@ -49,6 +49,18 @@ const injected = (planner: ScriptedPlanner): string[] =>
     r.messages.filter((m): m is Extract<LoopMessage, { role: 'user' }> => m.role === 'user')
       .map((m) => m.text ?? ''))
     .filter((t) => t !== '');
+
+
+/** Makes the surface alternate between two screens: a real there-and-back cycle. */
+function pingPong(h: Harness, a = 'member-detail', b = 'account-detail'): void {
+  let flip = false;
+  const original = h.surface.observe.bind(h.surface);
+  h.surface.observe = async () => {
+    h.surface.current = snap(flip ? b : a);
+    flip = !flip;
+    return original();
+  };
+}
 
 describe('a run that completes', () => {
   it('ends on the terminal the model declared, and returns it', async () => {
@@ -168,15 +180,11 @@ describe('oscillation', () => {
     // The fake surface never changes, so every action returns to the same
     // state - the shape of a real cycle on a legacy grid.
     const h = buildHarness({ root: ROOT });
-    // Observe once, then click the same control over and over. Each click
-    // succeeds and lands back on the same screen, so the refs stay current -
-    // this is a genuine cycle, not a run failing on stale refs.
-    const planner = new ScriptedPlanner([
-      { toolCalls: [call('observe')] },
-      ...Array.from({ length: 8 }, (_, i) => ({
-        toolCalls: [call('click', { ref: `o${i + 1}#f3e44`, intent: 'go round again' })],
-      })),
-    ]);
+    // The surface ping-pongs between two screens, so the run keeps arriving
+    // back somewhere it has already been - a genuine cycle, as opposed to
+    // merely standing still, which is not one.
+    pingPong(h);
+    const planner = new ScriptedPlanner(Array(10).fill({ toolCalls: [call('observe')] }));
 
     const result = await run(h, planner, { maxStateRepeats: 2 });
 
@@ -191,15 +199,35 @@ describe('oscillation', () => {
 
   it('names the turn the model was last in that state, so the advice is actionable', async () => {
     const h = buildHarness({ root: ROOT });
-    const planner = new ScriptedPlanner([
-      { toolCalls: [call('observe')] },
-      ...Array.from({ length: 8 }, (_, i) => ({
-        toolCalls: [call('click', { ref: `o${i + 1}#f3e44`, intent: 'again' })],
-      })),
-    ]);
+    pingPong(h);
+    const planner = new ScriptedPlanner(Array(10).fill({ toolCalls: [call('observe')] }));
 
     await run(h, planner, { maxStateRepeats: 2 });
     expect(injected(planner).some((t) => /you were on at turn \d+/.test(t))).toBe(true);
+  });
+
+  it('does not fire while a form is being filled in', async () => {
+    // The structure hash excludes values, so every keystroke leaves it
+    // identical. Counting that as a revisit ended a real discovery run after
+    // three fields of a login form.
+    const h = buildHarness({ root: ROOT, params: { memberId: '12345' } });
+    const planner = new ScriptedPlanner([
+      { toolCalls: [call('observe')] },
+      ...Array.from({ length: 6 }, (_, i) => ({
+        toolCalls: [call('type', {
+          ref: `o${i + 1}#f3e12`, text: '$input.memberId', intent: 'fill a field',
+        })],
+      })),
+      { toolCalls: [call('finish', { outputs: {} })] },
+    ]);
+
+    const result = await discover({
+      planner, runner: h.runner, evidence: h.evidence, system: 'test',
+      budget: { maxStateRepeats: 2 },
+    });
+
+    expect(result.stop.kind).toBe('terminal');
+    expect(result.metrics.oscillationWarnings).toBe(0);
   });
 
   it('does not fire when the screen keeps changing', async () => {
