@@ -143,7 +143,58 @@ export class WebSurface implements Surface {
   // -------------------------------------------------------------------------
 
   async click(node: UiNode): Promise<void> {
-    await this.#act(node, async (l) => { await l.click({ timeout: this.#actionTimeout }); }, 'click');
+    await this.#act(
+      node,
+      async (l) => { await l.click({ timeout: this.#actionTimeout }); },
+      'click',
+      (l) => this.#rescueSubmit(l),
+    );
+  }
+
+  /**
+   * Works around a Playwright input-routing bug that silently eats form
+   * submissions.
+   *
+   * Once an iframe has navigated *because of a form submission*, synthesized
+   * clicks in that frame stop triggering any further form submission. The click
+   * lands - the element receives it, the submit event fires - and the browser
+   * then does nothing at all. No request is made.
+   *
+   * Reproduced in forty lines of static HTML with none of this project in the
+   * path, against Playwright 1.63.0:
+   *
+   *     iframe -> submit form A -> submit form B     B never submits
+   *     iframe -> location.href -> submit form B     B submits
+   *     iframe -> (nothing)     -> submit form B     B submits
+   *
+   * It is the prior *form* navigation that poisons the frame, and every way of
+   * addressing that frame afterwards is affected equally - reused or fresh
+   * FrameLocator, Frame object, frame by name. Meridian walks straight into it:
+   * sign-in is a POST form and every screen after it is reached by submitting
+   * another one.
+   *
+   * `requestSubmit()` is the DOM's own "behave as if the user clicked this
+   * submit button" - it fires the submit event and runs constraint validation,
+   * unlike `submit()`, which skips both. A form the browser would have refused
+   * is still refused here.
+   *
+   * Submitting twice is the only failure here that would really matter, so
+   * `#act` calls this only when nothing navigated during the click, and it acts
+   * only on a still-attached submit control.
+   */
+  async #rescueSubmit(locator: Locator): Promise<void> {
+    try {
+      await locator.evaluate((el) => {
+        const input = el as HTMLInputElement | HTMLButtonElement;
+        if (!el.isConnected) return;
+        const form = input.form;
+        if (!form) return;
+        if (input.type !== 'submit' && input.type !== 'image') return;
+        form.requestSubmit(input);
+      }, undefined, { timeout: this.#actionTimeout });
+    } catch {
+      // The element is gone, which means the click navigated and worked.
+    }
   }
 
   async type(node: UiNode, text: string, opts: { clearFirst?: boolean } = {}): Promise<void> {
@@ -225,7 +276,13 @@ export class WebSurface implements Surface {
    * the action did what it was asked and the timeout was an artefact of it
    * succeeding. Any other failure is still a failure.
    */
-  async #act(node: UiNode, run: (l: Locator) => Promise<void>, what: string): Promise<void> {
+  async #act(
+    node: UiNode,
+    run: (l: Locator) => Promise<void>,
+    what: string,
+    /** Runs only if the action moved nothing. See #rescueSubmit. */
+    rescue?: (l: Locator) => Promise<void>,
+  ): Promise<void> {
     const locator = await this.#locatorFor(node);
 
     let navigated = false;
@@ -234,6 +291,7 @@ export class WebSurface implements Surface {
 
     try {
       await run(locator);
+      if (rescue && !navigated) await rescue(locator);
     } catch (cause) {
       if (navigated && isTimeout(cause)) return;
       throw new SurfaceError(

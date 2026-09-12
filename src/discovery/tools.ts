@@ -520,6 +520,14 @@ export class ToolRunner {
       return fail(`That value cannot be described for replay: ${synth.reason}.`, 'unlocatable');
     }
 
+    // Read before acting. `act` re-observes, which retires this node, and the
+    // surface refuses to touch a node from an earlier observation (#34). The
+    // action is read-only, so reading first changes nothing.
+    const sensitivityEarly = (str(input.sensitivity) || 'none') as Sensitivity;
+    const shown = sensitivityEarly === 'none'
+      ? await this.o.surface.readText(found.node)
+      : '[redacted]';
+
     const action: ActionSpec = { kind: 'extract' };
     const outcome = await this.o.executor.act({
       stepId: `d${this.#steps.length + 1}`,
@@ -530,7 +538,7 @@ export class ToolRunner {
     });
     if (!outcome.ok) return this.#explainFailure(outcome);
 
-    const sensitivity = (str(input.sensitivity) || 'none') as Sensitivity;
+    const sensitivity = sensitivityEarly;
     const spec: ExtractSpec = {
       name,
       from: synth.bundle,
@@ -549,7 +557,6 @@ export class ToolRunner {
       beforeUrl: snapshot.url,
     });
 
-    const shown = sensitivity === 'none' ? await this.o.surface.readText(found.node) : '[redacted]';
     return { ok: true, text: `Recorded output "${name}" (${str(input.as)}). Current value: ${shown}` };
   }
 
