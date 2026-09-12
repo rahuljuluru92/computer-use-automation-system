@@ -288,6 +288,61 @@ describe('the inferences', () => {
     expect(r.artifact.steps[0]!.checkpoint).toEqual([asserted]);
   });
 
+  it('proves a typed value landed, since typing moves no structure', async () => {
+    // The first real discovery run compiled three type steps with no
+    // checkpoint at all - the "assumes the click worked" step the contract
+    // warns about. Typing changes no roles, names or nesting, so nothing
+    // structural can speak for it; the field holding the value can.
+    const withType = run({
+      steps: [
+        step({
+          intent: 'enter the member id',
+          action: { kind: 'type', clearFirst: true },
+          actionClass: 'write_reversible',
+          target: bundle('Member ID'),
+          data: { value: '$input.memberId', sensitivity: 'none' },
+          beforeHash: 'same', afterHash: 'same',
+        }),
+        ...HAPPY_PATH.slice(1),
+      ],
+    });
+    const r = await compile(options({ run: withType }));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const check = r.artifact.steps[0]!.checkpoint[0]!;
+    expect(check.kind).toBe('value_equals');
+    if (check.kind !== 'value_equals') return;
+    expect(check.value).toBe('$input.memberId');
+    expect(r.report.uncheckedSteps).toEqual([]);
+  });
+
+  it('never asserts a credential value, only that its field is there', async () => {
+    const withSecret = run({
+      steps: [
+        step({
+          intent: 'enter the operator password',
+          action: { kind: 'type', clearFirst: true },
+          actionClass: 'write_reversible',
+          target: bundle('Password'),
+          // sensitivity "none" on purpose: the operator *id* is recorded this
+          // way, and keying on the flag rather than the value missed it.
+          data: { value: '$secret.MERIDIAN_USERNAME', sensitivity: 'none' },
+          beforeHash: 'same', afterHash: 'same',
+        }),
+        ...HAPPY_PATH.slice(1),
+      ],
+    });
+    const r = await compile(options({ run: withSecret }));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    // A failing value_equals quotes what it found; a password must not end up
+    // in evidence that way.
+    expect(r.artifact.steps[0]!.checkpoint[0]!.kind).toBe('node_present');
+    expect(JSON.stringify(r.artifact.steps[0]!.checkpoint)).not.toContain('value_equals');
+  });
+
   it('does not wait for a transition that never happened', async () => {
     // The third step read a value without moving; there was nothing to wait for.
     const r = await compile(options());

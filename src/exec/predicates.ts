@@ -16,6 +16,7 @@
 import type { Predicate, LocatorBundle } from '../core/schema.ts';
 import type { Surface } from '../surface/surface.ts';
 import type { UiSnapshot } from '../surface/uinode.ts';
+import { interpolate } from '../surface/locator/strategies.ts';
 import { resolveBundle } from '../surface/locator/resolve.ts';
 
 export interface PredicateContext {
@@ -64,7 +65,10 @@ export async function evaluate(p: Predicate, ctx: PredicateContext): Promise<Pre
       const r = resolveBundle(p.locator, ctx.snapshot, ctx.params);
       if (!r.ok) return { held: false, detail: `"${p.locator.description}" not found` };
       const actual = r.value.node.value ?? r.value.node.name;
-      return { held: actual === p.value, detail: `"${p.locator.description}" = "${actual}" (wanted "${p.value}")` };
+      // Interpolated, so a checkpoint can say "the field holds the member id
+      // the caller asked for" rather than naming one specific member.
+      const wanted = interpolate(p.value, ctx.params);
+      return { held: actual === wanted, detail: `"${p.locator.description}" = "${actual}" (wanted "${wanted}")` };
     }
 
     case 'url_matches': {

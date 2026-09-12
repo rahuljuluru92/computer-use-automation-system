@@ -227,8 +227,30 @@ function withInferredWaitsAndCheckpoints(steps: readonly RecordedStep[]): Step[]
       kind: 'node_present', locator: e.from,
     }));
 
+    // Typing changes no structure, so neither of the above can speak for it -
+    // and the first real run compiled three type steps with no checkpoint at
+    // all, which is exactly the "assumes the click worked" step the contract
+    // warns about. What proves a type landed is the field holding the value.
+    //
+    // Never for anything a credential resolves into. Two reasons, and the
+    // second is why this keys on the value rather than on the sensitivity
+    // flag: the predicate's failure detail quotes what it found, so a password
+    // would land in evidence - and `$secret.` is resolved by the secret
+    // resolver at action time, not by predicate interpolation, so the
+    // comparison would test against the literal text "$secret.NAME" and fail
+    // every time. The operator *id* is marked sensitivity "none" and still
+    // recorded as `$secret.MERIDIAN_USERNAME`, which is exactly the case that
+    // caught this. Those prove the field is there instead.
+    const usesSecret = step.data?.value.includes('$secret.') ?? false;
+    const typed: Predicate[] = step.action.kind === 'type' && step.target && step.data
+      ? usesSecret
+        ? [{ kind: 'node_present', locator: step.target }]
+        : [{ kind: 'value_equals', locator: step.target, value: step.data.value }]
+      : [];
+
     const checkpoint = asserted.length > 0
       ? asserted
+      : typed.length > 0 ? typed
       : arrival.length > 0 ? arrival : readProof;
 
     return {
