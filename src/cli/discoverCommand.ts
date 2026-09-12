@@ -48,6 +48,7 @@ export interface DiscoverCommandOptions {
   id?: string | undefined;
   version?: string | undefined;
   maxTurns?: number | undefined;
+  maxWallClockMs?: number | undefined;
   model?: string | undefined;
   label?: string | undefined;
   json: boolean;
@@ -156,7 +157,10 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
       runner,
       evidence,
       system: systemPrompt({ goal: opts.goal, startUrl: opts.target, inputs: declared }),
-      ...(opts.maxTurns ? { budget: { maxTurns: opts.maxTurns } } : {}),
+      ...((opts.maxTurns ?? opts.maxWallClockMs) ? { budget: {
+        ...(opts.maxTurns ? { maxTurns: opts.maxTurns } : {}),
+        ...(opts.maxWallClockMs ? { maxWallClockMs: opts.maxWallClockMs } : {}),
+      } } : {}),
     });
   } finally {
     // Closed before verification: the capability has to work from cold, and a

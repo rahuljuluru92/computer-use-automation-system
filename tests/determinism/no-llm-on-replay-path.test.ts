@@ -31,8 +31,13 @@ const ROOT = new URL('../../', import.meta.url).pathname;
  * would be a model consulted on the replay path. "Ask a model what the operator
  * probably meant" is exactly the kind of helpful idea this boundary exists to
  * refuse.
+ *
+ * `src/mcp` joins the list in Phase 6: every `tools/call` is `replay()` behind
+ * a different transport, not a new decision loop. If it ever needed a model to
+ * serve a tool call, it would no longer be replay - it would be discovery
+ * wearing an MCP costume.
  */
-const EXECUTION_PATH = ['src/replay', 'src/exec', 'src/surface', 'src/policy', 'src/escalation'];
+const EXECUTION_PATH = ['src/replay', 'src/exec', 'src/surface', 'src/policy', 'src/escalation', 'src/mcp'];
 
 /** Imports that would break determinism. */
 const FORBIDDEN: Array<{ pattern: RegExp; why: string }> = [

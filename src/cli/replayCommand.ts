@@ -13,7 +13,7 @@ import { EXIT_CODES, type ReplayResult } from '../core/result.ts';
 import { WebSurface } from '../surface/web/webSurface.ts';
 import { PolicyEngine } from '../policy/policyEngine.ts';
 import { loadPolicy } from '../policy/loadPolicy.ts';
-import { SecretResolver } from '../policy/secrets.ts';
+import { SecretResolver, applyDemoCredentialDefaults } from '../policy/secrets.ts';
 import { EvidenceWriter } from '../evidence/writer.ts';
 import { buildRedactor } from '../core/redact.ts';
 import { newRunId } from '../core/ids.ts';
@@ -33,18 +33,6 @@ export interface ReplayCommandOptions {
   /** Base URL of a running `cua operator` console to escalate into. */
   operator?: string | undefined;
   json: boolean;
-}
-
-async function applyDemoCredentialDefaults(): Promise<void> {
-  if (process.env.MERIDIAN_USERNAME && process.env.MERIDIAN_PASSWORD) return;
-  try {
-    const { OPERATOR } = await import('../../apps/meridian-core/data/seed.ts');
-    process.env.MERIDIAN_USERNAME ??= OPERATOR.username;
-    process.env.MERIDIAN_PASSWORD ??= OPERATOR.password;
-  } catch {
-    // Not the bundled demo app. The pre-flight check in replay() will report
-    // any credential this artifact needs and the environment lacks.
-  }
 }
 
 export async function runReplayCommand(opts: ReplayCommandOptions): Promise<number> {

@@ -16,10 +16,10 @@
  */
 
 import { parseArgs } from 'node:util';
-import { existsSync } from 'node:fs';
 import * as z from 'zod';
 import { CapabilityArtifact } from '../core/schema.ts';
 import { ReplayResult } from '../core/result.ts';
+import { loadDotEnv } from '../core/dotenv.ts';
 
 const COMMANDS = ['discover', 'replay', 'explain', 'approve', 'operator', 'mcp'] as const;
 type Command = (typeof COMMANDS)[number];
@@ -28,10 +28,12 @@ const USAGE = `
 cua - computer-use capability system
 
   cua discover --goal <text> --target <url> [--input <json>] [--id <cap.x.y>]
-               [--version <semver>] [--model <id>] [--max-steps <n>]
+               [--version <semver>] [--model <id>] [--max-steps <n>] [--max-wall-clock-ms <ms>]
       Drive a live surface with a model until the goal is met, then compile and
       self-verify a capability artifact. Requires ANTHROPIC_API_KEY.
       Writes nothing unless the compiled artifact replays successfully.
+      Default budget: 40 turns or 5 minutes, whichever comes first - an
+      unfamiliar site the model has to explore may need more of either.
 
   cua replay --artifact <path> [--input <json>] [--tenant <id>] [--chaos <mode>] [--label <name>]
              [--operator <url>]
@@ -55,26 +57,6 @@ cua - computer-use capability system
       before the run abandons; any operator activity resets it.
   cua mcp                          Serve approved capabilities over MCP (stdio).
 `;
-
-/**
- * Load `.env` if there is one.
- *
- * `.env.example` has documented an ANTHROPIC_API_KEY line since Phase 0 and
- * nothing ever read it, so anyone following the README put their key in a file
- * the process ignored and got an authentication error for their trouble.
- *
- * Real environment variables win: `process.loadEnvFile` does not overwrite what
- * is already set, so an exported key or a CI secret still takes precedence over
- * a stale file on a laptop.
- */
-function loadDotEnv(): void {
-  if (!existsSync('.env')) return;
-  try {
-    process.loadEnvFile('.env');
-  } catch {
-    // A malformed .env should not stop `replay`, which needs no secrets at all.
-  }
-}
 
 function fail(message: string): never {
   console.error(`error: ${message}\n${USAGE}`);
@@ -105,6 +87,7 @@ async function main(argv: string[]): Promise<number> {
       operator: { type: 'string' },
       timeout: { type: 'string' },
       'max-steps': { type: 'string' },
+      'max-wall-clock-ms': { type: 'string' },
       id: { type: 'string' },
       version: { type: 'string' },
       model: { type: 'string' },
@@ -166,17 +149,29 @@ async function main(argv: string[]): Promise<number> {
         version: values.version,
         model: values.model,
         maxTurns: values['max-steps'] ? Number(values['max-steps']) : undefined,
+        maxWallClockMs: values['max-wall-clock-ms'] ? Number(values['max-wall-clock-ms']) : undefined,
         label: values.label,
         json: values.json ?? false,
       });
     }
 
-    // Phase 6. Wired to its module as that phase lands; the CLI surface was
-    // fixed at Phase 0 so the README's demo path never has to change.
-    case 'approve':
-    case 'mcp':
-      console.error(`"${command}" is not implemented yet.`);
-      return 70; // EX_SOFTWARE
+    case 'approve': {
+      if (!values.artifact) fail('approve needs --artifact <path>');
+      const { runApproveCommand } = await import('./approveCommand.ts');
+      return runApproveCommand({ artifactPath: values.artifact });
+    }
+
+    case 'mcp': {
+      const { buildMcpServer } = await import('../mcp/server.ts');
+      const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
+      const server = buildMcpServer();
+      const transport = new StdioServerTransport();
+      // stdout is the JSON-RPC channel; every human-readable line goes to stderr.
+      transport.onclose = () => process.exit(0);
+      await server.connect(transport);
+      console.error('cua mcp: serving approved capabilities over stdio (Ctrl+C to stop)');
+      return new Promise<number>(() => {}); // the transport owns the process lifetime now
+    }
   }
 }
 

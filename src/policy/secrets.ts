@@ -10,6 +10,29 @@
 
 import type { Redactor } from '../core/redact.ts';
 
+/**
+ * Fills in the bundled demo app's own credentials when the environment
+ * doesn't set them - never overwriting a real value someone did set.
+ *
+ * Read from the seed rather than written out again in a third place: this
+ * exact value has already drifted twice (`.env.example`, a doc comment), and
+ * both times it surfaced as "cannot sign in" deep inside a run rather than as
+ * a clear cause. Every entry point that can replay against Meridian without
+ * an operator supplying its own credentials (`cua replay`, `cua mcp`) calls
+ * this, so the fallback is defined once.
+ */
+export async function applyDemoCredentialDefaults(): Promise<void> {
+  if (process.env.MERIDIAN_USERNAME && process.env.MERIDIAN_PASSWORD) return;
+  try {
+    const { OPERATOR } = await import('../../apps/meridian-core/data/seed.ts');
+    process.env.MERIDIAN_USERNAME ??= OPERATOR.username;
+    process.env.MERIDIAN_PASSWORD ??= OPERATOR.password;
+  } catch {
+    // Not the bundled demo app. The pre-flight check inside replay() will
+    // report any credential this artifact needs and the environment lacks.
+  }
+}
+
 export interface SecretRef { $secret: string }
 
 export function isSecretRef(v: unknown): v is SecretRef {

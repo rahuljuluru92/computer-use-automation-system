@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "id": "cap.member.read_savings_balance",
   "version": "1.0.0",
-  "status": "draft",
+  "status": "approved",
   "title": "Look up a member and read their current savings balance",
   "description": "Look up a member and read their current savings balance",
   "target": {
@@ -1101,6 +1101,6 @@
     "lastVerifiedAt": "2026-09-12T04:23:39.664Z"
   },
   "integrity": {
-    "hash": "sha256:2167b59f53cb8e54e3fc193efd7766ffd892ba036f29fce120d9ba0d3e43fee1"
+    "hash": "sha256:0b34af1c5eca20efe958d08f3838bc3791eb1c76827eb87d7b746eda4a952c37"
   }
 }
