@@ -10,6 +10,7 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { rmSync } from 'node:fs';
 import { runStrategy } from '../../src/surface/locator/strategies.ts';
+import { SurfaceError } from '../../src/surface/surface.ts';
 import { DISCOVERY_TOOLS, type ToolRunner } from '../../src/discovery/tools.ts';
 import type { PolicyConfig } from '../../src/policy/policyEngine.ts';
 import type { UiSnapshot } from '../../src/surface/uinode.ts';
@@ -202,6 +203,31 @@ describe('refusals are explained, not merely returned', () => {
     expect(r.text).toMatch(/Policy refuses/);
     expect(r.text).toMatch(/do not try another route/i);
     // A refused action is not a recorded step.
+    expect(runner.steps).toHaveLength(0);
+  });
+
+  it('returns a stale-ref extract failure as a typed result, never a thrown error', async () => {
+    // Found live against a real site: `extract` reads via `surface.readText`
+    // directly (decision #92 - reading first is safe because the executor's
+    // own re-observe would retire the node), which bypasses `executor.act()`'s
+    // try/catch. A `SurfaceError` from a stale ref used to escape the tool
+    // runner entirely and crash the whole discovery loop instead of coming
+    // back as a correctable tool result like every other action's failure.
+    await runner.run('observe', {});
+    surface.readText = async () => {
+      throw new SurfaceError('refusing to act on "Finish": it comes from an earlier '
+        + 'observation and the page has moved since. Re-observe before acting.');
+    };
+
+    const r = await runner.run('extract', {
+      ref: 'o1#f3e42', name: 'savingsBalance', as: 'currency',
+      intent: 'read the savings balance',
+    });
+
+    expect(r.ok).toBe(false);
+    expect(r.text).toMatch(/observe again/i);
+    expect(r.text).toMatch(/earlier.*observation/i);
+    // A failed extraction is not a recorded step, same as any other refusal.
     expect(runner.steps).toHaveLength(0);
   });
 

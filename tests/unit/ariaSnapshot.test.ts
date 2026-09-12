@@ -147,3 +147,37 @@ describe('form labelling', () => {
     expect(deposit).toBeDefined();
   });
 });
+
+describe('a plain <div> that carries the actual content', () => {
+  // Found live against saucedemo.com's checkout overview page: its entire
+  // price breakdown is rendered as non-semantic `<div>`s, which Playwright's
+  // AI-mode snapshot reports as role "generic" - exactly the role this
+  // parser also uses for pure layout wrappers. A blanket exclusion by role
+  // cannot tell "noise" from "the actual number the model was asked to
+  // read" apart, and dropped both identically.
+  const yaml = `
+- generic [ref=e1]:
+  - generic [ref=e2]:
+  - generic [ref=e3]: "Total: $32.39"
+  - generic [ref=e4]:
+    - button "Finish" [ref=e5]
+`;
+
+  it('keeps a structural-role node that carries its own text', () => {
+    const s = flattenToSnapshot(parseAriaSnapshot(yaml), { url: 'x', title: 'x' });
+    const total = s.nodes.find((n) => n.ref === 'e3');
+    expect(total?.name).toBe('Total: $32.39');
+  });
+
+  it('still drops a structural-role node that is a pure, empty wrapper', () => {
+    const s = flattenToSnapshot(parseAriaSnapshot(yaml), { url: 'x', title: 'x' });
+    expect(s.nodes.find((n) => n.ref === 'e1')).toBeUndefined();
+    expect(s.nodes.find((n) => n.ref === 'e2')).toBeUndefined();
+    expect(s.nodes.find((n) => n.ref === 'e4')).toBeUndefined();
+  });
+
+  it('does not touch nodes that were never structural in the first place', () => {
+    const s = flattenToSnapshot(parseAriaSnapshot(yaml), { url: 'x', title: 'x' });
+    expect(s.nodes.find((n) => n.ref === 'e5')?.role).toBe('button');
+  });
+});

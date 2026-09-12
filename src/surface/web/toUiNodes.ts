@@ -27,7 +27,22 @@ import { createHash } from 'node:crypto';
 import type { ParsedAriaNode } from './ariaYaml.ts';
 import type { UiNode, UiSnapshot, TableContext } from '../uinode.ts';
 
-/** Roles that carry no useful identity and only add noise for the model. */
+/**
+ * Roles that carry no useful identity **when they are pure layout wrappers**
+ * - a `<div>` around other elements, a `<tbody>`, a presentational table.
+ *
+ * The qualifier matters: `generic` is also what Playwright's AI-mode snapshot
+ * reports for any plain, non-semantic element that carries its *own* text -
+ * which on a real site (as opposed to a purpose-built target authored with
+ * table/cell roles throughout) is an extremely common way to render a label
+ * or a value. A blanket exclusion by role alone silently dropped every such
+ * node - on saucedemo.com's checkout overview page, that meant the entire
+ * price breakdown ("Item total: $29.99", "Tax: $2.40", "Total: $32.39")
+ * never reached the model at all, which is a perception gap, not a model
+ * failure: no amount of exploring could find text that was never shown.
+ * See the exclusion check below, which keeps a structural-role node only
+ * when it has no content of its own to lose.
+ */
 const STRUCTURAL = new Set(['generic', 'rowgroup', 'text', 'none', 'presentation']);
 
 interface Frame {
@@ -75,7 +90,11 @@ export function flattenToSnapshot(
 
     if (depth > maxDepth) { truncated += 1; return; }
 
-    if (node.ref && !STRUCTURAL.has(node.role)) {
+    // A structural-role node is noise only while it is *empty* - a bare
+    // wrapper with nothing but children. One with its own name or text is
+    // the content, whatever ARIA role the browser happened to assign it.
+    const isEmptyWrapper = STRUCTURAL.has(node.role) && !node.name && !node.text;
+    if (node.ref && !isEmptyWrapper) {
       nodes.push(toUiNode(node, ancestors, frames, depth));
     }
 

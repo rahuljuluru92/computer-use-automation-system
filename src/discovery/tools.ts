@@ -523,10 +523,32 @@ export class ToolRunner {
     // Read before acting. `act` re-observes, which retires this node, and the
     // surface refuses to touch a node from an earlier observation (#34). The
     // action is read-only, so reading first changes nothing.
+    //
+    // This call goes straight to the surface rather than through
+    // `executor.act()`, so - unlike every other tool here - it does not get
+    // that chokepoint's try/catch for free. `readText` can throw the same
+    // staleness `SurfaceError` a click or type would (a ref from a prior
+    // observation, reused after something else already navigated in the same
+    // turn), so it needs the identical typed-result treatment: returned to
+    // the model as a correctable tool result, never thrown out of the loop.
     const sensitivityEarly = (str(input.sensitivity) || 'none') as Sensitivity;
-    const shown = sensitivityEarly === 'none'
-      ? await this.o.surface.readText(found.node)
-      : '[redacted]';
+    let shown: string;
+    if (sensitivityEarly === 'none') {
+      try {
+        shown = await this.o.surface.readText(found.node);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        this.o.evidence.event('action', `extract failed: ${message}`,
+          { actionKind: 'extract', error: message });
+        return this.#explainFailure({
+          ok: false, code: 'surface_error', retryable: true,
+          expected: `to read the value of "${name}" from "${found.node.name || found.node.role}"`,
+          observed: message,
+        });
+      }
+    } else {
+      shown = '[redacted]';
+    }
 
     const action: ActionSpec = { kind: 'extract' };
     const outcome = await this.o.executor.act({
