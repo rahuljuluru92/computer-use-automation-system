@@ -12,7 +12,7 @@ import type { Server } from 'node:http';
 import { rmSync, existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { createApp } from '../../apps/meridian-core/server.ts';
-import { OPERATOR, CANARY_SSN, CANARY_CARD } from '../../apps/meridian-core/data/seed.ts';
+import { OPERATOR } from '../../apps/meridian-core/data/seed.ts';
 import { WebSurface } from '../../src/surface/web/webSurface.ts';
 import { PolicyEngine, DEFAULT_POLICY } from '../../src/policy/policyEngine.ts';
 import { SecretResolver } from '../../src/policy/secrets.ts';
@@ -223,28 +223,5 @@ describe('evidence', () => {
   }, 60_000);
 });
 
-describe('safety: nothing sensitive reaches disk', () => {
-  it('keeps the operator password out of every byte of evidence', async () => {
-    const { evidence } = await run({ memberId: '12345' });
-    const files = (readdirSync(evidence.dir, { recursive: true }) as string[])
-      .map((f) => join(evidence.dir, f))
-      .filter((f) => /\.(json|jsonl|txt|html)$/.test(f));
-    expect(files.length).toBeGreaterThan(0);
-    for (const f of files) {
-      const content = readFileSync(f, 'utf8');
-      expect(content, `${f} leaked the operator password`).not.toContain(OPERATOR.password);
-    }
-  }, 60_000);
-
-  it('keeps regulated member data out of the text evidence', async () => {
-    const { evidence } = await run({ memberId: '12345' });
-    const files = (readdirSync(evidence.dir, { recursive: true }) as string[])
-      .map((f) => join(evidence.dir, f))
-      .filter((f) => /\.(json|jsonl|txt|html)$/.test(f));
-    for (const f of files) {
-      const content = readFileSync(f, 'utf8');
-      expect(content, `${f} leaked an SSN`).not.toContain(CANARY_SSN);
-      expect(content, `${f} leaked a card number`).not.toContain(CANARY_CARD);
-    }
-  }, 60_000);
-});
+// The canary-value safety tests (operator password, SSN, card number never
+// reaching disk) live in tests/safety/redaction.test.ts, not here.
