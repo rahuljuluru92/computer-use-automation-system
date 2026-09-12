@@ -402,6 +402,86 @@ export function seedArtifactInput(): CapabilityArtifactInput {
       allowedActionClasses: ['read', 'write_reversible'],
     },
 
+    // A second tenant skin (Meridian's `summitcu` re-brand) proves the overlay
+    // story live rather than only describing it (Section 3.7). Summit renames
+    // the field a caller knows as "memberId" to "Customer Number" and adds a
+    // consent interstitial no other tenant shows. Both are real re-skins of
+    // the same underlying flow, not a different capability: the steps, their
+    // order, and what they extract are unchanged.
+    tenancy: {
+      canonical: true,
+      overlays: {
+        summitcu: {
+          // s4 types into the renamed field.
+          targets: {
+            s4: {
+              description: 'the Customer Number search field',
+              strategies: [
+                { tier: 1, strategy: roleName('textbox', 'Customer Number'), confidence: 0.9,
+                  rationale: 'Same field as the base flow\'s Member ID box; this tenant labels it '
+                           + 'Customer Number instead.' },
+                { tier: 3, strategy: { kind: 'label_anchored', label: 'Customer Number', controlRole: 'textbox' },
+                  confidence: 0.7, rationale: 'Fallback if the label association is lost.' },
+              ],
+            },
+          },
+          // s3's own checkpoint (proving sign-in worked by finding the search
+          // field) names the field the base tenant sees. A re-skin that
+          // renames the field invalidates that checkpoint exactly as much as
+          // it invalidates s4's target - so it needs the same kind of patch,
+          // not just a locator swap on the step that types into it.
+          checkpoints: {
+            s3: [{
+              kind: 'node_present',
+              locator: {
+                description: 'the Customer Number search field',
+                strategies: [{ tier: 1, strategy: roleName('textbox', 'Customer Number'), confidence: 0.9,
+                  rationale: 'Being able to search is the real postcondition of signing in, under '
+                           + 'whatever name this tenant gives the field.' }],
+                minAgreement: 1,
+              },
+            }],
+          },
+          waitFors: {},
+          // Summit shows a one-time consent notice right after sign-in, before
+          // the search screen the base flow expects. s3's own waitFor (the
+          // Member Search panel) fails against it first, which is exactly
+          // the signal a declared recovery rule exists to catch.
+          recovery: [{
+            id: 'accept-summitcu-consent',
+            description: 'accept the Summit Credit Union servicing consent notice',
+            kind: 'dismiss',
+            when: {
+              kind: 'node_present',
+              locator: {
+                description: 'the consent notice',
+                strategies: [{ tier: 1, strategy: roleName('button', 'I Agree'), confidence: 0.9,
+                  rationale: 'Summit\'s consent screen offers exactly one way past it.' }],
+                minAgreement: 1,
+              },
+            },
+            do: [{
+              action: { kind: 'click' },
+              target: {
+                description: 'the I Agree button',
+                strategies: [{ tier: 1, strategy: roleName('button', 'I Agree'), confidence: 0.9,
+                  rationale: 'Same control the `when` predicate detected.' }],
+                minAgreement: 1,
+              },
+            }],
+            maxAttempts: 1,
+            thenRetryStep: true,
+          }],
+          waitBudgetMultiplier: 1,
+          notes:
+            'Summit Credit Union re-brand: "Customer Number" replaces "Member ID" on the search '
+            + 'field, and a one-time consent notice gates the console after sign-in. Same flow, '
+            + 'same steps, same outputs - only the locator and one checkpoint the rename touches, '
+            + 'plus the recovery rule the consent notice requires.',
+        },
+      },
+    },
+
     provenance: {
       discoveryRunId: 'hand-authored-seed',
       model: 'none (hand-authored before the discovery loop existed)',

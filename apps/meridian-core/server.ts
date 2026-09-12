@@ -33,6 +33,7 @@ import { sessionMiddleware } from './session.ts';
 import { chaosMiddleware, isChaosMode, errorPage, markFired, CHAOS_MODES } from './chaos.ts';
 import { newRender, ctl } from './ids.ts';
 import { findMember, OPERATOR, MEMBERS } from './data/seed.ts';
+import { TENANTS, isTenantName } from './tenants.ts';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.MERIDIAN_PORT ?? 4400);
@@ -70,6 +71,7 @@ function page(
     ctl,
     fmt,
     user: req.session.user,
+    tenant: TENANTS[req.session.tenant],
     linkBase: req.baseUrl,
     currentPath: req.originalUrl,
     surpriseModal: res.locals.surpriseModal ?? null,
@@ -89,6 +91,7 @@ function shell(req: express.Request, res: express.Response): void {
   res.render('_shell', {
     ctl,
     user: req.session.user,
+    tenant: TENANTS[req.session.tenant],
     title: 'Meridian Core',
     frameSrc: '/frame' + req.originalUrl,
   }, (err, html) => {
@@ -110,6 +113,18 @@ function requireAuth(req: express.Request, res: express.Response): boolean {
     pid: ctl('pnlLogin', 'txtPassword'),
     sid: ctl('pnlLogin', 'btnSignIn'),
   });
+  return false;
+}
+
+/**
+ * Some tenants require an operator to click through a consent notice before
+ * servicing tools open, once per session. Rendered inside the frame, same
+ * reasoning as session-expiry sign-in (decision #19): the flow never leaves
+ * the content document the automation is already watching.
+ */
+function requireConsent(req: express.Request, res: express.Response): boolean {
+  if (!TENANTS[req.session.tenant].requiresConsent || req.session.consented) return true;
+  page(req, res, 'consent', { title: 'Consent Required' });
   return false;
 }
 
@@ -148,6 +163,7 @@ function contentRouter(): express.Router {
 
   r.get('/members/search', (req, res) => {
     if (!requireAuth(req, res)) return;
+    if (!requireConsent(req, res)) return;
     page(req, res, 'search', {
       title: 'Member Search', error: null, notFound: false, searchedId: '',
       midInput: ctl('pnlSearch', 'txtMemberId'),
@@ -157,6 +173,7 @@ function contentRouter(): express.Router {
 
   r.get('/members/lookup', (req, res) => {
     if (!requireAuth(req, res)) return;
+    if (!requireConsent(req, res)) return;
     const id = String(req.query.memberId ?? '').trim();
     // "record not found" is page content with HTTP 200, exactly as a real app
     // does it. Status-code-driven detection would never see this.
@@ -174,6 +191,7 @@ function contentRouter(): express.Router {
 
   r.get('/members/:id', (req, res) => {
     if (!requireAuth(req, res)) return;
+    if (!requireConsent(req, res)) return;
     const member = findMember(String(req.params.id));
     if (!member) { res.status(404).send(errorPage('Not Found', 'No such member record.')); return; }
     if (req.session.chaos.mode === 'permission_denied' || member.status === 'Restricted') {
@@ -185,6 +203,7 @@ function contentRouter(): express.Router {
 
   r.get('/members/:id/accounts/:acct', (req, res) => {
     if (!requireAuth(req, res)) return;
+    if (!requireConsent(req, res)) return;
     const member = findMember(String(req.params.id));
     const account = member?.accounts.find((a) => a.number === String(req.params.acct));
     if (!member || !account) { res.status(404).send(errorPage('Not Found', 'No such account.')); return; }
@@ -205,6 +224,7 @@ function contentRouter(): express.Router {
 
   r.get('/members/:id/subaccount/new', (req, res) => {
     if (!requireAuth(req, res)) return;
+    if (!requireConsent(req, res)) return;
     const member = findMember(String(req.params.id));
     if (!member) { res.status(404).send(errorPage('Not Found', 'No such member.')); return; }
     page(req, res, 'subaccount_new', {
@@ -214,6 +234,7 @@ function contentRouter(): express.Router {
 
   r.post('/members/:id/subaccount/review', (req, res) => {
     if (!requireAuth(req, res)) return;
+    if (!requireConsent(req, res)) return;
     const member = findMember(String(req.params.id));
     if (!member) { res.status(404).send(errorPage('Not Found', 'No such member.')); return; }
 
@@ -245,6 +266,7 @@ function contentRouter(): express.Router {
 
   r.post('/members/:id/subaccount/commit', (req, res) => {
     if (!requireAuth(req, res)) return;
+    if (!requireConsent(req, res)) return;
     const member = findMember(String(req.params.id));
     const pending = req.session.pending;
     if (!member || !pending) {
@@ -266,6 +288,12 @@ function contentRouter(): express.Router {
       reference: `SUB-${Date.now().toString(36).toUpperCase().slice(-8)}`,
       accountNumber: `00${7 + member.accounts.length}-${Math.floor(1000 + Math.random() * 8999)}`,
     });
+  });
+
+  r.post('/consent/accept', (req, res) => {
+    if (!requireAuth(req, res)) return;
+    req.session.consented = true;
+    res.redirect(String(req.body.back || `${req.baseUrl}/members/search`));
   });
 
   r.post('/_dismiss', (req, res) => {
@@ -297,6 +325,18 @@ export function createApp(): express.Express {
   app.get('/_chaos/reset', (req, res) => {
     req.session.chaos = { mode: 'none', hits: 0, fired: false };
     res.json({ ok: true, mode: 'none' });
+  });
+  // Tenant skin, armed through its own control route for the same reason
+  // chaos is: the run itself stays an ordinary run driven through /frame.
+  app.get('/_tenant', (req, res) => {
+    const name = String(req.query.name ?? '');
+    if (!isTenantName(name)) {
+      res.status(400).json({ error: 'unknown tenant', valid: Object.keys(TENANTS) });
+      return;
+    }
+    req.session.tenant = name;
+    req.session.consented = false;
+    res.json({ ok: true, tenant: name });
   });
   app.get('/_health', (_req, res) => { res.json({ ok: true, members: MEMBERS.length }); });
 

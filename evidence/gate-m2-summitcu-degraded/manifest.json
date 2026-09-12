@@ -1,0 +1,17 @@
+{
+  "runId": "gate-m2-summitcu-degraded",
+  "gate": "gate-m2-summitcu-degraded",
+  "demonstrates": "The SAME unmodified capability, no --tenant flag, against the summitcu skin. It renames \"Member ID\" to \"Customer Number\" and adds a consent notice sign-in never produced before - so this run genuinely degrades. This is the evidence that motivates writing an overlay, not a contrived failure.",
+  "artifact": "tests/fixtures/seedArtifact.ts (hand-authored reference capability)",
+  "tenantSkin": "summitcu",
+  "overlayApplied": false,
+  "status": "failed",
+  "failedAt": "s3",
+  "code": "locator_unresolved",
+  "events": 23,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T18:56:45.286Z"
+}

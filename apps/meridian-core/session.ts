@@ -11,6 +11,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
 import { freshChaos, type ChaosState } from './chaos.ts';
+import { DEFAULT_TENANT, type TenantName } from './tenants.ts';
 
 export interface Session {
   id: string;
@@ -20,6 +21,10 @@ export interface Session {
   submitted: Set<string>;
   /** Pending sub-account request, carried between form and confirmation step. */
   pending: Record<string, string> | null;
+  /** Which tenant skin this session sees. Sticky, same reasoning as chaos mode. */
+  tenant: TenantName;
+  /** Whether this session has clicked past a tenant's consent interstitial. */
+  consented: boolean;
 }
 
 declare global {
@@ -35,7 +40,10 @@ const STORE = new Map<string, Session>();
 const COOKIE = 'meridian_sid';
 
 function create(): Session {
-  return { id: randomUUID(), user: null, chaos: freshChaos(), submitted: new Set(), pending: null };
+  return {
+    id: randomUUID(), user: null, chaos: freshChaos(), submitted: new Set(), pending: null,
+    tenant: DEFAULT_TENANT, consented: false,
+  };
 }
 
 export function sessionMiddleware(req: Request, res: Response, next: NextFunction): void {

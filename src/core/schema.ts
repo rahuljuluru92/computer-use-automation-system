@@ -339,6 +339,16 @@ export type BusinessOutcome = z.infer<typeof BusinessOutcome>;
 export const TenantOverlay = z.object({
   /** Per-step locator bundle replacements, keyed by step id. */
   targets: z.record(z.string(), LocatorBundle).default({}),
+  /**
+   * Per-step checkpoint/waitFor predicate replacements, keyed by step id.
+   * A re-skin can rename the very field a step's postcondition checks for -
+   * "Member ID" becoming "Customer Number" invalidates the sign-in step's
+   * checkpoint exactly as much as it invalidates the search step's target -
+   * so these exist alongside `targets` rather than forcing a locator-only
+   * patch to silently leave a stale predicate behind (decision #121).
+   */
+  checkpoints: z.record(z.string(), z.array(Predicate)).default({}),
+  waitFors: z.record(z.string(), z.array(Predicate)).default({}),
   /** Extra recovery rules this tenant needs (e.g. a consent interstitial). */
   recovery: z.array(RecoveryRule).default([]),
   waitBudgetMultiplier: z.number().positive().default(1),

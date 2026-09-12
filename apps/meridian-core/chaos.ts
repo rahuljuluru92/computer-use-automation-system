@@ -58,7 +58,7 @@ export function freshChaos(): ChaosState {
 }
 
 /** Routes that must keep working even under chaos, or the run cannot recover. */
-const EXEMPT = new Set(['/_chaos', '/_chaos/reset', '/_health', '/favicon.ico']);
+const EXEMPT = new Set(['/_chaos', '/_chaos/reset', '/_tenant', '/_health', '/favicon.ico']);
 
 /**
  * Applies the globally-scoped modes. Modes that depend on business logic

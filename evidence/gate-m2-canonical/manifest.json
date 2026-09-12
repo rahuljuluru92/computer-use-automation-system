@@ -1,0 +1,19 @@
+{
+  "runId": "gate-m2-canonical",
+  "gate": "gate-m2-canonical",
+  "demonstrates": "The base capability against the canonical Meridian skin - the control this gate compares against.",
+  "artifact": "tests/fixtures/seedArtifact.ts (hand-authored reference capability)",
+  "tenantSkin": "meridian",
+  "overlayApplied": false,
+  "status": "success",
+  "outputs": [
+    "savingsBalance",
+    "accountNumber"
+  ],
+  "events": 45,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T18:56:36.266Z"
+}

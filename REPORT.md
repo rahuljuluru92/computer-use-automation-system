@@ -93,8 +93,18 @@ tier, a `DriftRecord` is emitted — the same base artifact run against a re-ski
 systematically degrades exactly on the steps that tenant changed, which is detectable without
 anyone filing a bug.
 
-**Not built**: a second live tenant skin (M2) demonstrating this overlay mechanism end to end.
-Cut for time — see §7.
+**Built**: a second live tenant skin (M2), `summitcu` — different branding, "Customer Number"
+replacing "Member ID" on the search field, and a one-time consent interstitial no other tenant
+shows. The reference capability's `tenancy.overlays.summitcu` resolves all three re-skins with
+one locator replacement, one checkpoint replacement, and one recovery rule. Run for real
+(`scripts/gate-m2.ts`): the unmodified base capability, pointed at `summitcu` with no `--tenant`
+flag, genuinely degrades — not a clean timeout, but `locator_unresolved`, because the sign-in
+step's `waitFor` misses the renamed search panel, retries, and blindly re-clicks a Sign In button
+that is no longer on the page. With `--tenant summitcu`, the same capability replays end to end to
+the identical typed output the canonical tenant returns. Building it surfaced a real limitation in
+the overlay mechanism itself: `TenantOverlay.targets` could only patch a step's action target, not
+the checkpoint or waitFor predicates that carry their own locator bundles — a field rename breaks
+both. Extended rather than routed around (decision #121). Evidence at `evidence/gate-m2-*/`.
 
 **What running against a real, unfamiliar public site actually found.** A second discovery run
 against [saucedemo.com](https://www.saucedemo.com) (not required — Section 4 asks for one real
@@ -163,9 +173,6 @@ is invisible to a value-based redactor by construction — which is exactly why 
 
 ## 7. Cuts
 
-- **M2 (second tenant skin).** Would demonstrate §3.7 live instead of only in §4 above and
-  ADR-0002; ~3 hours of work the overlay mechanism already supports. Skipped to spend the time on
-  the mandatory write-up and the MCP stretch goal instead.
 - **The discovered artifact declares no business outcomes or recovery rules** (decision #114).
   The one real discovery run (Section 2's "has to be real" requirement) only ever walked the happy
   path, so it never met "no such member" and never learned to declare it. The hand-authored
@@ -196,5 +203,6 @@ What's real and verified, not merely described: two genuine Sonnet 5 discovery r
 hand-authoring, against two different targets, each producing a self-verified artifact;
 deterministic replay of the first with zero model calls across success, business-outcome,
 recovered, hard-failure, and human-escalation terminal states (`scripts/gate-p5.ts`,
-`evidence/gate-*/`); and an approved capability actually invoked by a real MCP client over real
-JSON-RPC (`scripts/demo-stretch.sh`). 311 tests, one command (`npm run check`) to verify all of it.
+`evidence/gate-*/`); a second live tenant skin proven end to end (`scripts/gate-m2.ts`,
+`evidence/gate-m2-*/`); and an approved capability actually invoked by a real MCP client over real
+JSON-RPC (`scripts/demo-stretch.sh`). 328 tests, one command (`npm run check`) to verify all of it.

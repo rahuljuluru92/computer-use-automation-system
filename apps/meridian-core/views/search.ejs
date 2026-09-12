@@ -7,7 +7,7 @@
     <form method="get" action="<%= linkBase %>/members/lookup">
       <table cellpadding="4" cellspacing="0" border="0">
         <tr>
-          <td class="lbl"><label for="<%= midInput %>">Member ID</label></td>
+          <td class="lbl"><label for="<%= midInput %>"><%= tenant.memberIdLabel %></label></td>
           <td><input type="text" name="memberId" id="<%= midInput %>" size="18" maxlength="10">
               <font size="1" color="#667">&nbsp;numeric, 5 digits</font></td>
         </tr>

@@ -49,17 +49,18 @@ discipline alone:
 | Phase | What | Tests at this gate | State |
 |---|---|---|---|
 | P0 | Contracts and rails | 33 | **DONE** |
-| P1 | Meridian Core target app (M0+M1) | 19 | **DONE** - M2 (second tenant skin) optional, not built |
+| P1 | Meridian Core target app (M0+M1+M2) | 19, +17 with M2 | **DONE** |
 | P2 | Surface + locator engine | +35 new | **DONE** |
 | P3 | Executor, policy, evidence | 124 | **DONE** |
 | P4 | Discovery loop + compiler | 235 | **DONE** |
 | P5 | Error taxonomy + escalation | 290 | **DONE** |
 | P6 | MCP catalog (stretch goal) | 303 | **DONE** |
 | P7 | README + REPORT + evidence | 311 | **DONE** - screen recording optional, not recorded |
+| - | M2 second tenant skin (picked up from P7 slack) | 328 | **DONE** |
 
-**311 tests, verified via `npm run check` (typecheck + lint + full suite).** Both open items
-(M2, the screen recording) are explicitly optional per the brief's own text and are logged,
-not hidden, in [REPORT.md §7](../REPORT.md#7-cuts).
+**328 tests, verified via `npm run check` (typecheck + lint + full suite).** The one remaining
+open item, the escalation screen recording, is explicitly optional per the brief's own text
+and is logged, not hidden, in [REPORT.md §7](../REPORT.md#7-cuts).
 
 ---
 
@@ -74,17 +75,34 @@ not hidden, in [REPORT.md §7](../REPORT.md#7-cuts).
 `src/cli/index.ts`, the eslint determinism boundary, vitest, and `tsconfig` (strict +
 `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes`).
 
-### P1 - Meridian Core target app (M0 + M1)
+### P1 - Meridian Core target app (M0 + M1 + M2)
 
 `npm run app` serves Meridian Core on `:4400`. Both flows work by hand and under test; all
-eight chaos modes fire. 19 integration tests. Visually confirmed in a browser.
+eight chaos modes fire. 24 integration tests. Visually confirmed in a browser.
 
-**Deliverables:** `apps/meridian-core/{server,chaos,session,ids}.ts`, `data/seed.ts`, 11 EJS
+**Deliverables:** `apps/meridian-core/{server,chaos,session,ids}.ts`, `data/seed.ts`, 12 EJS
 views, `tests/integration/meridian.test.ts`.
 
-**M2 (second tenant skin) not built** - optional, ~2h of work, the difference between
-demonstrating §3.7 (heterogeneity & multi-tenant) live versus only describing it. The brief
-itself says it does not expect multi-tenant support to be built, only designed for.
+**M2, a second tenant skin, picked up from P7 slack.** `apps/meridian-core/tenants.ts` adds
+`summitcu`: different branding, "Customer Number" replacing "Member ID" on the search field,
+and a one-time consent interstitial no other tenant shows - armed through its own control
+route (`/_tenant?name=`), sticky per session like chaos mode. The reference capability's
+`tenancy.overlays.summitcu` resolves all three re-skins with one locator replacement, one
+checkpoint replacement, and one recovery rule.
+
+Building it live found a real limitation in the overlay mechanism: `TenantOverlay.targets`
+could only patch a step's action target, not the checkpoint/waitFor predicates that carry
+their own locator bundles - and the sign-in step's checkpoint (proving the search screen
+loaded, by finding the very field this tenant renames) needed exactly that. Extended
+`TenantOverlay` with `checkpoints`/`waitFors` maps rather than routing around it.
+
+`npx tsx scripts/gate-m2.ts` proves it live: the unmodified base capability run against
+`summitcu` with no `--tenant` flag genuinely degrades (`locator_unresolved`, not a clean
+timeout - the sign-in step's `waitFor` misses the renamed panel, retries, and blindly
+re-clicks a Sign In button no longer on the page), and the same capability with
+`--tenant summitcu` replays end to end to the identical typed output. 0 model calls in every
+run. Tests: `tests/unit/overlay.test.ts` (9, schema-level), `tests/integration/tenantOverlay
+.test.ts` (3, real browser against both skins), 5 new cases in `meridian.test.ts`.
 
 ### P2 - Surface + locator engine
 
@@ -384,10 +402,11 @@ nothing gets silently re-litigated or re-broken later.
 | 118 | `loadDotEnv` clears **empty** exported env vars before loading `.env`, not just missing ones | Decision #77 says a real env var wins over `.env`, but found live: a sandboxed shell can pre-export a variable name with an empty string, and `process.loadEnvFile`'s own overwrite-avoidance honors that as "already set" - silently shadowing a real key sitting in `.env`, surfacing many steps later as a rejected credential with no clear cause. An empty string is not a value anyone set on purpose. Same lineage as #97/#98: a credential problem should be typed and immediate, not an SDK exception several layers down. |
 | 119 | `extract`'s direct `surface.readText()` call is wrapped in the same try/catch every other tool gets for free from `executor.act()` | Found live on the second (public-site) discovery run: `extract` reads before acting on purpose (decision #92 - the executor's own re-observe would retire the node), which means it calls the surface directly instead of through `Executor.act()`'s chokepoint. A stale ref reused across two tool calls in one turn threw a raw `SurfaceError` that escaped the tool runner and crashed the whole discovery process, instead of coming back as the same kind of correctable tool result a stale click or type already gets. Reuses `#explainFailure` for the conversion, so the model sees the identical "observe again and reconsider" guidance it would for any other stale-ref action. |
 | 120 | A structural-role node is excluded only when it is **empty** - no name, no text of its own - never by role alone | The most significant bug the saucedemo.com run found. `toUiNodes.ts`'s `STRUCTURAL` set (`generic`, `rowgroup`, `text`, `none`, `presentation`) exists to drop pure layout wrappers, but `generic` is *also* what Playwright's AI-mode snapshot reports for any plain, non-semantic element that carries its own text - which on a real site built without table/cell roles throughout (as opposed to Meridian, purpose-built with them) is an ordinary way to render a label or a value. The old check excluded every `generic` node unconditionally, so saucedemo's entire price breakdown ("Item total: $29.99", "Tax: $2.40", "Total: $32.39") never reached the model at all - not a locator failure, not a model mistake, a perception gap: no amount of exploring finds text that was never shown. Confirmed by diffing the raw Playwright YAML (which has the content) against our own parsed output (which didn't) before touching any code. Fix is additive - 308/311 tests still pass, including every real-browser Meridian test, because Meridian's own semantic roles were never affected by the old blanket exclusion in the first place. This is exactly the kind of gap Section 3.7 (generalization to real, non-purpose-built surfaces) is asking whether a design has a credible answer for - found, not theorized. |
+| 121 | `TenantOverlay` also patches a step's **checkpoint and waitFor**, not only its `target` | Found building the M2 `summitcu` skin: the field a re-skin renames is checked in more than one place. The search step's target types into it, but the sign-in step's checkpoint proves sign-in worked by finding it too - a rename invalidates both, and the original overlay (decision #87) could only fix the first. Extending to `checkpoints`/`waitFors` per step id is the same design applied completely, not a new mechanism: still keyed by step id, still additive, still cannot add/remove/reorder steps. |
 
 ---
 
-For the deliberate cuts (M2, the screen recording, the stability harness, the golden-fixture
-test, and the two open loose ends #57 and #90), see [REPORT.md §7](../REPORT.md#7-cuts) -
-kept there rather than duplicated here, since that is the version graded against the brief's
-own "say what you cut and why."
+For the deliberate cuts (the screen recording, the stability harness, the golden-fixture test,
+and the two open loose ends #57 and #90), see [REPORT.md §7](../REPORT.md#7-cuts) - kept there
+rather than duplicated here, since that is the version graded against the brief's own "say what
+you cut and why."

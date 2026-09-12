@@ -24,3 +24,4 @@ npx tsx scripts/gate-p5.ts
 
 echo
 echo "== full verification: npm run check    stretch demo: bash scripts/demo-stretch.sh =="
+echo "== second tenant skin, generalizing live: npx tsx scripts/gate-m2.ts =="

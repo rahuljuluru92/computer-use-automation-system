@@ -1,0 +1,19 @@
+{
+  "runId": "gate-m2-summitcu-overlaid",
+  "gate": "gate-m2-summitcu-overlaid",
+  "demonstrates": "The same capability with the summitcu overlay applied (--tenant summitcu): the renamed field is resolved, the renamed sign-in checkpoint is resolved, and the consent notice is cleared by a declared recovery rule. Same steps, same output.",
+  "artifact": "tests/fixtures/seedArtifact.ts (hand-authored reference capability)",
+  "tenantSkin": "summitcu",
+  "overlayApplied": true,
+  "status": "success",
+  "outputs": [
+    "savingsBalance",
+    "accountNumber"
+  ],
+  "events": 51,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T18:56:55.039Z"
+}

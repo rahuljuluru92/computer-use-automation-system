@@ -7,12 +7,13 @@
  * times by hand.
  *
  * So a capability is a *base* artifact plus small, declarative per-tenant
- * patches. An overlay may replace the locator bundle for a named step, add
- * recovery rules that only one tenant needs (a consent interstitial, say), and
- * stretch wait budgets for a tenant on slower infrastructure. It may not add,
- * remove or reorder steps - an overlay that can change the shape of a flow is
- * not a variation on that flow, it is a different capability wearing the same
- * name, and it should be reviewed as one.
+ * patches. An overlay may replace the locator bundle, checkpoint and waitFor
+ * predicates for a named step, add recovery rules that only one tenant needs
+ * (a consent interstitial, say), and stretch wait budgets for a tenant on
+ * slower infrastructure. It may not add, remove or reorder steps - an overlay
+ * that can change the shape of a flow is not a variation on that flow, it is
+ * a different capability wearing the same name, and it should be reviewed as
+ * one.
  *
  * That restriction is the whole design: it keeps "what this capability does"
  * reviewable once, while "how this tenant's screens are laid out" stays local.
@@ -45,12 +46,16 @@ export function applyOverlay(base: CapabilityArtifact, tenant: string): Capabili
 
   const steps = base.steps.map((step) => {
     const replacement = overlay.targets[step.id];
+    const checkpoint = overlay.checkpoints[step.id];
+    const waitFor = overlay.waitFors[step.id];
     const budget = overlay.waitBudgetMultiplier === 1
       ? step.budget
       : { ...step.budget, timeoutMs: Math.round(step.budget.timeoutMs * overlay.waitBudgetMultiplier) };
     return {
       ...step,
       ...(replacement ? { target: replacement } : {}),
+      ...(checkpoint ? { checkpoint } : {}),
+      ...(waitFor ? { waitFor } : {}),
       budget,
     };
   });
@@ -66,5 +71,11 @@ export function applyOverlay(base: CapabilityArtifact, tenant: string): Capabili
 
 /** Which steps a tenant overrides. Used by the explainer and drift reports. */
 export function overriddenSteps(base: CapabilityArtifact, tenant: string): string[] {
-  return Object.keys(base.tenancy.overlays[tenant]?.targets ?? {});
+  const overlay = base.tenancy.overlays[tenant];
+  if (!overlay) return [];
+  return [...new Set([
+    ...Object.keys(overlay.targets),
+    ...Object.keys(overlay.checkpoints),
+    ...Object.keys(overlay.waitFors),
+  ])];
 }

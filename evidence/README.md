@@ -62,6 +62,22 @@ Every one of the five carries `metrics.llmCalls: 0`; `gate-p5.ts` asserts this a
 runs at once and throws if it's ever violated, so this claim is enforced by the script that
 produces the evidence, not just stated next to it.
 
+## A second tenant skin, generalizing live (`npx tsx scripts/gate-m2.ts`)
+
+Section 3.7 asks whether a design generalizes to more than one instance of the same vendor
+product. `summitcu` is a second skin of Meridian Core - different branding, "Customer Number"
+in place of "Member ID", and a one-time consent notice the canonical tenant never shows - and
+`tenancy.overlays.summitcu` on the reference artifact resolves all three re-skins.
+
+| Directory | Status | What it proves |
+|---|---|---|
+| [`gate-m2-canonical/`](gate-m2-canonical/) | `success` | The control: the base capability, unmodified, against the canonical Meridian skin. |
+| [`gate-m2-summitcu-degraded/`](gate-m2-summitcu-degraded/) | `failed` | The **same** unmodified capability, no `--tenant` flag, against `summitcu`. Genuinely degrades - `locator_unresolved` at the sign-in step, not a clean timeout: its `waitFor` misses the renamed search panel (the consent notice is there instead), nothing declared recognises the notice, the step retries, and the retry blindly re-clicks a Sign In button that is no longer on the page. This is the evidence an overlay responds to, not a contrived failure. |
+| [`gate-m2-summitcu-overlaid/`](gate-m2-summitcu-overlaid/) | `success` | The same capability run with `--tenant summitcu`: the renamed field resolves, the renamed sign-in checkpoint resolves, the consent notice is cleared by a declared recovery rule, and the run reaches the identical typed output the canonical tenant returns. |
+
+All three: `metrics.llmCalls: 0`; `gate-m2.ts` asserts the control succeeds, the un-overlaid run
+degrades, and the overlaid run succeeds, and throws if any of the three doesn't hold.
+
 ## Replay with no model configured at all
 
 | Directory | What it proves |

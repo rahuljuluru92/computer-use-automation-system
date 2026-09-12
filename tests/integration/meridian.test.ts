@@ -251,3 +251,78 @@ describe('Meridian Core: chaos modes', () => {
     expect(await second.text()).toContain('DUP-GUARD-01');
   });
 });
+
+describe('Meridian Core: tenant skins', () => {
+  const setTenant = async (go: ReturnType<typeof client>, name: string): Promise<Response> =>
+    go(`/_tenant?name=${name}`);
+
+  it('rejects an unknown tenant rather than silently doing nothing', async () => {
+    const go = client();
+    expect((await setTenant(go, 'not-a-real-bank')).status).toBe(400);
+  });
+
+  it('defaults to the canonical Meridian skin with no tenant set', async () => {
+    const go = client();
+    await signIn(go);
+    const body = await (await go('/frame/members/search')).text();
+    expect(body).toContain('Member ID');
+    expect(body).not.toContain('Customer Number');
+    expect(body).not.toContain('Consent Required');
+  });
+
+  it('summitcu renames the search field and gates the console on consent', async () => {
+    const go = client();
+    expect((await setTenant(go, 'summitcu')).status).toBe(200);
+    await signIn(go);
+
+    // Straight past sign-in, before consent: the servicing tools are not
+    // available yet, in whatever screen was requested.
+    const gated = await (await go('/frame/members/search')).text();
+    expect(gated).toContain('Consent Required');
+    expect(gated).toContain('SUMMIT CREDIT UNION');
+    expect(gated).not.toContain('Customer Number');
+
+    await go('/frame/consent/accept', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ back: '/members/search' }),
+    });
+
+    const afterConsent = await (await go('/frame/members/search')).text();
+    expect(afterConsent).toContain('Customer Number');
+    expect(afterConsent).not.toContain('Consent Required');
+    expect(afterConsent).not.toContain('>Member ID<');
+  });
+
+  it('consent is sticky per session and does not leak into a fresh one', async () => {
+    const consented = client();
+    expect((await setTenant(consented, 'summitcu')).status).toBe(200);
+    await signIn(consented);
+    await consented('/frame/consent/accept', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ back: '/members/search' }),
+    });
+    expect(await (await consented('/frame/members/search')).text()).toContain('Customer Number');
+
+    const fresh = client();
+    expect((await setTenant(fresh, 'summitcu')).status).toBe(200);
+    await signIn(fresh);
+    expect(await (await fresh('/frame/members/search')).text()).toContain('Consent Required');
+  });
+
+  it('re-arming a tenant clears a stale consent for that session', async () => {
+    const go = client();
+    expect((await setTenant(go, 'summitcu')).status).toBe(200);
+    await signIn(go);
+    await go('/frame/consent/accept', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ back: '/members/search' }),
+    });
+    expect(await (await go('/frame/members/search')).text()).toContain('Customer Number');
+
+    await setTenant(go, 'summitcu');
+    expect(await (await go('/frame/members/search')).text()).toContain('Consent Required');
+  });
+});

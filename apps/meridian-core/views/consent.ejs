@@ -1,0 +1,15 @@
+<table class="panel" width="560" cellpadding="0" cellspacing="0">
+  <tr><th colspan="2">Consent Required</th></tr>
+  <tr><td style="padding:10px">
+    <font size="2">
+      <%= tenant.brandName %> requires a servicing consent acknowledgment before member
+      tools are available in this session. By continuing you confirm you are an authorized
+      representative acting on behalf of the member.
+    </font>
+    <br><br>
+    <form method="post" action="<%= linkBase %>/consent/accept">
+      <input type="hidden" name="back" value="<%= currentPath %>">
+      <input type="submit" id="<%= ctl('pnlConsent', 'btnAgree') %>" value="I Agree">
+    </form>
+  </td></tr>
+</table>
