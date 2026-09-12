@@ -12,6 +12,11 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20', cache: npm }
       - run: npm ci
+      # npm ci installs the playwright package, not the browser binary it
+      # drives - every browser-backed test needs this or it fails with
+      # "Executable doesn't exist". Only chromium: it's the only browser
+      # webSurface.ts ever launches.
+      - run: npx playwright install --with-deps chromium
       # typecheck + lint + tests. No ANTHROPIC_API_KEY is set here on purpose:
       # everything except `cua discover` must work without a model, and CI
       # failing on a missing key would mean that promise had been broken.
