@@ -190,6 +190,32 @@ export class WebSurface implements Surface {
         const form = input.form;
         if (!form) return;
         if (input.type !== 'submit' && input.type !== 'image') return;
+
+        // The browser would refuse an invalid form, so this must too. Both
+        // routes below skip constraint validation, and that difference is
+        // exactly what would let an artifact submit something a person could
+        // not have.
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+
+        const view = el.ownerDocument.defaultView;
+        if (form.method.toLowerCase() === 'get' && view) {
+          // A GET form is only a URL, and navigating to one is the single
+          // thing a poisoned frame still does reliably. requestSubmit() is the
+          // more faithful call and was tried first, but it goes through the
+          // same submission path the bug eats: it worked about two runs in
+          // three, which is worse than not working at all.
+          const url = new URL(form.action, el.ownerDocument.baseURI);
+          const data = new FormData(form, input);
+          const query = new URLSearchParams();
+          data.forEach((value, key) => query.append(key, String(value)));
+          url.search = query.toString();
+          view.location.href = url.toString();
+          return;
+        }
+
+        // POST has no URL to navigate to. requestSubmit() carries the submitter
+        // so the right button's name and value are sent, and a frame's *first*
+        // submission is unaffected by the bug in any case.
         form.requestSubmit(input);
       }, undefined, { timeout: this.#actionTimeout });
     } catch {
