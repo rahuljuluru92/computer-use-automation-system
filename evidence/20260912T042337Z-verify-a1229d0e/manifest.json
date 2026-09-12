@@ -1,0 +1,15 @@
+{
+  "runId": "20260912T042337Z-verify-a1229d0e",
+  "verifying": "cap.member.read_savings_balance",
+  "version": "1.0.0",
+  "status": "success",
+  "outputs": [
+    "savingsBalance"
+  ],
+  "events": 48,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T04:23:39.648Z"
+}

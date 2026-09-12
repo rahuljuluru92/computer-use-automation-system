@@ -1,0 +1,23 @@
+{
+  "runId": "20260912T042321Z-discovery-170125b7",
+  "goal": "Look up a member and read their current savings balance",
+  "target": "http://localhost:4400",
+  "promptVersion": "discovery.v1+sha256:3686038d",
+  "discovery": {
+    "turns": 9,
+    "toolCalls": 11,
+    "llmCalls": 9,
+    "inputTokens": 18,
+    "outputTokens": 1103,
+    "durationMs": 15600,
+    "policyDenials": 0,
+    "oscillationWarnings": 0
+  },
+  "compiled": true,
+  "events": 35,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T04:23:39.665Z"
+}

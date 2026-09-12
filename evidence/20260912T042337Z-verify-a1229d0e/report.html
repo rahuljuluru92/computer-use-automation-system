@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<title>Run 20260912T041103Z-verify-f50c2835</title>
+<title>Run 20260912T042337Z-verify-a1229d0e</title>
 <style>
   :root { color-scheme: light; }
   body { margin:0; background:#f6f7f9; color:#1c1e21;
@@ -51,9 +51,9 @@
   .overflow { overflow-x:auto; }
 </style></head><body><div class="wrap">
 
-<h1>Look up member 12345 and read their current savings balance
+<h1>Look up a member and read their current savings balance
   <span class="badge b-success">success</span></h1>
-<p class="sub">Run <code>20260912T041103Z-verify-f50c2835</code> &middot; capability v1.0.0</p>
+<p class="sub">Run <code>20260912T042337Z-verify-a1229d0e</code> &middot; capability v1.0.0</p>
 
 <div class="card"><b>Outputs</b><div class="overflow"><table style="margin-top:8px">
       <tr><td class="k">savingsBalance</td><td>4210.55</td></tr>
@@ -68,7 +68,7 @@
     <div class="k">recoveries</div></div>
   <div class="metric"><div class="n">0</div>
     <div class="k">degraded</div></div>
-  <div class="metric"><div class="n">2.3s</div>
+  <div class="metric"><div class="n">2.1s</div>
     <div class="k">duration</div></div>
   <div class="metric hero"><div class="n">0</div>
     <div class="k">model calls</div></div>
@@ -79,11 +79,11 @@ asserted in the test suite. Determinism that is only promised is not determinism
 
 <h2>Steps</h2>
 <div class="step s-ok">
-    <h3>1. Go to the bank back-office console start page
+    <h3>1. Open the bank back-office console
       <span class="badge b-success"
         >ok</span></h3>
     <div class="meta">
-      <b>navigate</b> (read) &middot; 54ms
+      <b>navigate</b> (read) &middot; 58ms
       
       
     </div>
@@ -97,7 +97,7 @@ asserted in the test suite. Determinism that is only promised is not determinism
       <span class="badge b-success"
         >ok</span></h3>
     <div class="meta">
-      <b>type</b> (write_reversible) &middot; 371ms
+      <b>type</b> (write_reversible) &middot; 410ms
       
       
     </div>
@@ -114,7 +114,7 @@ asserted in the test suite. Determinism that is only promised is not determinism
       <span class="badge b-success"
         >ok</span></h3>
     <div class="meta">
-      <b>type</b> (write_reversible) &middot; 419ms
+      <b>type</b> (write_reversible) &middot; 447ms
       
       
     </div>
@@ -127,7 +127,7 @@ asserted in the test suite. Determinism that is only promised is not determinism
         <figcaption>after.png</figcaption></figure></div>
   </div>
 <div class="step s-ok">
-    <h3>4. Sign in to the back-office console
+    <h3>4. Sign in to the console
       <span class="badge b-success"
         >ok</span></h3>
     <div class="meta">
@@ -136,7 +136,7 @@ asserted in the test suite. Determinism that is only promised is not determinism
       
     </div>
     <div class="meta">
-      Found <b>Sign in to the back-office console</b> at tier <b>1</b>,
+      Found <b>Sign in to the console</b> at tier <b>1</b>,
       3 strategies in agreement
       </div>
     <div class="shots"><figure><img src="steps/04/before.png" alt="steps/04/before.png" loading="lazy">
@@ -144,16 +144,16 @@ asserted in the test suite. Determinism that is only promised is not determinism
         <figcaption>after.png</figcaption></figure></div>
   </div>
 <div class="step s-ok">
-    <h3>5. Search for member 12345
+    <h3>5. Search for the member by ID
       <span class="badge b-success"
         >ok</span></h3>
     <div class="meta">
-      <b>type</b> (write_reversible) &middot; 405ms
+      <b>type</b> (write_reversible) &middot; 422ms
       
       
     </div>
     <div class="meta">
-      Found <b>Search for member 12345</b> at tier <b>1</b>,
+      Found <b>Search for the member by ID</b> at tier <b>1</b>,
       4 strategies in agreement
       </div>
     <div class="shots"><figure><img src="steps/05/before.png" alt="steps/05/before.png" loading="lazy">
@@ -161,16 +161,16 @@ asserted in the test suite. Determinism that is only promised is not determinism
         <figcaption>after.png</figcaption></figure></div>
   </div>
 <div class="step s-ok">
-    <h3>6. Search for member 12345
+    <h3>6. Search for the member
       <span class="badge b-success"
         >ok</span></h3>
     <div class="meta">
-      <b>click</b> (read) &middot; 485ms
+      <b>click</b> (read) &middot; 148ms
       
       
     </div>
     <div class="meta">
-      Found <b>Search for member 12345</b> at tier <b>1</b>,
+      Found <b>Search for the member</b> at tier <b>1</b>,
       2 strategies in agreement
       </div>
     <div class="shots"><figure><img src="steps/06/before.png" alt="steps/06/before.png" loading="lazy">
@@ -178,11 +178,11 @@ asserted in the test suite. Determinism that is only promised is not determinism
         <figcaption>after.png</figcaption></figure></div>
   </div>
 <div class="step s-ok">
-    <h3>7. Read the member&#39;s current savings balance
+    <h3>7. Read the current savings balance for the member
       <span class="badge b-success"
         >ok</span></h3>
     <div class="meta">
-      <b>extract</b> (read) &middot; 435ms
+      <b>extract</b> (read) &middot; 437ms
       
       
     </div>
@@ -202,283 +202,289 @@ asserted in the test suite. Determinism that is only promised is not determinism
 <tr><th>#</th><th>time</th><th>kind</th><th>step</th><th>what happened, and why</th></tr>
 <tr>
     <td class="k">1</td>
-    <td class="k">04:11:03.332</td>
+    <td class="k">04:23:37.567</td>
     <td class="kind">run.start</td>
     <td class="k"></td>
-    <td>Replaying cap.discovered.look_member_12345_read_current v1.0.0 (draft), with no model in the loop.</td></tr>
+    <td>Replaying cap.member.read_savings_balance v1.0.0 (draft), with no model in the loop.</td></tr>
 <tr>
     <td class="k">2</td>
-    <td class="k">04:11:03.383</td>
+    <td class="k">04:23:37.605</td>
     <td class="kind">observe</td>
     <td class="k"></td>
     <td>Entered at http://localhost:4400/.</td></tr>
 <tr>
     <td class="k">3</td>
-    <td class="k">04:11:03.383</td>
+    <td class="k">04:23:37.606</td>
     <td class="kind">step.begin</td>
     <td class="k">s1</td>
-    <td>Step 1: Go to the bank back-office console start page</td></tr>
+    <td>Step 1: Open the bank back-office console</td></tr>
 <tr>
     <td class="k">4</td>
-    <td class="k">04:11:03.406</td>
+    <td class="k">04:23:37.633</td>
     <td class="kind">policy.check</td>
     <td class="k">s1</td>
     <td>Policy allows this read action.</td></tr>
 <tr>
     <td class="k">5</td>
-    <td class="k">04:11:03.411</td>
+    <td class="k">04:23:37.639</td>
     <td class="kind">action</td>
     <td class="k">s1</td>
     <td>Navigated.</td></tr>
 <tr>
     <td class="k">6</td>
-    <td class="k">04:11:03.424</td>
+    <td class="k">04:23:37.651</td>
     <td class="kind">wait</td>
     <td class="k">s1</td>
     <td>The expected change happened after 0ms.</td></tr>
 <tr>
     <td class="k">7</td>
-    <td class="k">04:11:03.424</td>
+    <td class="k">04:23:37.651</td>
     <td class="kind">checkpoint</td>
     <td class="k">s1</td>
     <td>Checkpoint held: &quot;Enter operator ID to sign in&quot; is present</td></tr>
 <tr>
     <td class="k">8</td>
-    <td class="k">04:11:03.436</td>
+    <td class="k">04:23:37.664</td>
     <td class="kind">step.end</td>
     <td class="k">s1</td>
     <td>Step 1 ok.</td></tr>
 <tr>
     <td class="k">9</td>
-    <td class="k">04:11:03.437</td>
+    <td class="k">04:23:37.664</td>
     <td class="kind">step.begin</td>
     <td class="k">s2</td>
     <td>Step 2: Enter operator ID to sign in</td></tr>
 <tr>
     <td class="k">10</td>
-    <td class="k">04:11:03.453</td>
+    <td class="k">04:23:37.681</td>
     <td class="kind">locator.resolve</td>
     <td class="k">s2</td>
     <td>Found Enter operator ID to sign in via tier 1.</td></tr>
 <tr>
     <td class="k">11</td>
-    <td class="k">04:11:03.453</td>
+    <td class="k">04:23:37.681</td>
     <td class="kind">policy.check</td>
     <td class="k">s2</td>
     <td>Policy allows this write_reversible action.</td></tr>
 <tr>
     <td class="k">12</td>
-    <td class="k">04:11:03.463</td>
+    <td class="k">04:23:37.694</td>
     <td class="kind">action</td>
     <td class="k">s2</td>
     <td>Typed into on &quot;Operator ID&quot;.</td></tr>
 <tr>
     <td class="k">13</td>
-    <td class="k">04:11:03.790</td>
+    <td class="k">04:23:38.037</td>
     <td class="kind">checkpoint</td>
     <td class="k">s2</td>
-    <td>Checkpoint held: (nothing asserted)</td></tr>
+    <td>Checkpoint held: &quot;Enter operator ID to sign in&quot; is present</td></tr>
 <tr>
     <td class="k">14</td>
-    <td class="k">04:11:03.808</td>
+    <td class="k">04:23:38.074</td>
     <td class="kind">step.end</td>
     <td class="k">s2</td>
     <td>Step 2 ok.</td></tr>
 <tr>
     <td class="k">15</td>
-    <td class="k">04:11:03.808</td>
+    <td class="k">04:23:38.074</td>
     <td class="kind">step.begin</td>
     <td class="k">s3</td>
     <td>Step 3: Enter operator password to sign in</td></tr>
 <tr>
     <td class="k">16</td>
-    <td class="k">04:11:03.839</td>
+    <td class="k">04:23:38.120</td>
     <td class="kind">locator.resolve</td>
     <td class="k">s3</td>
     <td>Found Enter operator password to sign in via tier 1.</td></tr>
 <tr>
     <td class="k">17</td>
-    <td class="k">04:11:03.839</td>
+    <td class="k">04:23:38.120</td>
     <td class="kind">policy.check</td>
     <td class="k">s3</td>
     <td>Policy allows this write_reversible action.</td></tr>
 <tr>
     <td class="k">18</td>
-    <td class="k">04:11:03.870</td>
+    <td class="k">04:23:38.152</td>
     <td class="kind">action</td>
     <td class="k">s3</td>
     <td>Typed into on &quot;Password&quot;.</td></tr>
 <tr>
     <td class="k">19</td>
-    <td class="k">04:11:04.200</td>
+    <td class="k">04:23:38.494</td>
     <td class="kind">checkpoint</td>
     <td class="k">s3</td>
-    <td>Checkpoint held: (nothing asserted)</td></tr>
+    <td>Checkpoint held: &quot;Enter operator password to sign in&quot; is present</td></tr>
 <tr>
     <td class="k">20</td>
-    <td class="k">04:11:04.227</td>
+    <td class="k">04:23:38.521</td>
     <td class="kind">step.end</td>
     <td class="k">s3</td>
     <td>Step 3 ok.</td></tr>
 <tr>
     <td class="k">21</td>
-    <td class="k">04:11:04.227</td>
+    <td class="k">04:23:38.521</td>
     <td class="kind">step.begin</td>
     <td class="k">s4</td>
-    <td>Step 4: Sign in to the back-office console</td></tr>
+    <td>Step 4: Sign in to the console</td></tr>
 <tr>
     <td class="k">22</td>
-    <td class="k">04:11:04.257</td>
+    <td class="k">04:23:38.552</td>
     <td class="kind">locator.resolve</td>
     <td class="k">s4</td>
-    <td>Found Sign in to the back-office console via tier 1.</td></tr>
+    <td>Found Sign in to the console via tier 1.</td></tr>
 <tr>
     <td class="k">23</td>
-    <td class="k">04:11:04.257</td>
+    <td class="k">04:23:38.552</td>
     <td class="kind">policy.check</td>
     <td class="k">s4</td>
     <td>Policy allows this read action.</td></tr>
 <tr>
     <td class="k">24</td>
-    <td class="k">04:11:04.302</td>
+    <td class="k">04:23:38.595</td>
     <td class="kind">action</td>
     <td class="k">s4</td>
     <td>Clicked on &quot;Sign In&quot;.</td></tr>
 <tr>
     <td class="k">25</td>
-    <td class="k">04:11:04.334</td>
+    <td class="k">04:23:38.627</td>
     <td class="kind">wait</td>
     <td class="k">s4</td>
     <td>The expected change happened after 0ms.</td></tr>
 <tr>
     <td class="k">26</td>
-    <td class="k">04:11:04.334</td>
+    <td class="k">04:23:38.627</td>
     <td class="kind">checkpoint</td>
     <td class="k">s4</td>
-    <td>Checkpoint held: &quot;Search for member 12345&quot; is present</td></tr>
+    <td>Checkpoint held: &quot;Search for the member by ID&quot; is present</td></tr>
 <tr>
     <td class="k">27</td>
-    <td class="k">04:11:04.347</td>
+    <td class="k">04:23:38.640</td>
     <td class="kind">step.end</td>
     <td class="k">s4</td>
     <td>Step 4 ok.</td></tr>
 <tr>
     <td class="k">28</td>
-    <td class="k">04:11:04.347</td>
+    <td class="k">04:23:38.640</td>
     <td class="kind">step.begin</td>
     <td class="k">s5</td>
-    <td>Step 5: Search for member 12345</td></tr>
+    <td>Step 5: Search for the member by ID</td></tr>
 <tr>
     <td class="k">29</td>
-    <td class="k">04:11:04.380</td>
+    <td class="k">04:23:38.674</td>
     <td class="kind">locator.resolve</td>
     <td class="k">s5</td>
-    <td>Found Search for member 12345 via tier 1.</td></tr>
+    <td>Found Search for the member by ID via tier 1.</td></tr>
 <tr>
     <td class="k">30</td>
-    <td class="k">04:11:04.380</td>
+    <td class="k">04:23:38.674</td>
     <td class="kind">policy.check</td>
     <td class="k">s5</td>
     <td>Policy allows this write_reversible action.</td></tr>
 <tr>
     <td class="k">31</td>
-    <td class="k">04:11:04.387</td>
+    <td class="k">04:23:38.680</td>
     <td class="kind">action</td>
     <td class="k">s5</td>
     <td>Typed into on &quot;Member ID&quot;.</td></tr>
 <tr>
     <td class="k">32</td>
-    <td class="k">04:11:04.730</td>
+    <td class="k">04:23:39.032</td>
     <td class="kind">checkpoint</td>
     <td class="k">s5</td>
-    <td>Checkpoint held: (nothing asserted)</td></tr>
+    <td>Checkpoint held: &quot;Search for the member by ID&quot; = &quot;12345&quot; (wanted &quot;12345&quot;)</td></tr>
 <tr>
     <td class="k">33</td>
-    <td class="k">04:11:04.752</td>
+    <td class="k">04:23:39.062</td>
     <td class="kind">step.end</td>
     <td class="k">s5</td>
     <td>Step 5 ok.</td></tr>
 <tr>
     <td class="k">34</td>
-    <td class="k">04:11:04.752</td>
+    <td class="k">04:23:39.062</td>
     <td class="kind">step.begin</td>
     <td class="k">s6</td>
-    <td>Step 6: Search for member 12345</td></tr>
+    <td>Step 6: Search for the member</td></tr>
 <tr>
     <td class="k">35</td>
-    <td class="k">04:11:04.782</td>
+    <td class="k">04:23:39.092</td>
     <td class="kind">locator.resolve</td>
     <td class="k">s6</td>
-    <td>Found Search for member 12345 via tier 1.</td></tr>
+    <td>Found Search for the member via tier 1.</td></tr>
 <tr>
     <td class="k">36</td>
-    <td class="k">04:11:04.783</td>
+    <td class="k">04:23:39.092</td>
     <td class="kind">policy.check</td>
     <td class="k">s6</td>
     <td>Policy allows this read action.</td></tr>
 <tr>
     <td class="k">37</td>
-    <td class="k">04:11:04.826</td>
+    <td class="k">04:23:39.155</td>
     <td class="kind">action</td>
     <td class="k">s6</td>
     <td>Clicked on &quot;Search&quot;.</td></tr>
 <tr>
     <td class="k">38</td>
-    <td class="k">04:11:05.198</td>
-    <td class="kind">checkpoint</td>
+    <td class="k">04:23:39.171</td>
+    <td class="kind">wait</td>
     <td class="k">s6</td>
-    <td>Checkpoint held: &quot;Confirm the Savings account row is present for member 12345&quot; reads &quot;Savings&quot; (wanted /Savings/)</td></tr>
+    <td>The expected change happened after 0ms.</td></tr>
 <tr>
     <td class="k">39</td>
-    <td class="k">04:11:05.237</td>
+    <td class="k">04:23:39.171</td>
+    <td class="kind">checkpoint</td>
+    <td class="k">s6</td>
+    <td>Checkpoint held: &quot;Confirm the Savings account row is present for this member&quot; reads &quot;Savings&quot; (wanted /Savings/)</td></tr>
+<tr>
+    <td class="k">40</td>
+    <td class="k">04:23:39.210</td>
     <td class="kind">step.end</td>
     <td class="k">s6</td>
     <td>Step 6 ok.</td></tr>
 <tr>
-    <td class="k">40</td>
-    <td class="k">04:11:05.237</td>
+    <td class="k">41</td>
+    <td class="k">04:23:39.210</td>
     <td class="kind">step.begin</td>
     <td class="k">s7</td>
-    <td>Step 7: Read the member&#39;s current savings balance</td></tr>
+    <td>Step 7: Read the current savings balance for the member</td></tr>
 <tr>
-    <td class="k">41</td>
-    <td class="k">04:11:05.267</td>
+    <td class="k">42</td>
+    <td class="k">04:23:39.243</td>
     <td class="kind">locator.resolve</td>
     <td class="k">s7</td>
     <td>Found value of savingsBalance via tier 1.</td></tr>
 <tr>
-    <td class="k">42</td>
-    <td class="k">04:11:05.267</td>
+    <td class="k">43</td>
+    <td class="k">04:23:39.243</td>
     <td class="kind">policy.check</td>
     <td class="k">s7</td>
     <td>Policy allows this read action.</td></tr>
 <tr>
-    <td class="k">43</td>
-    <td class="k">04:11:05.267</td>
+    <td class="k">44</td>
+    <td class="k">04:23:39.243</td>
     <td class="kind">action</td>
     <td class="k">s7</td>
     <td>Read on &quot;$4,210.55&quot;.</td></tr>
 <tr>
-    <td class="k">44</td>
-    <td class="k">04:11:05.629</td>
+    <td class="k">45</td>
+    <td class="k">04:23:39.605</td>
     <td class="kind">checkpoint</td>
     <td class="k">s7</td>
     <td>Checkpoint held: &quot;value of savingsBalance&quot; is present</td></tr>
 <tr>
-    <td class="k">45</td>
-    <td class="k">04:11:05.635</td>
+    <td class="k">46</td>
+    <td class="k">04:23:39.610</td>
     <td class="kind">extract</td>
     <td class="k">s7</td>
     <td>Read savingsBalance.</td></tr>
 <tr>
-    <td class="k">46</td>
-    <td class="k">04:11:05.672</td>
+    <td class="k">47</td>
+    <td class="k">04:23:39.647</td>
     <td class="kind">step.end</td>
     <td class="k">s7</td>
     <td>Step 7 ok.</td></tr>
 <tr>
-    <td class="k">47</td>
-    <td class="k">04:11:05.672</td>
+    <td class="k">48</td>
+    <td class="k">04:23:39.647</td>
     <td class="kind">run.end</td>
     <td class="k"></td>
     <td>Completed 7 steps and extracted 1 output(s).</td></tr>

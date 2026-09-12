@@ -1,0 +1,15 @@
+{
+  "runId": "demo-discovered-replay",
+  "capability": "cap.member.read_savings_balance",
+  "version": "1.0.0",
+  "status": "success",
+  "outputs": [
+    "savingsBalance"
+  ],
+  "events": 48,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-12T04:24:24.078Z"
+}
