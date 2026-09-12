@@ -69,6 +69,36 @@ async function run(inputs: Record<string, unknown>, opts: { chaos?: string } = {
   return { result, evidence };
 }
 
+describe('replay: an environment that cannot run the capability', () => {
+  it('says so as a typed failure, before the browser opens', async () => {
+    // A capability that needs a credential this environment cannot supply is
+    // unrunnable. Finding that out six steps in - as an uncaught throw from
+    // inside the secret resolver, which is what used to happen - turns a
+    // configuration mistake into a stack trace.
+    const redactor = buildRedactor({ secrets: {} });
+    const evidence = new EvidenceWriter({
+      runId: newRunId('nosecrets'), root: EVIDENCE_ROOT, redactor,
+    });
+    const result = await replay({
+      artifact: seedArtifact(),
+      inputs: { memberId: '12345' },
+      surface,
+      policy: new PolicyEngine({ ...DEFAULT_POLICY, allowedOrigins: [base] }),
+      evidence,
+      baseUrl: base,
+      // no `secrets` resolver at all
+    });
+
+    expect(result.status).toBe('failed');
+    if (result.status !== 'failed') return;
+    expect(result.failure.code).toBe('artifact_invalid');
+    expect(result.failure.message).toMatch(/MERIDIAN_PASSWORD/);
+    // Nothing was executed - it refused before touching the application.
+    expect(result.metrics.stepsExecuted).toBe(0);
+    expect(result.metrics.llmCalls).toBe(0);
+  });
+});
+
 describe('replay: success', () => {
   it('reads the savings balance and returns typed outputs', async () => {
     const { result } = await run({ memberId: '12345' });

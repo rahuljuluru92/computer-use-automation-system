@@ -59,12 +59,47 @@ const CREDENTIALS: Record<string, string> = {
   operatorPassword: 'MERIDIAN_PASSWORD',
 };
 
+/**
+ * The environment wins; the demo target's own credentials fill in.
+ *
+ * The README promises the whole path runs on a clean clone with only
+ * ANTHROPIC_API_KEY set. Requiring two more variables breaks that promise in
+ * the least helpful way possible - a reviewer following the instructions gets
+ * a model that correctly reports it cannot sign in, which reads as the system
+ * failing rather than as a missing export. That happened here on the first
+ * live run.
+ *
+ * Read from the seed rather than written out again: the same value has now
+ * been duplicated and drifted twice, once in .env.example and once in a doc
+ * comment, and both times it was only noticed when something could not sign
+ * in. Imported lazily so nothing in the engine's normal path depends on the
+ * demo application existing.
+ *
+ * A real target sets the variables and never reaches the fallback.
+ */
+async function operatorCredentials(): Promise<{ username?: string; password?: string }> {
+  const username = process.env.MERIDIAN_USERNAME;
+  const password = process.env.MERIDIAN_PASSWORD;
+  if (username && password) return { username, password };
+
+  try {
+    const { OPERATOR } = await import('../../apps/meridian-core/data/seed.ts');
+    return {
+      username: username ?? OPERATOR.username,
+      password: password ?? OPERATOR.password,
+    };
+  } catch {
+    // Not running against the bundled demo app. Whatever the environment gave
+    // us is what there is; a target that needs credentials will say so.
+    return { ...(username ? { username } : {}), ...(password ? { password } : {}) };
+  }
+}
+
 export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<number> {
   const taskInputs = JSON.parse(opts.inputJson) as Record<string, unknown>;
   const baseUrl = new URL(opts.target).origin;
 
-  const username = process.env.MERIDIAN_USERNAME;
-  const password = process.env.MERIDIAN_PASSWORD;
+  const { username, password } = await operatorCredentials();
 
   // Params the run can reference. Credentials sit alongside task inputs so the
   // model can sign in by reference, and are marked secret so neither the prompt

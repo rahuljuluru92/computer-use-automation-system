@@ -167,6 +167,27 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
     return result;
   }
 
+  // Same idea as the input check above, and for the same reason: a capability
+  // that asks for a credential this environment cannot supply is unrunnable,
+  // and finding that out six steps in - as an uncaught throw from inside the
+  // secret resolver, which is what used to happen - turns a configuration
+  // mistake into a stack trace. It is a typed failure, and it happens before
+  // the browser opens.
+  const missing = missingSecrets(artifact, opts.secrets);
+  if (missing.length > 0) {
+    const detail = `this capability needs ${missing.map((n) => `$secret.${n}`).join(', ')} `
+      + `and the environment does not supply ${missing.length === 1 ? 'it' : 'them'}`;
+    evidence.event('run.end', `Refusing to start: ${detail}`, { reason: 'artifact_invalid', missing });
+    const result: ReplayResult = {
+      ...envelope(), status: 'failed',
+      failure: { code: 'artifact_invalid', message: detail,
+        expected: `${missing.join(', ')} set in the environment`,
+        observed: 'not set - copy .env.example to .env and fill it in', evidence: [] },
+    };
+    evidence.close({ status: result.status, failure: detail });
+    return result;
+  }
+
   const params = { ...opts.inputs, baseUrl: opts.baseUrl };
 
   // ---- Entry --------------------------------------------------------------
@@ -646,6 +667,28 @@ async function extractValue(
  * artifact therefore never contains a credential - only a reference to one,
  * which is what makes artifacts safe to review in a pull request.
  */
+/**
+ * Every `$secret.NAME` the artifact mentions that this environment cannot
+ * supply. Read off the whole artifact rather than only the step data, because
+ * a recovery rule or a tenant overlay can reference one too.
+ */
+function missingSecrets(artifact: CapabilityArtifact, secrets?: SecretResolver): string[] {
+  const names = new Set<string>();
+  for (const m of JSON.stringify(artifact).matchAll(/\$secret\.([A-Za-z0-9_]+)/g)) {
+    names.add(m[1]!);
+  }
+  const missing: string[] = [];
+  for (const name of names) {
+    if (!secrets) { missing.push(name); continue; }
+    try {
+      secrets.resolve({ $secret: `env:${name}` });
+    } catch {
+      missing.push(name);
+    }
+  }
+  return missing;
+}
+
 function materialise(
   value: string,
   params: Record<string, unknown>,

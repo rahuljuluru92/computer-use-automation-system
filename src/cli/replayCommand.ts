@@ -29,6 +29,18 @@ export interface ReplayCommandOptions {
   json: boolean;
 }
 
+async function applyDemoCredentialDefaults(): Promise<void> {
+  if (process.env.MERIDIAN_USERNAME && process.env.MERIDIAN_PASSWORD) return;
+  try {
+    const { OPERATOR } = await import('../../apps/meridian-core/data/seed.ts');
+    process.env.MERIDIAN_USERNAME ??= OPERATOR.username;
+    process.env.MERIDIAN_PASSWORD ??= OPERATOR.password;
+  } catch {
+    // Not the bundled demo app. The pre-flight check in replay() will report
+    // any credential this artifact needs and the environment lacks.
+  }
+}
+
 export async function runReplayCommand(opts: ReplayCommandOptions): Promise<number> {
   const artifact = CapabilityArtifact.parse(
     JSON.parse(await readFile(opts.artifactPath, 'utf8')) as unknown,
@@ -43,6 +55,14 @@ export async function runReplayCommand(opts: ReplayCommandOptions): Promise<numb
 
   const inputs = JSON.parse(opts.inputJson) as Record<string, unknown>;
   const baseUrl = process.env.MERIDIAN_BASE_URL ?? 'http://localhost:4400';
+
+  // The environment wins; the demo target's own credentials fill in, so the
+  // README's path runs on a clean clone with no secrets configured at all -
+  // which for replay is the whole point, since it must also run with no API
+  // key. Read from the seed rather than written out again: this same value has
+  // drifted twice already. A real target sets the variables and never reaches
+  // the fallback.
+  await applyDemoCredentialDefaults();
 
   const redactor = buildRedactor({
     secrets: {
