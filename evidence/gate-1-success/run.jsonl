@@ -1,45 +1,45 @@
-{"seq":1,"t":"2026-09-12T08:33:20.240Z","kind":"note","message":"The happy path: sign in, find the member, open Savings, read the balance.","data":{"gate":"gate-1-success"}}
-{"seq":2,"t":"2026-09-12T08:33:20.240Z","kind":"run.start","message":"Replaying cap.member.read_savings_balance v1.0.0 (draft), with no model in the loop.","data":{"capability":"cap.member.read_savings_balance","version":"1.0.0","inputs":["memberId"]}}
-{"seq":3,"t":"2026-09-12T08:33:20.288Z","kind":"observe","message":"Entered at http://localhost:63044/frame/.","data":{"url":"http://localhost:63044/frame/","nodes":21,"structureHash":"bda5c9c65b947054"}}
-{"seq":4,"t":"2026-09-12T08:33:20.288Z","kind":"step.begin","message":"Step 1: Enter the operator ID on the sign-in form","stepId":"s1","data":{"index":1,"actionKind":"type","actionClass":"write_reversible"}}
-{"seq":5,"t":"2026-09-12T08:33:20.316Z","kind":"locator.resolve","message":"Found the Operator ID field via tier 1.","stepId":"s1","data":{"locatorDescription":"the Operator ID field","winningTier":1,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
-{"seq":6,"t":"2026-09-12T08:33:20.316Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s1","data":{"verdict":"allow","actionClass":"write_reversible"}}
-{"seq":7,"t":"2026-09-12T08:33:20.330Z","kind":"action","message":"Typed into on \"Operator ID\".","stepId":"s1","data":{"actionKind":"type","durationMs":14,"target":{"role":"textbox","name":"Operator ID","frame":[]}}}
-{"seq":8,"t":"2026-09-12T08:33:20.670Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s1","data":{"held":true}}
-{"seq":9,"t":"2026-09-12T08:33:20.694Z","kind":"step.end","message":"Step 1 ok.","stepId":"s1","data":{"status":"ok","durationMs":405}}
-{"seq":10,"t":"2026-09-12T08:33:20.694Z","kind":"step.begin","message":"Step 2: Enter the operator password","stepId":"s2","data":{"index":2,"actionKind":"type","actionClass":"write_reversible"}}
-{"seq":11,"t":"2026-09-12T08:33:20.725Z","kind":"locator.resolve","message":"Found the Password field via tier 1.","stepId":"s2","data":{"locatorDescription":"the Password field","winningTier":1,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
-{"seq":12,"t":"2026-09-12T08:33:20.725Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s2","data":{"verdict":"allow","actionClass":"write_reversible"}}
-{"seq":13,"t":"2026-09-12T08:33:20.754Z","kind":"action","message":"Typed into on \"Password\".","stepId":"s2","data":{"actionKind":"type","durationMs":29,"target":{"role":"textbox","name":"Password","frame":[]}}}
-{"seq":14,"t":"2026-09-12T08:33:21.087Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s2","data":{"held":true}}
-{"seq":15,"t":"2026-09-12T08:33:21.112Z","kind":"step.end","message":"Step 2 ok.","stepId":"s2","data":{"status":"ok","durationMs":418}}
-{"seq":16,"t":"2026-09-12T08:33:21.113Z","kind":"step.begin","message":"Step 3: Submit the sign-in form","stepId":"s3","data":{"index":3,"actionKind":"click","actionClass":"write_reversible"}}
-{"seq":17,"t":"2026-09-12T08:33:21.159Z","kind":"locator.resolve","message":"Found the Sign In button via tier 1.","stepId":"s3","data":{"locatorDescription":"the Sign In button","winningTier":1,"agreement":1,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
-{"seq":18,"t":"2026-09-12T08:33:21.159Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s3","data":{"verdict":"allow","actionClass":"write_reversible"}}
-{"seq":19,"t":"2026-09-12T08:33:21.215Z","kind":"action","message":"Clicked on \"Sign In\".","stepId":"s3","data":{"actionKind":"click","durationMs":56,"target":{"role":"button","name":"Sign In","frame":[]}}}
-{"seq":20,"t":"2026-09-12T08:33:21.230Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s3","data":{"held":true,"elapsedMs":0,"attempts":1}}
-{"seq":21,"t":"2026-09-12T08:33:21.230Z","kind":"checkpoint","message":"Checkpoint held: \"the Member ID search field\" is present","stepId":"s3","data":{"held":true}}
-{"seq":22,"t":"2026-09-12T08:33:21.242Z","kind":"step.end","message":"Step 3 ok.","stepId":"s3","data":{"status":"ok","durationMs":129}}
-{"seq":23,"t":"2026-09-12T08:33:21.243Z","kind":"step.begin","message":"Step 4: Type the member ID into the search field","stepId":"s4","data":{"index":4,"actionKind":"type","actionClass":"write_reversible"}}
-{"seq":24,"t":"2026-09-12T08:33:21.259Z","kind":"locator.resolve","message":"Found the Member ID search field via tier 1.","stepId":"s4","data":{"locatorDescription":"the Member ID search field","winningTier":1,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
-{"seq":25,"t":"2026-09-12T08:33:21.259Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s4","data":{"verdict":"allow","actionClass":"write_reversible"}}
-{"seq":26,"t":"2026-09-12T08:33:21.264Z","kind":"action","message":"Typed into on \"Member ID\".","stepId":"s4","data":{"actionKind":"type","durationMs":5,"target":{"role":"textbox","name":"Member ID","frame":[]}}}
-{"seq":27,"t":"2026-09-12T08:33:21.598Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s4","data":{"held":true}}
-{"seq":28,"t":"2026-09-12T08:33:21.633Z","kind":"step.end","message":"Step 4 ok.","stepId":"s4","data":{"status":"ok","durationMs":390}}
-{"seq":29,"t":"2026-09-12T08:33:21.633Z","kind":"step.begin","message":"Step 5: Run the member search","stepId":"s5","data":{"index":5,"actionKind":"click","actionClass":"read"}}
-{"seq":30,"t":"2026-09-12T08:33:21.681Z","kind":"locator.resolve","message":"Found the Search button via tier 1.","stepId":"s5","data":{"locatorDescription":"the Search button","winningTier":1,"agreement":1,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
-{"seq":31,"t":"2026-09-12T08:33:21.682Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s5","data":{"verdict":"allow","actionClass":"read"}}
-{"seq":32,"t":"2026-09-12T08:33:21.737Z","kind":"action","message":"Clicked on \"Search\".","stepId":"s5","data":{"actionKind":"click","durationMs":55,"target":{"role":"button","name":"Search","frame":[]}}}
-{"seq":33,"t":"2026-09-12T08:33:21.756Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s5","data":{"held":true,"elapsedMs":0,"attempts":1}}
-{"seq":34,"t":"2026-09-12T08:33:21.756Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s5","data":{"held":true}}
-{"seq":35,"t":"2026-09-12T08:33:21.786Z","kind":"step.end","message":"Step 5 ok.","stepId":"s5","data":{"status":"ok","durationMs":153}}
-{"seq":36,"t":"2026-09-12T08:33:21.786Z","kind":"step.begin","message":"Step 6: Open the member's Savings account from the accounts grid","stepId":"s6","data":{"index":6,"actionKind":"click","actionClass":"read"}}
-{"seq":37,"t":"2026-09-12T08:33:21.817Z","kind":"locator.resolve","message":"Found the View link on the Savings row of the Accounts grid via tier 2.","stepId":"s6","data":{"locatorDescription":"the View link on the Savings row of the Accounts grid","winningTier":2,"agreement":1,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
-{"seq":38,"t":"2026-09-12T08:33:21.817Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s6","data":{"verdict":"allow","actionClass":"read"}}
-{"seq":39,"t":"2026-09-12T08:33:21.849Z","kind":"action","message":"Clicked on \"View\".","stepId":"s6","data":{"actionKind":"click","durationMs":32,"target":{"role":"link","name":"View","frame":[]}}}
-{"seq":40,"t":"2026-09-12T08:33:21.862Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s6","data":{"held":true,"elapsedMs":0,"attempts":1}}
-{"seq":41,"t":"2026-09-12T08:33:21.862Z","kind":"checkpoint","message":"Checkpoint held: \"the Account Type field\" reads \"Savings\" (wanted /Savings/)","stepId":"s6","data":{"held":true}}
-{"seq":42,"t":"2026-09-12T08:33:21.864Z","kind":"extract","message":"Read savingsBalance.","stepId":"s6","data":{"name":"savingsBalance","sensitivity":"none"}}
-{"seq":43,"t":"2026-09-12T08:33:21.866Z","kind":"extract","message":"Read accountNumber.","stepId":"s6","data":{"name":"accountNumber","sensitivity":"none"}}
-{"seq":44,"t":"2026-09-12T08:33:21.891Z","kind":"step.end","message":"Step 6 ok.","stepId":"s6","data":{"status":"ok","durationMs":104}}
-{"seq":45,"t":"2026-09-12T08:33:21.891Z","kind":"run.end","message":"Completed 6 steps and extracted 2 output(s).","data":{"outputs":["savingsBalance","accountNumber"]}}
+{"seq":1,"t":"2026-09-12T14:52:33.052Z","kind":"note","message":"The happy path: sign in, find the member, open Savings, read the balance.","data":{"gate":"gate-1-success"}}
+{"seq":2,"t":"2026-09-12T14:52:33.052Z","kind":"run.start","message":"Replaying cap.member.read_savings_balance v1.0.0 (draft), with no model in the loop.","data":{"capability":"cap.member.read_savings_balance","version":"1.0.0","inputs":["memberId"]}}
+{"seq":3,"t":"2026-09-12T14:52:33.112Z","kind":"observe","message":"Entered at http://localhost:64823/frame/.","data":{"url":"http://localhost:64823/frame/","nodes":21,"structureHash":"bda5c9c65b947054"}}
+{"seq":4,"t":"2026-09-12T14:52:33.112Z","kind":"step.begin","message":"Step 1: Enter the operator ID on the sign-in form","stepId":"s1","data":{"index":1,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":5,"t":"2026-09-12T14:52:33.141Z","kind":"locator.resolve","message":"Found the Operator ID field via tier 1.","stepId":"s1","data":{"locatorDescription":"the Operator ID field","winningTier":1,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":6,"t":"2026-09-12T14:52:33.141Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s1","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":7,"t":"2026-09-12T14:52:33.168Z","kind":"action","message":"Typed into on \"Operator ID\".","stepId":"s1","data":{"actionKind":"type","durationMs":27,"target":{"role":"textbox","name":"Operator ID","frame":[]}}}
+{"seq":8,"t":"2026-09-12T14:52:33.508Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s1","data":{"held":true}}
+{"seq":9,"t":"2026-09-12T14:52:33.543Z","kind":"step.end","message":"Step 1 ok.","stepId":"s1","data":{"status":"ok","durationMs":431}}
+{"seq":10,"t":"2026-09-12T14:52:33.543Z","kind":"step.begin","message":"Step 2: Enter the operator password","stepId":"s2","data":{"index":2,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":11,"t":"2026-09-12T14:52:33.573Z","kind":"locator.resolve","message":"Found the Password field via tier 1.","stepId":"s2","data":{"locatorDescription":"the Password field","winningTier":1,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":12,"t":"2026-09-12T14:52:33.573Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s2","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":13,"t":"2026-09-12T14:52:33.611Z","kind":"action","message":"Typed into on \"Password\".","stepId":"s2","data":{"actionKind":"type","durationMs":38,"target":{"role":"textbox","name":"Password","frame":[]}}}
+{"seq":14,"t":"2026-09-12T14:52:33.946Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s2","data":{"held":true}}
+{"seq":15,"t":"2026-09-12T14:52:33.974Z","kind":"step.end","message":"Step 2 ok.","stepId":"s2","data":{"status":"ok","durationMs":431}}
+{"seq":16,"t":"2026-09-12T14:52:33.974Z","kind":"step.begin","message":"Step 3: Submit the sign-in form","stepId":"s3","data":{"index":3,"actionKind":"click","actionClass":"write_reversible"}}
+{"seq":17,"t":"2026-09-12T14:52:34.005Z","kind":"locator.resolve","message":"Found the Sign In button via tier 1.","stepId":"s3","data":{"locatorDescription":"the Sign In button","winningTier":1,"agreement":1,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":18,"t":"2026-09-12T14:52:34.005Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s3","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":19,"t":"2026-09-12T14:52:34.063Z","kind":"action","message":"Clicked on \"Sign In\".","stepId":"s3","data":{"actionKind":"click","durationMs":57,"target":{"role":"button","name":"Sign In","frame":[]}}}
+{"seq":20,"t":"2026-09-12T14:52:34.079Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s3","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":21,"t":"2026-09-12T14:52:34.079Z","kind":"checkpoint","message":"Checkpoint held: \"the Member ID search field\" is present","stepId":"s3","data":{"held":true}}
+{"seq":22,"t":"2026-09-12T14:52:34.091Z","kind":"step.end","message":"Step 3 ok.","stepId":"s3","data":{"status":"ok","durationMs":117}}
+{"seq":23,"t":"2026-09-12T14:52:34.091Z","kind":"step.begin","message":"Step 4: Type the member ID into the search field","stepId":"s4","data":{"index":4,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":24,"t":"2026-09-12T14:52:34.108Z","kind":"locator.resolve","message":"Found the Member ID search field via tier 1.","stepId":"s4","data":{"locatorDescription":"the Member ID search field","winningTier":1,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":25,"t":"2026-09-12T14:52:34.108Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s4","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":26,"t":"2026-09-12T14:52:34.113Z","kind":"action","message":"Typed into on \"Member ID\".","stepId":"s4","data":{"actionKind":"type","durationMs":5,"target":{"role":"textbox","name":"Member ID","frame":[]}}}
+{"seq":27,"t":"2026-09-12T14:52:34.449Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s4","data":{"held":true}}
+{"seq":28,"t":"2026-09-12T14:52:34.484Z","kind":"step.end","message":"Step 4 ok.","stepId":"s4","data":{"status":"ok","durationMs":393}}
+{"seq":29,"t":"2026-09-12T14:52:34.484Z","kind":"step.begin","message":"Step 5: Run the member search","stepId":"s5","data":{"index":5,"actionKind":"click","actionClass":"read"}}
+{"seq":30,"t":"2026-09-12T14:52:34.526Z","kind":"locator.resolve","message":"Found the Search button via tier 1.","stepId":"s5","data":{"locatorDescription":"the Search button","winningTier":1,"agreement":1,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":31,"t":"2026-09-12T14:52:34.527Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s5","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":32,"t":"2026-09-12T14:52:34.586Z","kind":"action","message":"Clicked on \"Search\".","stepId":"s5","data":{"actionKind":"click","durationMs":59,"target":{"role":"button","name":"Search","frame":[]}}}
+{"seq":33,"t":"2026-09-12T14:52:34.605Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s5","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":34,"t":"2026-09-12T14:52:34.605Z","kind":"checkpoint","message":"Checkpoint held: (nothing asserted)","stepId":"s5","data":{"held":true}}
+{"seq":35,"t":"2026-09-12T14:52:34.633Z","kind":"step.end","message":"Step 5 ok.","stepId":"s5","data":{"status":"ok","durationMs":149}}
+{"seq":36,"t":"2026-09-12T14:52:34.634Z","kind":"step.begin","message":"Step 6: Open the member's Savings account from the accounts grid","stepId":"s6","data":{"index":6,"actionKind":"click","actionClass":"read"}}
+{"seq":37,"t":"2026-09-12T14:52:34.666Z","kind":"locator.resolve","message":"Found the View link on the Savings row of the Accounts grid via tier 2.","stepId":"s6","data":{"locatorDescription":"the View link on the Savings row of the Accounts grid","winningTier":2,"agreement":1,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":38,"t":"2026-09-12T14:52:34.667Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s6","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":39,"t":"2026-09-12T14:52:34.698Z","kind":"action","message":"Clicked on \"View\".","stepId":"s6","data":{"actionKind":"click","durationMs":31,"target":{"role":"link","name":"View","frame":[]}}}
+{"seq":40,"t":"2026-09-12T14:52:34.712Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s6","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":41,"t":"2026-09-12T14:52:34.712Z","kind":"checkpoint","message":"Checkpoint held: \"the Account Type field\" reads \"Savings\" (wanted /Savings/)","stepId":"s6","data":{"held":true}}
+{"seq":42,"t":"2026-09-12T14:52:34.714Z","kind":"extract","message":"Read savingsBalance.","stepId":"s6","data":{"name":"savingsBalance","sensitivity":"none"}}
+{"seq":43,"t":"2026-09-12T14:52:34.716Z","kind":"extract","message":"Read accountNumber.","stepId":"s6","data":{"name":"accountNumber","sensitivity":"none"}}
+{"seq":44,"t":"2026-09-12T14:52:34.741Z","kind":"step.end","message":"Step 6 ok.","stepId":"s6","data":{"status":"ok","durationMs":107}}
+{"seq":45,"t":"2026-09-12T14:52:34.741Z","kind":"run.end","message":"Completed 6 steps and extracted 2 output(s).","data":{"outputs":["savingsBalance","accountNumber"]}}

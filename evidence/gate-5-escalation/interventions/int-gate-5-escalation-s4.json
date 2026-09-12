@@ -11,60 +11,60 @@
   "stepIntent": "Type the member ID into the search field",
   "actionKind": "type",
   "actionClass": "write_reversible",
-  "url": "http://localhost:63044/frame/members/search",
+  "url": "http://localhost:64823/frame/members/search",
   "title": "Member Search",
   "screenshotPath": "steps/04/escalation.png",
   "evidenceDir": "evidence/gate-5-escalation",
   "state": "resolved",
-  "raisedAt": "2026-09-12T08:33:26.055Z",
-  "expiresAt": "2026-09-12T08:38:26.200Z",
+  "raisedAt": "2026-09-12T14:52:38.827Z",
+  "expiresAt": "2026-09-12T14:57:38.919Z",
   "claimedBy": "scripted-operator (gate demo)",
-  "claimedAt": "2026-09-12T08:33:26.152Z",
+  "claimedAt": "2026-09-12T14:52:38.877Z",
   "resolution": "resolved",
   "note": "Acknowledged the maintenance notice by hand and handed the session back.",
-  "resolvedAt": "2026-09-12T08:33:26.201Z",
+  "resolvedAt": "2026-09-12T14:52:38.920Z",
   "humanActions": [
     {
-      "at": "2026-09-12T08:33:26.178Z",
+      "at": "2026-09-12T14:52:38.897Z",
       "kind": "click",
       "target": "Acknowledge",
       "role": "button",
       "frame": "main"
     },
     {
-      "at": "2026-09-12T08:33:26.180Z",
+      "at": "2026-09-12T14:52:38.899Z",
       "kind": "submit",
       "target": "form",
       "role": "form",
       "frame": "main"
     },
     {
-      "at": "2026-09-12T08:33:26.198Z",
+      "at": "2026-09-12T14:52:38.917Z",
       "kind": "navigate",
-      "target": "http://localhost:63044/frame/members/search",
+      "target": "http://localhost:64823/frame/members/search",
       "role": "document",
       "frame": "main",
-      "url": "http://localhost:63044/frame/members/search"
+      "url": "http://localhost:64823/frame/members/search"
     }
   ],
   "leaseTransfers": [
     {
       "generation": 2,
-      "at": "2026-09-12T08:33:26.052Z",
+      "at": "2026-09-12T14:52:38.823Z",
       "from": "automation",
       "to": "none",
       "reason": "escalated: recovery_exhausted"
     },
     {
       "generation": 3,
-      "at": "2026-09-12T08:33:26.208Z",
+      "at": "2026-09-12T14:52:38.981Z",
       "from": "none",
       "to": "operator",
       "reason": "operator claimed the session"
     },
     {
       "generation": 4,
-      "at": "2026-09-12T08:33:26.208Z",
+      "at": "2026-09-12T14:52:38.982Z",
       "from": "operator",
       "to": "automation",
       "reason": "operator resolved"
