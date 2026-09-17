@@ -8,6 +8,7 @@
  *   replay    an artifact + inputs   -> a typed result             (needs NO model)
  *   explain   an artifact            -> prose a human can review
  *   approve   an artifact            -> cleared for unattended use
+ *   catalog   list what is approved  -> the same list `cua mcp` would serve
  *   operator  the escalation console
  *   mcp       serve approved capabilities to a calling agent
  *
@@ -21,7 +22,7 @@ import { CapabilityArtifact } from '../core/schema.ts';
 import { ReplayResult } from '../core/result.ts';
 import { loadDotEnv } from '../core/dotenv.ts';
 
-const COMMANDS = ['discover', 'replay', 'explain', 'approve', 'operator', 'mcp'] as const;
+const COMMANDS = ['discover', 'replay', 'explain', 'approve', 'catalog', 'operator', 'mcp'] as const;
 type Command = (typeof COMMANDS)[number];
 
 const USAGE = `
@@ -61,10 +62,16 @@ cua - computer-use capability system
   cua approve --artifact <path>
       Move draft -> approved. Required before unattended invocation over MCP.
 
+  cua catalog [--json]
+      List every approved capability - the same list cua mcp's tools/list
+      would serve, and the same one the operator console's /catalog route
+      renders. Reads directly from artifacts/, no server required.
+
   cua operator [--port <n>] [--timeout <ms>]
       The escalation console. Start it before a run that might need a human.
       Loopback only. --timeout is how long an intervention tolerates silence
-      before the run abandons; any operator activity resets it.
+      before the run abandons; any operator activity resets it. Also serves
+      a read-only capability catalog at /catalog.
   cua mcp                          Serve approved capabilities over MCP (stdio).
 `;
 
@@ -173,6 +180,11 @@ async function main(argv: string[]): Promise<number> {
       if (!values.artifact) fail('approve needs --artifact <path>');
       const { runApproveCommand } = await import('./approveCommand.ts');
       return runApproveCommand({ artifactPath: values.artifact });
+    }
+
+    case 'catalog': {
+      const { runCatalogCommand } = await import('./catalogCommand.ts');
+      return runCatalogCommand({ json: values.json ?? false });
     }
 
     case 'mcp': {

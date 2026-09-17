@@ -15,6 +15,9 @@ import { InterventionBus } from '../../src/escalation/bus.ts';
 import type { RaiseInput } from '../../src/escalation/bus.ts';
 import { startOperatorConsole, type RunningConsole } from '../../src/escalation/operatorConsole/server.ts';
 import { RemoteBus } from '../../src/escalation/remote.ts';
+import { CapabilityArtifact } from '../../src/core/schema.ts';
+import { withIntegrity } from '../../src/core/integrity.ts';
+import { minimalArtifact } from '../fixtures/minimalArtifact.ts';
 
 const EVIDENCE_ROOT = 'evidence/_test_console';
 
@@ -142,6 +145,47 @@ describe('the operator console', () => {
     }));
     const res = await fetch(`${base}/api/interventions/int-escape/screenshot`);
     expect(res.status).toBe(403);
+  });
+});
+
+describe('the read-only capability catalog at /catalog', () => {
+  const CATALOG_DIR = 'evidence/_test_console_catalog';
+  let catalogConsole: RunningConsole;
+  let catalogBase: string;
+
+  beforeAll(async () => {
+    mkdirSync(CATALOG_DIR, { recursive: true });
+    writeFileSync(join(CATALOG_DIR, 'approved.json'), JSON.stringify(
+      withIntegrity(CapabilityArtifact.parse(minimalArtifact({
+        id: 'cap.x.catalog_test', status: 'approved',
+        tenancy: { canonical: true, overlays: { summitcu: {} } },
+      }))),
+    ));
+    writeFileSync(join(CATALOG_DIR, 'draft.json'), JSON.stringify(
+      withIntegrity(CapabilityArtifact.parse(minimalArtifact({ id: 'cap.x.still_draft', status: 'draft' }))),
+    ));
+    const b = new InterventionBus({ timeoutMs: 30_000 });
+    catalogConsole = await startOperatorConsole({ bus: b, port: 0, artifactsDir: CATALOG_DIR });
+    catalogBase = catalogConsole.url;
+  });
+
+  afterAll(async () => {
+    await catalogConsole.close();
+    rmSync(CATALOG_DIR, { recursive: true, force: true });
+  });
+
+  it('lists an approved capability, never a draft one', async () => {
+    const res = await fetch(`${catalogBase}/catalog`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('text/html');
+    const html = await res.text();
+    expect(html).toContain('cap.x.catalog_test');
+    expect(html).not.toContain('cap.x.still_draft');
+  });
+
+  it('shows the tenant overlay a capability carries', async () => {
+    const html = await (await fetch(`${catalogBase}/catalog`)).text();
+    expect(html).toContain('summitcu');
   });
 });
 

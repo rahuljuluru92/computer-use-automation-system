@@ -32,13 +32,17 @@ import { resolve, join, sep } from 'node:path';
 import type { InterventionBus } from '../bus.ts';
 import { InterventionError } from '../bus.ts';
 import { Resolution, type InterventionRecord } from '../intervention.ts';
+import { loadApprovedCatalog } from '../../mcp/catalog.ts';
 import { consolePage } from './ui.ts';
+import { catalogPage } from './catalog.ts';
 
 export interface ConsoleOptions {
   bus: InterventionBus;
   port?: number;
   /** Loopback only. Overridable for tests that need an ephemeral port. */
   host?: string;
+  /** Where `/catalog` reads approved artifacts from. Same default as `cua mcp`. */
+  artifactsDir?: string;
 }
 
 export interface RunningConsole {
@@ -51,9 +55,10 @@ export interface RunningConsole {
 export async function startOperatorConsole(o: ConsoleOptions): Promise<RunningConsole> {
   const host = o.host ?? '127.0.0.1';
   const bus = o.bus;
+  const artifactsDir = o.artifactsDir ?? 'artifacts';
 
   const server = createServer((req, res) => {
-    handle(req, res, bus).catch((err: unknown) => {
+    handle(req, res, bus, artifactsDir).catch((err: unknown) => {
       send(res, 500, { error: err instanceof Error ? err.message : String(err) });
     });
   });
@@ -71,7 +76,9 @@ export async function startOperatorConsole(o: ConsoleOptions): Promise<RunningCo
 
 // ---------------------------------------------------------------------------
 
-async function handle(req: IncomingMessage, res: ServerResponse, bus: InterventionBus): Promise<void> {
+async function handle(
+  req: IncomingMessage, res: ServerResponse, bus: InterventionBus, artifactsDir: string,
+): Promise<void> {
   const url = new URL(req.url ?? '/', 'http://localhost');
   const path = url.pathname;
   const method = req.method ?? 'GET';
@@ -79,6 +86,15 @@ async function handle(req: IncomingMessage, res: ServerResponse, bus: Interventi
   if (method === 'GET' && (path === '/' || path === '/index.html')) {
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     res.end(consolePage());
+    return;
+  }
+
+  // Read-only, rebuilt fresh per request - capability metadata, not a live
+  // intervention, so there is nothing here to poll or mutate.
+  if (method === 'GET' && path === '/catalog') {
+    const entries = await loadApprovedCatalog(artifactsDir);
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    res.end(catalogPage(entries));
     return;
   }
 

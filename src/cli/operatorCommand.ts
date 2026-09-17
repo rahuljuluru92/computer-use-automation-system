@@ -40,6 +40,7 @@ export async function runOperatorCommand(opts: OperatorCommandOptions): Promise<
 
   console.log(`operator console  ${running.url}`);
   console.log(`  Route a run to it with:  npm run replay -- --artifact <path> --operator ${running.url}`);
+  console.log(`  Capability catalog (read-only):  ${running.url}/catalog`);
   console.log(`  Loopback only. Ctrl-C to stop.\n`);
 
   await new Promise<void>((resolve) => {

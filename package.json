@@ -13,6 +13,7 @@
     "discover": "tsx src/cli/index.ts discover",
     "replay": "tsx src/cli/index.ts replay",
     "approve": "tsx src/cli/index.ts approve",
+    "catalog": "tsx src/cli/index.ts catalog",
     "explain": "tsx src/cli/index.ts explain",
     "operator": "tsx src/cli/index.ts operator",
     "mcp": "tsx src/cli/index.ts mcp",
