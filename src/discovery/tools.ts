@@ -78,7 +78,18 @@ export interface RecordedStep {
 /** How a discovery run ended, as declared by the model. */
 export type Terminal =
   | { kind: 'finish'; outputs: Record<string, unknown> }
-  | { kind: 'declare_outcome'; code: string; description: string; severity: 'info' | 'warn' }
+  | {
+      kind: 'declare_outcome'; code: string; description: string; severity: 'info' | 'warn';
+      /**
+       * Resolved from the model's own `ref`, the same way every other tool's
+       * target is resolved - never synthesised from the description text.
+       * Absent when the model omitted `ref` (or it didn't resolve): the
+       * outcome is still recorded here, but the compiler drops it rather than
+       * shipping a detector with nothing to detect (decision #122).
+       */
+      detectTarget?: LocatorBundle;
+      expectText?: string;
+    }
   | { kind: 'give_up'; reason: string }
   | { kind: 'request_human'; reason: string; question: string };
 
@@ -304,13 +315,27 @@ export const DISCOVERY_TOOLS: ToolDefinition[] = [
     description:
       'The application gave a legitimate answer that is not success - no such member, account '
       + 'restricted, request refused. This is information the caller asked for, not a failure, '
-      + 'and recording it here is what lets replay tell the two apart. Ends the run.',
+      + 'and recording it here is what lets replay tell the two apart. Ends the run. If the '
+      + 'refusal is written somewhere on screen, pass its ref so replay can recognise the same '
+      + 'condition again - without one, this outcome cannot be detected later and will be '
+      + 'recorded without a detector. If you see a validation or policy error, declare it '
+      + 'immediately; do not try to correct the input, retry, or find another path first.',
     input_schema: {
       type: 'object',
       properties: {
         code: { type: 'string', description: 'Stable lower_snake code, e.g. "no_such_member".' },
         description: { type: 'string' },
         severity: { type: 'string', enum: ['info', 'warn'] },
+        ref: {
+          ...REF,
+          description: 'Optional: the ref of the text or banner on screen that says this '
+            + `happened, so replay can recognise it again. ${REF.description}`,
+        },
+        expect_text: {
+          type: 'string',
+          description: 'Optional, only meaningful with ref: require this exact text at that '
+            + 'node. Omit to require only that the node is present.',
+        },
       },
       required: ['code', 'description'],
     },
@@ -620,11 +645,34 @@ export class ToolRunner {
 
   async #declareOutcome(input: Record<string, unknown>): Promise<ToolResult> {
     const severity = str(input.severity) === 'warn' ? 'warn' : 'info';
+    const expectText = input.expect_text === undefined ? undefined : str(input.expect_text);
+
+    // `ref` is optional here, unlike `assert` - the model is ending the run
+    // either way, and refusing to end it over an unlocatable node would be
+    // worse than shipping an undetectable (and therefore dropped, decision
+    // #122) outcome. A bad ref is still reported, so the model sees why.
+    let detectTarget: LocatorBundle | undefined;
+    if (input.ref !== undefined) {
+      const found = this.#resolveRef(input.ref);
+      if (!found.ok) return found.result;
+      const snapshot = this.#snapshot!;
+      const synth = synthesizeBundle(found.node, snapshot, {
+        description: str(input.description) || `outcome ${str(input.code)}`,
+        params: this.o.params,
+      });
+      if (synth.ok) detectTarget = synth.bundle;
+      // Synthesis failing here is not a reason to fail the tool call - the
+      // model saw a real refusal and is reporting it; the compiler is the
+      // place that decides an undetectable outcome should be dropped.
+    }
+
     return this.#end({
       kind: 'declare_outcome',
       code: str(input.code),
       description: str(input.description),
       severity,
+      ...(detectTarget ? { detectTarget } : {}),
+      ...(expectText !== undefined ? { expectText } : {}),
     });
   }
 

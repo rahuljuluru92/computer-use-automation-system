@@ -372,3 +372,171 @@ describe('the compile report', () => {
     expect(r.report.rewrites.some((w) => w.field === 'action.urlTemplate')).toBe(true);
   });
 });
+
+describe('a declared business outcome', () => {
+  // These end the run instead of `finish` - no extraction happened, so no
+  // output schema is populated, but the flow still needs at least one step.
+  const outcomeRun = (terminal: NonNullable<DiscoveryRun['terminal']>): DiscoveryRun => run({
+    steps: [HAPPY_PATH[0]!],
+    terminal,
+    stop: { kind: 'terminal', terminal },
+  });
+
+  it('builds a text_matches detector from the ref and text the model pointed at', async () => {
+    const r = await compile(options({
+      run: outcomeRun({
+        kind: 'declare_outcome', code: 'no_such_member', description: 'No member matches.',
+        severity: 'info', detectTarget: bundle('No results'), expectText: 'No member matches',
+      }),
+    }));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    expect(r.artifact.outcomes).toHaveLength(1);
+    expect(r.artifact.outcomes[0]).toMatchObject({ code: 'no_such_member', terminal: true });
+    expect(r.artifact.outcomes[0]!.detect).toMatchObject({
+      kind: 'text_matches', pattern: 'No member matches',
+    });
+    // Never a schema-invalid predicate forced through a type-cast - it must
+    // carry the locator the model actually pointed at.
+    expect((r.artifact.outcomes[0]!.detect as { locator?: unknown }).locator).toBeDefined();
+  });
+
+  it('builds a node_present detector when the model gave a ref but no expect_text', async () => {
+    const r = await compile(options({
+      run: outcomeRun({
+        kind: 'declare_outcome', code: 'account_restricted', description: 'Account is restricted.',
+        severity: 'warn', detectTarget: bundle('Restricted notice'),
+      }),
+    }));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.artifact.outcomes[0]!.detect.kind).toBe('node_present');
+  });
+
+  it('drops an outcome declared with no locatable node, rather than shipping an undetectable one', async () => {
+    const r = await compile(options({
+      run: outcomeRun({
+        kind: 'declare_outcome', code: 'permission_denied', description: 'Not allowed.',
+        severity: 'warn',
+      }),
+    }));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    expect(r.artifact.outcomes).toEqual([]);
+    expect(r.report.droppedOutcomes).toHaveLength(1);
+    expect(r.report.droppedOutcomes[0]).toMatch(/permission_denied/);
+  });
+});
+
+describe('outcome scenarios - proving a business outcome by replaying it, not merging trajectories', () => {
+  const scenarioTerminal: NonNullable<DiscoveryRun['terminal']> = {
+    kind: 'declare_outcome', code: 'deposit_exceeds_funding_limit',
+    description: 'Exceeds the daily funding limit.', severity: 'warn',
+    detectTarget: bundle('Funding limit notice'), expectText: 'exceeds the daily funding limit',
+  };
+  const scenarioRun = (): DiscoveryRun => run({
+    steps: [HAPPY_PATH[0]!], terminal: scenarioTerminal,
+    stop: { kind: 'terminal', terminal: scenarioTerminal },
+  });
+
+  const businessOutcome = (code: string): ReplayResult => ({
+    status: 'business_outcome',
+    runId: 'verify-scenario',
+    capability: { id: 'cap.x', version: '1.0.0', hash: 'h', status: 'draft' },
+    startedAt: new Date(0).toISOString(),
+    endedAt: new Date(1000).toISOString(),
+    durationMs: 1000,
+    steps: [], drift: [],
+    outcome: { code, description: 'x', severity: 'warn', data: {} },
+    metrics: { stepsExecuted: 1, retries: 0, recoveries: 0, degradedResolutions: 0, llmCalls: 0, interventions: 0 },
+    evidenceDir: 'evidence/verify-scenario',
+  } as ReplayResult);
+
+  it('adds the scenario outcome to outcomes[] without touching the primary steps', async () => {
+    const r = await compile(options({
+      additionalOutcomeScenarios: [{
+        run: scenarioRun(),
+        armUrl: 'http://localhost:4400/_chaos?mode=validation_error',
+        expectedCode: 'deposit_exceeds_funding_limit',
+      }],
+      verify: async (a, scenario) => (
+        scenario ? businessOutcome('deposit_exceeds_funding_limit') : succeeds(a)
+      ),
+    }));
+
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.artifact.steps).toHaveLength(3); // the primary run's steps, unchanged
+    expect(r.artifact.outcomes.map((o) => o.code)).toEqual(['deposit_exceeds_funding_limit']);
+  });
+
+  it('arms the precondition it was given before the scenario replay', async () => {
+    const armed: (string | undefined)[] = [];
+    const r = await compile(options({
+      additionalOutcomeScenarios: [{
+        run: scenarioRun(),
+        armUrl: 'http://localhost:4400/_chaos?mode=validation_error',
+        expectedCode: 'deposit_exceeds_funding_limit',
+      }],
+      verify: async (a, scenario) => {
+        armed.push(scenario?.armUrl);
+        return scenario ? businessOutcome('deposit_exceeds_funding_limit') : succeeds(a);
+      },
+    }));
+
+    expect(r.ok).toBe(true);
+    expect(armed).toEqual([undefined, 'http://localhost:4400/_chaos?mode=validation_error']);
+  });
+
+  it('refuses to ship when the scenario replay does not reproduce the declared outcome', async () => {
+    const r = await compile(options({
+      additionalOutcomeScenarios: [{
+        run: scenarioRun(),
+        armUrl: 'http://localhost:4400/_chaos?mode=validation_error',
+        expectedCode: 'deposit_exceeds_funding_limit',
+      }],
+      // The arm didn't take (or was never checked) - a clean replay of a
+      // correct primary flow, which is exactly the failure mode a merged-run
+      // design would never catch: the happy path always passes.
+      verify: async (a) => succeeds(a),
+    }));
+
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.reason).toMatch(/outcome scenario "deposit_exceeds_funding_limit" did not verify/);
+  });
+
+  it('refuses to ship when the scenario replay reports the wrong outcome code', async () => {
+    const r = await compile(options({
+      additionalOutcomeScenarios: [{
+        run: scenarioRun(),
+        armUrl: 'http://localhost:4400/_chaos?mode=validation_error',
+        expectedCode: 'deposit_exceeds_funding_limit',
+      }],
+      verify: async (a, scenario) => (scenario ? businessOutcome('wrong_code') : succeeds(a)),
+    }));
+
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.reason).toMatch(/did not verify/);
+  });
+
+  it('rejects a scenario whose run did not end in declare_outcome, before spending any browser time', async () => {
+    let verifyCalls = 0;
+    const r = await compile(options({
+      additionalOutcomeScenarios: [{
+        run: run(), // ends in `finish`, per the default fixture
+        armUrl: 'http://localhost:4400/_chaos?mode=validation_error',
+        expectedCode: 'deposit_exceeds_funding_limit',
+      }],
+      verify: async (a) => { verifyCalls += 1; return succeeds(a); },
+    }));
+
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.reason).toMatch(/not declare_outcome/);
+    expect(verifyCalls).toBe(0);
+  });
+});

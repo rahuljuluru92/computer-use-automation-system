@@ -83,8 +83,44 @@ export interface CompileProvenance {
   discoveryRunId: string;
 }
 
-/** Replays a candidate artifact against the real application. */
-export type Verifier = (artifact: CapabilityArtifact) => Promise<ReplayResult>;
+/**
+ * Replays a candidate artifact against the real application. `scenario`, when
+ * given, is a precondition to arm on a fresh session *before* replaying -
+ * e.g. arming a chaos mode - so the same function verifies both the plain
+ * happy path and a declared business outcome that only appears once that
+ * precondition holds.
+ */
+export type Verifier = (
+  artifact: CapabilityArtifact,
+  scenario?: { armUrl: string },
+) => Promise<ReplayResult>;
+
+/**
+ * A second discovery run, kept only for the business outcome it declared, and
+ * the data needed to prove that outcome rather than merely assert it.
+ *
+ * This is *not* a second trajectory to merge into the primary one - a
+ * `BusinessOutcome` is artifact-level (`outcomes[]` sits beside `steps[]`,
+ * decision #36), evaluated on every step regardless of which run produced the
+ * steps. Compiling with one of these adds exactly one thing to the artifact:
+ * an entry in `outcomes[]`. There is no step-alignment question to answer,
+ * because outcomes are never anchored to a step index.
+ *
+ * What a bare extra `DiscoveryRun` could not supply is *how to reproduce* the
+ * condition that made it end that way - a verifier replaying the assembled
+ * artifact against a clean target will never see the refusal, the detector
+ * will never fire, and verification would fail for a reason that has nothing
+ * to do with whether the outcome is real. `armUrl` is that missing
+ * precondition, supplied as data rather than inferred (decision #123).
+ */
+export interface OutcomeScenario {
+  /** Must have ended in `declare_outcome`; anything else is a caller error. */
+  run: DiscoveryRun;
+  /** Navigated on a fresh session before replay, to arm the precondition. */
+  armUrl: string;
+  /** The code `outcomesFrom(run.terminal)` will produce, checked after replay. */
+  expectedCode: string;
+}
 
 export interface CompileOptions {
   run: DiscoveryRun;
@@ -93,6 +129,11 @@ export interface CompileOptions {
   /** The input values the run was recorded with, for canonicalisation. */
   params: Record<string, unknown>;
   verify: Verifier;
+  /**
+   * Extra runs kept only for a declared outcome, each proven by its own
+   * scenario replay rather than merged into the primary trajectory.
+   */
+  additionalOutcomeScenarios?: OutcomeScenario[];
   now?: () => Date;
 }
 
@@ -105,6 +146,13 @@ export interface CompileReport {
   inputsUsed: string[];
   /** Steps the compiler could not give a checkpoint. Worth a reviewer's eye. */
   uncheckedSteps: string[];
+  /**
+   * A declared outcome dropped for lack of a detector - the model ended the
+   * run with `declare_outcome` but gave no `ref` (or it did not resolve), so
+   * there is nothing replay could recognise later. Shipping a schema-invalid
+   * detector instead of this list was decision #122's actual bug.
+   */
+  droppedOutcomes: string[];
 }
 
 export type CompileResult =
@@ -120,18 +168,20 @@ export async function compile(opts: CompileOptions): Promise<CompileResult> {
   const canonical = canonicalize(pruned.steps, opts.params);
   const steps = withInferredWaitsAndCheckpoints(canonical.steps);
 
-  const report: CompileReport = {
+  const reportBase = {
     recordedSteps: opts.run.steps.length,
     compiledSteps: steps.length,
     pruned: pruned.removed,
     retainedCycles: pruned.retained,
     rewrites: canonical.rewrites,
     inputsUsed: canonical.used,
-    uncheckedSteps: steps.filter((s) => s.checkpoint.length === 0).map((s) => s.id),
   };
 
   if (steps.length === 0) {
-    return { ok: false, reason: 'the run recorded no steps to compile', report };
+    return {
+      ok: false, reason: 'the run recorded no steps to compile',
+      report: { ...reportBase, uncheckedSteps: [], droppedOutcomes: [] },
+    };
   }
 
   // A run that never said it succeeded did not produce a capability. Compiling
@@ -142,14 +192,43 @@ export async function compile(opts: CompileOptions): Promise<CompileResult> {
       ok: false,
       reason: `the run ended on ${opts.run.stop.kind} without the model declaring an outcome, `
         + 'so there is nothing to claim the flow completed',
-      report,
+      report: { ...reportBase, uncheckedSteps: [], droppedOutcomes: [] },
     };
   }
   if (terminal.kind === 'give_up' || terminal.kind === 'request_human') {
-    return { ok: false, reason: `the run ended in ${terminal.kind}: ${terminal.reason}`, report };
+    return {
+      ok: false, reason: `the run ended in ${terminal.kind}: ${terminal.reason}`,
+      report: { ...reportBase, uncheckedSteps: [], droppedOutcomes: [] },
+    };
   }
 
-  const draft = assemble(opts, steps, canonical.used, terminal, now());
+  // Every additional scenario must itself have ended in a declared outcome -
+  // there is nothing else it could be kept for. Checked before spending any
+  // browser time on it.
+  for (const scenario of opts.additionalOutcomeScenarios ?? []) {
+    if (scenario.run.terminal?.kind !== 'declare_outcome') {
+      return {
+        ok: false,
+        reason: `an outcome scenario's run ended in ${scenario.run.terminal?.kind
+          ?? scenario.run.stop.kind}, not declare_outcome - nothing to add to outcomes[]`,
+        report: { ...reportBase, uncheckedSteps: [], droppedOutcomes: [] },
+      };
+    }
+  }
+
+  const primaryOutcomes = outcomesFrom(terminal);
+  const scenarioOutcomes = (opts.additionalOutcomeScenarios ?? [])
+    .map((s) => outcomesFrom(s.run.terminal));
+  const outcomes = [...primaryOutcomes.outcomes, ...scenarioOutcomes.flatMap((o) => o.outcomes)];
+  const droppedOutcomes = [...primaryOutcomes.dropped, ...scenarioOutcomes.flatMap((o) => o.dropped)];
+
+  const report: CompileReport = {
+    ...reportBase,
+    uncheckedSteps: steps.filter((s) => s.checkpoint.length === 0).map((s) => s.id),
+    droppedOutcomes,
+  };
+
+  const draft = assemble(opts, steps, canonical.used, outcomes, now());
 
   // Contract first: a shape violation should surface here, not as a confusing
   // failure three steps into a browser session.
@@ -173,6 +252,22 @@ export async function compile(opts: CompileOptions): Promise<CompileResult> {
       diagnostic: parsed.data,
       verification,
     };
+  }
+
+  // Each additional outcome gets its own scenario replay, on the same
+  // artifact, with its own precondition armed first. A happy-path pass
+  // proves nothing about a branch that pass never took.
+  for (const scenario of opts.additionalOutcomeScenarios ?? []) {
+    const scenarioResult = await opts.verify(parsed.data, { armUrl: scenario.armUrl });
+    if (scenarioResult.status !== 'business_outcome' || scenarioResult.outcome.code !== scenario.expectedCode) {
+      return {
+        ok: false,
+        reason: `outcome scenario "${scenario.expectedCode}" did not verify: ${describe(scenarioResult)}`,
+        report,
+        diagnostic: parsed.data,
+        verification: scenarioResult,
+      };
+    }
   }
 
   const verified: CapabilityArtifact = {
@@ -279,7 +374,7 @@ function assemble(
   opts: CompileOptions,
   steps: Step[],
   used: string[],
-  terminal: NonNullable<DiscoveryRun['terminal']>,
+  outcomes: BusinessOutcome[],
   at: Date,
 ): unknown {
   const extracts = steps.flatMap((s) => s.extract);
@@ -300,7 +395,7 @@ function assemble(
     },
     inputs: inputsSchema(opts.task.inputs, used),
     outputs: outputsSchema(extracts),
-    outcomes: outcomesFrom(terminal),
+    outcomes,
     steps,
     recovery: [],
     policy: {
@@ -367,19 +462,42 @@ function outputsSchema(extracts: ExtractSpec[]): JsonSchemaDoc {
 /**
  * A declared business outcome becomes a detector replay can recognise
  * deliberately, rather than inferring one from a checkpoint that happened to
- * fail. Without a locator the model pointed at there is nothing to detect, so
- * the outcome is recorded without a detector and flagged - see the report.
+ * fail. The detector is built from the node the model itself pointed at
+ * (`declare_outcome`'s `ref`, resolved by the tool runner into `detectTarget`)
+ * - never synthesised from the description text, which is prose for a human
+ * reviewer, not something guaranteed to appear verbatim on the page.
+ *
+ * Without a locator there is nothing to detect, and shipping one anyway used
+ * to mean forcing a `text_matches` predicate through a type-cast with no
+ * `locator` field - schema-invalid, caught by nothing because no discovered
+ * artifact had ever taken this path (decision #114). Now it is dropped and
+ * named in the compile report instead (decision #122).
  */
-function outcomesFrom(terminal: NonNullable<DiscoveryRun['terminal']>): BusinessOutcome[] {
-  if (terminal.kind !== 'declare_outcome') return [];
-  return [{
-    code: terminal.code,
-    description: terminal.description,
-    severity: terminal.severity,
-    terminal: true,
-    detect: { kind: 'text_matches', pattern: escapeRegex(terminal.description) } as unknown as Predicate,
-    returns: {},
-  }];
+function outcomesFrom(
+  terminal: DiscoveryRun['terminal'],
+): { outcomes: BusinessOutcome[]; dropped: string[] } {
+  if (!terminal || terminal.kind !== 'declare_outcome') return { outcomes: [], dropped: [] };
+  if (!terminal.detectTarget) {
+    return {
+      outcomes: [],
+      dropped: [`"${terminal.code}" - declared with no locatable node, so replay could never `
+        + 'recognise it again; shipped without a detector would be worse than not shipping it'],
+    };
+  }
+  const detect: Predicate = terminal.expectText !== undefined
+    ? { kind: 'text_matches', locator: terminal.detectTarget, pattern: escapeRegex(terminal.expectText) }
+    : { kind: 'node_present', locator: terminal.detectTarget };
+  return {
+    outcomes: [{
+      code: terminal.code,
+      description: terminal.description,
+      severity: terminal.severity,
+      terminal: true,
+      detect,
+      returns: {},
+    }],
+    dropped: [],
+  };
 }
 
 /** Never grants the flow a class it never used. */

@@ -193,6 +193,57 @@ describe('what a recorded step contains', () => {
   });
 });
 
+describe('declare_outcome', () => {
+  it('resolves ref and expect_text into a detector the compiler can build a predicate from', async () => {
+    await runner.run('observe', {});
+    const r = await runner.run('declare_outcome', {
+      code: 'no_such_member', description: 'No results.', severity: 'info',
+      ref: savingsView(1), expect_text: 'View',
+    });
+
+    expect(r.ok).toBe(true);
+    expect(runner.terminal).toMatchObject({ kind: 'declare_outcome', code: 'no_such_member' });
+    const terminal = runner.terminal as { detectTarget?: unknown; expectText?: string };
+    expect(terminal.detectTarget).toBeDefined();
+    expect(terminal.expectText).toBe('View');
+  });
+
+  it('resolves a ref with no expect_text, for a node_present detector', async () => {
+    await runner.run('observe', {});
+    const r = await runner.run('declare_outcome', {
+      code: 'account_restricted', description: 'Restricted.', severity: 'warn',
+      ref: savingsView(1),
+    });
+
+    expect(r.ok).toBe(true);
+    const terminal = runner.terminal as { detectTarget?: unknown; expectText?: string };
+    expect(terminal.detectTarget).toBeDefined();
+    expect(terminal.expectText).toBeUndefined();
+  });
+
+  it('still ends the run when no ref is given, with nothing for the compiler to detect', async () => {
+    await runner.run('observe', {});
+    const r = await runner.run('declare_outcome', {
+      code: 'permission_denied', description: 'Not allowed.',
+    });
+
+    expect(r.ok).toBe(true);
+    const terminal = runner.terminal as { detectTarget?: unknown };
+    expect(terminal.detectTarget).toBeUndefined();
+  });
+
+  it('reports a hallucinated ref as a correctable failure rather than ending the run silently', async () => {
+    await runner.run('observe', {});
+    const r = await runner.run('declare_outcome', {
+      code: 'no_such_member', description: 'No results.', ref: 'o1#nonexistent',
+    });
+
+    expect(r.ok).toBe(false);
+    expect(r.text).toMatch(/No control/);
+    expect(runner.terminal).toBeUndefined();
+  });
+});
+
 describe('refusals are explained, not merely returned', () => {
   it('tells the model not to route around a policy denial', async () => {
     build({ denyLabels: ['Sign Out'] });

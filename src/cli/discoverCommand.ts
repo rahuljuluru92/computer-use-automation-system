@@ -237,14 +237,18 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
  * on its own as proof.
  */
 function verifier(baseUrl: string, inputs: Record<string, unknown>, redactor: ReturnType<typeof buildRedactor>) {
-  return async (artifact: CapabilityArtifact) => {
+  return async (artifact: CapabilityArtifact, scenario?: { armUrl: string }) => {
     const surface = await WebSurface.launch({ headless: process.env.CUA_HEADED !== '1' });
     const evidence = new EvidenceWriter({
       runId: newRunId('verify'),
       redactor,
-      meta: { verifying: artifact.id, version: artifact.version },
+      meta: { verifying: artifact.id, version: artifact.version, ...(scenario ? { scenario } : {}) },
     });
     try {
+      // Armed on this fresh session, before replay's own navigation - chaos is
+      // sticky per session (decision #21), so one visit here covers the whole
+      // replay that follows through the same browser context.
+      if (scenario) await surface.navigate(scenario.armUrl);
       return await replay({
         artifact,
         inputs,
