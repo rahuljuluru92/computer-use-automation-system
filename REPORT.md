@@ -106,6 +106,14 @@ the overlay mechanism itself: `TenantOverlay.targets` could only patch a step's 
 the checkpoint or waitFor predicates that carry their own locator bundles — a field rename breaks
 both. Extended rather than routed around (decision #121). Evidence at `evidence/gate-m2-*/`.
 
+**Extended to a second, real capability.** The M2 story above ran only against the hand-authored
+reference artifact — checking showed the model-discovered `read_savings_balance` artifact had
+never carried an overlay at all. `cap.member.open_subaccount` (Section 7) now does, applied to the
+actual shipped, model-discovered JSON rather than only a fixture built to make the point: the
+identical rename pattern hits its sign-in checkpoint and its search step, patched and re-signed
+the same way, and proven end to end against a real second capability
+(`tests/integration/tenantOverlayOpenSubaccount.test.ts`).
+
 **What running against a real, unfamiliar public site actually found.** A second discovery run
 against [saucedemo.com](https://www.saucedemo.com) (not required — Section 4 asks for one real
 run, and Meridian satisfies it — but run anyway to test the generalization claim above against
@@ -171,17 +179,34 @@ full recorded run and grepped out of every file it produced.
 is invisible to a value-based redactor by construction — which is exactly why capture records
 *what was touched, never what was typed* rather than trying to redact keystrokes after the fact.
 
+**A fourth policy check, added for the second capability's irreversible step**: a numeric
+`$input` field over a configured ceiling needs a human decision, the same way an irreversible
+action's label does — sourced from the caller-supplied input value itself, never from rendered
+page text, so it is never the locale-formatted-currency parsing problem it could have been.
+Proven live (`scripts/gate-value-ceiling.ts`): a $500 deposit completes with zero escalation,
+an $8000 one escalates specifically at the step that enters the amount, not several steps later
+at commit. And separately, invoking that same capability over MCP with a perfectly legitimate,
+in-bounds deposit still cannot complete unattended — its commit step's label match requires a
+human regardless of amount, and an MCP call wires no operator channel, so the run comes back a
+clean, typed refusal rather than a hang or a silent success. Both are the same underlying claim
+from two different angles: an irreversible financial action does not get to complete just
+because an agent asked nicely.
+
 ## 7. Cuts
 
-- **The discovered artifact declares no business outcomes or recovery rules** (decision #114).
-  The one real discovery run (Section 2's "has to be real" requirement) only ever walked the happy
-  path, so it never met "no such member" and never learned to declare it. The hand-authored
-  reference artifact does declare it, and the P5 gate and the MCP stretch demo both use it for
-  exactly this reason — confirmed live twice, not papered over: running the real *discovered*
-  artifact's capability over MCP with a bad member id correctly returns a typed `failed:
-  wait_timeout`, not a business outcome, because that outcome was never taught to it. Fixing this
-  for real means scripting the target to produce error paths mid-discovery — genuine new scope,
-  not a bug fix.
+- **`read_savings_balance`'s discovered artifact declares no business outcomes or recovery
+  rules** (decision #114). The one real discovery run behind it (Section 2's "has to be real"
+  requirement) only ever walked the happy path, so it never met "no such member" and never
+  learned to declare it. The hand-authored reference artifact does declare it, and the P5 gate
+  uses it for exactly this reason — confirmed live, not papered over: running the real
+  *discovered* artifact's capability over MCP with a bad member id correctly returns a typed
+  `failed: wait_timeout`, not a business outcome, because that outcome was never taught to it.
+  **Narrowed, not fixed, for a second capability**: `cap.member.open_subaccount` (Section 4) was
+  discovered in two runs — a clean happy path, and a second run with a chaos condition armed and
+  a dedicated prompt telling the model to declare the refusal it hits rather than try to fix it —
+  and ships with a real, replay-checked business outcome as a result. Discovered **recovery
+  rules** remain unaddressed for both capabilities: the compiler still has no tool through which a
+  model can author one, which is real, separate, larger scope than declaring an outcome.
 - **A live screen recording of the escalation handoff.** The brief marks this optional
   ("welcome but optional"); `evidence/gate-5-escalation/` carries the full audit trail and
   `report.html` instead.
@@ -199,10 +224,15 @@ is invisible to a value-based redactor by construction — which is exactly why 
   syntaxes (`{memberId}` vs `$input.memberId`) because they predate a shared implementation —
   correct today, worth unifying before the artifact schema grows further.
 
-What's real and verified, not merely described: two genuine Sonnet 5 discovery runs with zero
-hand-authoring, against two different targets, each producing a self-verified artifact;
-deterministic replay of the first with zero model calls across success, business-outcome,
-recovered, hard-failure, and human-escalation terminal states (`scripts/gate-p5.ts`,
-`evidence/gate-*/`); a second live tenant skin proven end to end (`scripts/gate-m2.ts`,
-`evidence/gate-m2-*/`); and an approved capability actually invoked by a real MCP client over real
-JSON-RPC (`scripts/demo-stretch.sh`). 328 tests, one command (`npm run check`) to verify all of it.
+What's real and verified, not merely described: four genuine Sonnet 5 discovery runs with zero
+hand-authoring (one capability recorded twice, to also capture a declared business outcome),
+against two different targets, producing three self-verified artifacts — one of them
+(`cap.member.open_subaccount`) an irreversible flow that ships with a real, replay-checked
+business outcome, not just a happy path; deterministic replay of the first with zero model calls
+across success, business-outcome, recovered, hard-failure, and human-escalation terminal states
+(`scripts/gate-p5.ts`, `evidence/gate-*/`); a second live tenant skin proven end to end against
+both capabilities (`scripts/gate-m2.ts`, `tests/integration/tenantOverlayOpenSubaccount.test.ts`);
+a value-ceiling safety check proven live against a real capability (`scripts/gate-value-ceiling
+.ts`); and two approved capabilities actually invoked by a real MCP client over real JSON-RPC,
+one of them refusing to complete an irreversible action unattended (`scripts/demo-stretch.sh`).
+362 tests, one command (`npm run check`) to verify all of it.

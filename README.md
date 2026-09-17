@@ -18,7 +18,7 @@ log and phase-by-phase build history, with test counts per phase:
 ```bash
 npm install                        # installs Playwright's browser binaries too
 cp .env.example .env               # fill in ANTHROPIC_API_KEY; everything else has a fallback
-npm run check                      # typecheck + lint + 328 tests, ~2 min
+npm run check                      # typecheck + lint + 362 tests, ~2-3 min
 ```
 
 Node 20+. Nothing else to install - the target app, the engine, and the operator console are all
@@ -94,38 +94,45 @@ npm run explain -- --schema                                                     
 | 3.1 Goal-driven agent loop | `src/discovery/{loop,planner,tools}.ts`, `src/cli/discoverCommand.ts` | `npm run discover -- --goal ... --target ...` |
 | 3.2 Structured artifact | `src/core/schema.ts` (`CapabilityArtifact`) | `npm run explain -- --schema` |
 | 3.3 Deterministic replay | `src/replay/replay.ts`, `src/core/result.ts` (`ReplayResult`) | `npm run replay -- ...` (any input above) |
-| 3.4 Safety & policy guardrails | `src/policy/{policyEngine,actionClass,secrets}.ts`, `config/policy.yaml` | `tests/unit/policy.test.ts`, `tests/safety/redaction.test.ts` |
+| 3.4 Safety & policy guardrails | `src/policy/{policyEngine,actionClass,secrets}.ts`, `config/policy.yaml` | `tests/unit/policy.test.ts`, `tests/safety/redaction.test.ts`, `npx tsx scripts/gate-value-ceiling.ts` |
 | 3.5 Evidence / observability | `src/evidence/{writer,reportHtml}.ts` | open any `evidence/<runId>/report.html` |
 | 3.6 Human-in-the-loop escalation | `src/escalation/*`, `src/exec/lease.ts` | `evidence/gate-5-escalation/report.html` |
-| 3.7 Heterogeneity & multi-tenant | `src/replay/overlay.ts`; a second live tenant skin in `apps/meridian-core/tenants.ts`; discussed in [REPORT.md §4](REPORT.md#4-heterogeneity--multi-tenant) | `npx tsx scripts/gate-m2.ts`, `tests/unit/overlay.test.ts`, `tests/integration/tenantOverlay.test.ts` |
+| 3.7 Heterogeneity & multi-tenant | `src/replay/overlay.ts`; a second live tenant skin in `apps/meridian-core/tenants.ts`, applied to both capabilities; discussed in [REPORT.md §4](REPORT.md#4-heterogeneity--multi-tenant) | `npx tsx scripts/gate-m2.ts`, `tests/integration/{tenantOverlay,tenantOverlayOpenSubaccount}.test.ts` |
 
 | Section 7 evaluation criterion | Primary evidence |
 |---|---|
 | System design | `src/core/schema.ts`, [REPORT.md §1-2](REPORT.md) |
-| Correctness of the core loop | `evidence/gate-1-success/`, a real Sonnet 5 discovery run in `evidence/` |
+| Correctness of the core loop | `evidence/gate-1-success/`, two real Sonnet 5 discovery runs in `evidence/` |
 | Robustness & error handling | `evidence/gate-2-business-outcome/`, `gate-3-recovered/`, `gate-4-hard-failure/` |
 | Human-in-the-loop escalation | `evidence/gate-5-escalation/`, [REPORT.md §5](REPORT.md#5-escalation--handoff) |
-| Generalization | [REPORT.md §4](REPORT.md#4-heterogeneity--multi-tenant), `src/replay/overlay.ts`, a second live tenant skin proven end to end (`evidence/gate-m2-*/`), and a second real discovery run against [saucedemo.com](https://www.saucedemo.com) (`evidence/20260912T153547Z-discovery-67e14020/`) - which found and fixed a real perception-layer gap rather than only arguing the design generalizes |
-| Safety & data handling | `config/policy.yaml`, `tests/safety/`, [REPORT.md §6](REPORT.md#6-safety) |
-| Code quality | `npm run check` (typecheck + lint + 328 tests) |
+| Generalization | [REPORT.md §4](REPORT.md#4-heterogeneity--multi-tenant), `src/replay/overlay.ts`, a second live tenant skin proven end to end against both capabilities (`evidence/gate-m2-*/`), and a second real discovery run against [saucedemo.com](https://www.saucedemo.com) (`evidence/20260912T153547Z-discovery-67e14020/`) - which found and fixed a real perception-layer gap rather than only arguing the design generalizes |
+| Safety & data handling | `config/policy.yaml`, `tests/safety/`, `evidence/gate-value-ceiling-*/`, [REPORT.md §6](REPORT.md#6-safety) |
+| Code quality | `npm run check` (typecheck + lint + 362 tests) |
 | Communication | [REPORT.md](REPORT.md), [docs/adr/](docs/adr/), this table |
 
 ## Stretch goal: the MCP capability catalog
 
 Quarantined from the core demo path on purpose - a stretch-goal slip must never break the
 primary thread above. Exposes approved capabilities as MCP tools an AI agent can discover and
-call by name:
+call by name. `npm run app &` needs to be running first:
 
 ```bash
 bash scripts/demo-stretch.sh
 ```
 
-This approves the reference capability (`draft → approved`, re-signed) and then runs a real MCP
-`Client` against a real `cua mcp` server over stdio - `tools/list` shows the catalog,
-`tools/call` invokes it and gets back typed `structuredContent`, and a made-up capability name is
-refused rather than silently attempted. See [REPORT.md §7](REPORT.md#7-cuts) and
-[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)'s P6 section for what this demo does and does not
-prove with the currently-shipped, model-discovered artifact.
+This approves both real capabilities (`draft → approved`, re-signed) and then runs a real MCP
+`Client` against a real `cua mcp` server over stdio: `tools/list` shows the catalog, a
+`read_savings_balance` call gets back typed `structuredContent`, an `open_subaccount` call with a
+perfectly legitimate deposit still cannot complete unattended (its commit step needs a human
+regardless of amount, and an MCP call wires no operator channel - a clean, typed refusal, not a
+hang), a bad member id and a made-up capability name are both refused rather than silently
+attempted. See [REPORT.md §7](REPORT.md#7-cuts) and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)'s
+P6 and P8 sections for what each of these does and does not prove with the currently-shipped,
+model-discovered artifacts.
+
+The same catalog is also browsable without a live MCP client: `cua operator` serves it at
+`/catalog` alongside the escalation console, and `npm run catalog` prints it to a terminal -
+both read the identical loader `tools/list` does, so none of the three can disagree.
 
 ## Project layout
 
