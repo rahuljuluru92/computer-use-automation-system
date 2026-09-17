@@ -44,6 +44,27 @@ async function main(): Promise<void> {
     console.log(`  structuredContent: ${JSON.stringify(ok.structuredContent)}`);
 
     line();
+    console.log('tools/call  cap.member.open_subaccount  { memberId: "12345", deposit: "500", ... }');
+    console.log('  Note: this is the second real, model-discovered capability (P8.2), the first one');
+    console.log('  whose flow ends in an irreversible commit ("Confirm and Open Account"). Its own');
+    console.log('  business outcome (a funding-limit refusal) needs a test-only chaos mode armed on');
+    console.log('  the session that hits it, which a fresh browser launched per MCP call has no way');
+    console.log('  to inherit - so this call instead shows the other half of the safety story: a');
+    console.log('  legitimate, in-bounds deposit still cannot complete unattended. requireApprovalLabels');
+    console.log('  matches the commit button regardless of amount, the run escalates, and the MCP');
+    console.log('  server wires no operator channel into an unattended tool call - so it comes back a');
+    console.log('  clean, typed refusal, not a hang and not a silent success.');
+    const irreversible = await client.callTool({
+      name: 'cap.member.open_subaccount',
+      arguments: {
+        memberId: '12345', subType: 'Savings', nickname: 'MCP Demo Fund',
+        deposit: '500', fundingAccount: '0001-4477',
+      },
+    });
+    console.log(`  isError: ${Boolean(irreversible.isError)}`);
+    console.log(`  ${(irreversible.content as Array<{ text?: string }>)[0]?.text}`);
+
+    line();
     console.log('tools/call  cap.member.read_savings_balance  { memberId: "99999" }  (a bad id)');
     console.log('  Note: this artifact is the real, model-discovered one (Phase 4) - the model');
     console.log('  only ever walked the happy path in its one discovery run, so it declared no');

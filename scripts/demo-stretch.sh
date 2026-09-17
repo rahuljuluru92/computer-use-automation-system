@@ -10,9 +10,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ARTIFACT="artifacts/cap.member.read_savings_balance@1.0.0.json"
+ARTIFACT2="artifacts/cap.member.open_subaccount@1.0.0.json"
 
-echo "== approving the reference capability for unattended invocation =="
+echo "== approving both real capabilities for unattended invocation =="
 npm run --silent approve -- --artifact "$ARTIFACT"
+npm run --silent approve -- --artifact "$ARTIFACT2"
 
 echo
 echo "== an AI agent discovers and calls it over MCP =="

@@ -1,0 +1,16 @@
+{
+  "runId": "20260917T225251Z-mcp-58adcbe5",
+  "capability": "cap.member.read_savings_balance",
+  "version": "1.0.0",
+  "via": "mcp",
+  "status": "success",
+  "outputs": [
+    "savingsBalance"
+  ],
+  "events": 48,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:52:54.360Z"
+}

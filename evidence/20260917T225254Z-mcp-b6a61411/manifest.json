@@ -1,0 +1,14 @@
+{
+  "runId": "20260917T225254Z-mcp-b6a61411",
+  "capability": "cap.member.open_subaccount",
+  "version": "1.0.0",
+  "via": "mcp",
+  "status": "escalated",
+  "intervention": "int-20260917T225254Z-mcp-b6a61411-s13",
+  "events": 88,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:52:57.443Z"
+}

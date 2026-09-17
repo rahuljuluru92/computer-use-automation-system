@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "id": "cap.member.open_subaccount",
   "version": "1.0.0",
-  "status": "draft",
+  "status": "approved",
   "title": "Open a member sub-account",
   "description": "Open a new sub-account for a member, funded from one of their existing accounts, and record the reference number and new account number the console gives back once it is opened.",
   "target": {
@@ -2378,7 +2378,218 @@
   },
   "tenancy": {
     "canonical": true,
-    "overlays": {}
+    "overlays": {
+      "summitcu": {
+        "targets": {
+          "s5": {
+            "description": "the Customer Number search field",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Customer Number",
+                  "exact": true
+                },
+                "confidence": 0.9,
+                "rationale": "Same field as the base flow's Member ID box; this tenant labels it Customer Number instead."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Customer Number",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.7,
+                "rationale": "Fallback if the label association is lost."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        },
+        "checkpoints": {
+          "s4": [
+            {
+              "kind": "node_present",
+              "locator": {
+                "description": "the Customer Number search field",
+                "frame": {
+                  "path": [
+                    "contentFrame"
+                  ]
+                },
+                "strategies": [
+                  {
+                    "tier": 1,
+                    "strategy": {
+                      "kind": "role_name",
+                      "role": "textbox",
+                      "name": "Customer Number",
+                      "exact": true
+                    },
+                    "confidence": 0.9,
+                    "rationale": "Being able to search is the real postcondition of signing in, under whatever name this tenant gives the field."
+                  }
+                ],
+                "requireUnique": true,
+                "minAgreement": 1,
+                "allowDegraded": true
+              }
+            }
+          ],
+          "s5": [
+            {
+              "kind": "value_equals",
+              "locator": {
+                "description": "the Customer Number search field",
+                "frame": {
+                  "path": [
+                    "contentFrame"
+                  ]
+                },
+                "strategies": [
+                  {
+                    "tier": 1,
+                    "strategy": {
+                      "kind": "role_name",
+                      "role": "textbox",
+                      "name": "Customer Number",
+                      "exact": true
+                    },
+                    "confidence": 0.9,
+                    "rationale": "Same field as the base flow's Member ID box; this tenant labels it Customer Number instead."
+                  },
+                  {
+                    "tier": 3,
+                    "strategy": {
+                      "kind": "label_anchored",
+                      "label": "Customer Number",
+                      "controlRole": "textbox"
+                    },
+                    "confidence": 0.7,
+                    "rationale": "Fallback if the label association is lost."
+                  }
+                ],
+                "requireUnique": true,
+                "minAgreement": 2,
+                "allowDegraded": true
+              },
+              "value": "$input.memberId"
+            }
+          ]
+        },
+        "waitFors": {
+          "s4": [
+            {
+              "kind": "node_present",
+              "locator": {
+                "description": "the Customer Number search field",
+                "frame": {
+                  "path": [
+                    "contentFrame"
+                  ]
+                },
+                "strategies": [
+                  {
+                    "tier": 1,
+                    "strategy": {
+                      "kind": "role_name",
+                      "role": "textbox",
+                      "name": "Customer Number",
+                      "exact": true
+                    },
+                    "confidence": 0.9,
+                    "rationale": "Being able to search is the real postcondition of signing in, under whatever name this tenant gives the field."
+                  }
+                ],
+                "requireUnique": true,
+                "minAgreement": 1,
+                "allowDegraded": true
+              }
+            }
+          ]
+        },
+        "recovery": [
+          {
+            "id": "accept-summitcu-consent",
+            "description": "accept the Summit Credit Union servicing consent notice",
+            "when": {
+              "kind": "node_present",
+              "locator": {
+                "description": "the consent notice",
+                "frame": {
+                  "path": [
+                    "contentFrame"
+                  ]
+                },
+                "strategies": [
+                  {
+                    "tier": 1,
+                    "strategy": {
+                      "kind": "role_name",
+                      "role": "button",
+                      "name": "I Agree",
+                      "exact": true
+                    },
+                    "confidence": 0.9,
+                    "rationale": "Summit's consent screen offers exactly one way past it."
+                  }
+                ],
+                "requireUnique": true,
+                "minAgreement": 1,
+                "allowDegraded": true
+              }
+            },
+            "kind": "dismiss",
+            "do": [
+              {
+                "action": {
+                  "kind": "click"
+                },
+                "target": {
+                  "description": "the I Agree button",
+                  "frame": {
+                    "path": [
+                      "contentFrame"
+                    ]
+                  },
+                  "strategies": [
+                    {
+                      "tier": 1,
+                      "strategy": {
+                        "kind": "role_name",
+                        "role": "button",
+                        "name": "I Agree",
+                        "exact": true
+                      },
+                      "confidence": 0.9,
+                      "rationale": "Same control the when predicate detected."
+                    }
+                  ],
+                  "requireUnique": true,
+                  "minAgreement": 1,
+                  "allowDegraded": true
+                }
+              }
+            ],
+            "maxAttempts": 1,
+            "budgetMs": 5000,
+            "thenRetryStep": true
+          }
+        ],
+        "waitBudgetMultiplier": 1,
+        "notes": "Summit Credit Union re-brand, the same fix as read_savings_balance (decision #121) applied to a second, real, model-discovered capability: \"Customer Number\" replaces \"Member ID\" on the search field and on the sign-in checkpoint that proves it is there, plus the consent-notice recovery rule. Same flow, same steps, same outputs."
+      }
+    }
   },
   "provenance": {
     "discoveryRunId": "20260917T221348Z-discovery-88e38c8a",
@@ -2401,6 +2612,6 @@
     "lastVerifiedAt": "2026-09-17T22:14:08.555Z"
   },
   "integrity": {
-    "hash": "sha256:1bed453e26aaa539ec655151563b3ec1fb49f25719b267dcfece6d8ea423a1f5"
+    "hash": "sha256:fedd732c6074f7211316780fa48fa9ef44b84fb2340c6095619bd9c130caddff"
   }
 }

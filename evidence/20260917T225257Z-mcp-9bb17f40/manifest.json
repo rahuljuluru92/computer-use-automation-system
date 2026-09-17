@@ -1,0 +1,15 @@
+{
+  "runId": "20260917T225257Z-mcp-9bb17f40",
+  "capability": "cap.member.read_savings_balance",
+  "version": "1.0.0",
+  "via": "mcp",
+  "status": "failed",
+  "failedAt": "s6",
+  "code": "wait_timeout",
+  "events": 47,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:53:23.658Z"
+}
