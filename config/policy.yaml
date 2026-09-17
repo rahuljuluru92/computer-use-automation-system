@@ -29,3 +29,10 @@ requireApprovalLabels:
 denyLabels:
   - '\bdelete member\b'
   - '\bpurge\b'
+
+# A numeric $input field over `max` needs a human decision, the same as an
+# irreversible action's label - checked against the caller-supplied input
+# value itself, never against rendered page text (decision #127).
+valueLimits:
+  - field: deposit
+    max: 5000

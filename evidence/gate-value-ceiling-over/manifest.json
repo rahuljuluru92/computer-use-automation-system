@@ -1,0 +1,12 @@
+{
+  "runId": "gate-value-ceiling-over",
+  "note": "Over the ceiling - escalates at the deposit step itself, not at commit.",
+  "status": "escalated",
+  "intervention": "int-gate-value-ceiling-over-s10",
+  "events": 68,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:37:17.795Z"
+}

@@ -13,6 +13,7 @@ const PolicyFile = z.object({
   maxUnapprovedActionClass: ActionClass.default('write_reversible'),
   requireApprovalLabels: z.array(z.string()).default([]),
   denyLabels: z.array(z.string()).default([]),
+  valueLimits: z.array(z.object({ field: z.string(), max: z.number() })).default([]),
 });
 
 export function loadPolicy(path = 'config/policy.yaml'): PolicyConfig {

@@ -415,11 +415,13 @@ async function runReplay(opts: ReplayOptions): Promise<ReplayResult> {
         const before = await captureShot(index, 'before');
         if (before) evidenceRefs.push(before);
 
+        const valueRef = valueRefOf(step, params);
         const req: ActRequest = {
           stepId: step.id, action: step.action, params, snapshot,
           ...(step.target ? { target: step.target } : {}),
           ...(step.data ? { text: materialise(step.data.value, params, opts.secrets) } : {}),
           declaredClass: step.actionClass as ActionClass,
+          ...(valueRef ? { valueRef } : {}),
         };
         const acted = await executor.act(req);
 
@@ -1013,6 +1015,31 @@ function missingSecrets(artifact: CapabilityArtifact, secrets?: SecretResolver):
     }
   }
   return missing;
+}
+
+/**
+ * The raw fact a value-ceiling check needs: which single `$input` field this
+ * step's whole value came from, and what it resolved to as a number.
+ *
+ * Deliberately exact-match only (`$input.deposit`, not "Ref: $input.x" or a
+ * template mixing literal text with a reference) - a plain numeric field is
+ * always recorded as a bare reference, and refusing to guess at anything
+ * looser keeps this from ever mis-reading a step it was not meant for. Never
+ * for `$secret.*` values, which are credentials, not amounts, and are
+ * resolved by `materialise` from the environment rather than from `params`
+ * at all. Policy decides whether the field has a configured limit and
+ * whether this value exceeds it - this only reports what was observed
+ * (decision #127), the same division of labour as `declaredClass`.
+ */
+function valueRefOf(
+  step: Step,
+  params: Record<string, unknown>,
+): { field: string; value: number } | undefined {
+  const ref = step.data?.value.match(/^\$input\.([A-Za-z0-9_]+)$/)?.[1];
+  if (ref === undefined) return undefined;
+  const raw = params[ref];
+  const value = typeof raw === 'string' || typeof raw === 'number' ? Number(raw) : NaN;
+  return Number.isFinite(value) ? { field: ref, value } : undefined;
 }
 
 function materialise(

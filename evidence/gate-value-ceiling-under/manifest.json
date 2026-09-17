@@ -1,0 +1,15 @@
+{
+  "runId": "gate-value-ceiling-under",
+  "note": "Under the ceiling - completes with zero escalation of any kind.",
+  "status": "success",
+  "outputs": [
+    "referenceNumber",
+    "accountNumber"
+  ],
+  "events": 102,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:37:15.433Z"
+}

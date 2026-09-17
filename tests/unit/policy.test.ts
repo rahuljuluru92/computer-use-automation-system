@@ -142,6 +142,49 @@ describe('the shipped policy file', () => {
   });
 });
 
+describe('value ceilings', () => {
+  // decision #127: the field name and its resolved value are supplied as a
+  // raw fact by the caller (mirroring declaredClass) - the engine alone
+  // decides whether a configured limit applies and whether it is exceeded.
+  const ceiling = engine({ valueLimits: [{ field: 'deposit', max: 5000 }] });
+
+  it('allows a value at or under the ceiling', () => {
+    const d = ceiling.check({ action: { kind: 'type', clearFirst: true }, target: node('Initial Deposit', 'textbox'),
+      currentUrl: at, valueRef: { field: 'deposit', value: 5000 } });
+    expect(d.verdict).toBe('allow');
+  });
+
+  it('requires approval once a value exceeds its configured ceiling', () => {
+    const d = ceiling.check({ action: { kind: 'type', clearFirst: true }, target: node('Initial Deposit', 'textbox'),
+      currentUrl: at, valueRef: { field: 'deposit', value: 8000 } });
+    expect(d.verdict).toBe('require_approval');
+    if (d.verdict === 'require_approval') {
+      expect(d.rule).toBe('valueLimits:deposit');
+      expect(d.reason).toMatch(/8000/);
+      expect(d.reason).toMatch(/5000/);
+    }
+  });
+
+  it('proceeds once approval has been granted for the run', () => {
+    const d = ceiling.check({ action: { kind: 'type', clearFirst: true }, target: node('Initial Deposit', 'textbox'),
+      currentUrl: at, valueRef: { field: 'deposit', value: 8000 }, approvalGranted: true });
+    expect(d.verdict).toBe('allow');
+  });
+
+  it('ignores a field with no configured limit', () => {
+    const d = ceiling.check({ action: { kind: 'type', clearFirst: true }, target: node('Nickname', 'textbox'),
+      currentUrl: at, valueRef: { field: 'nickname', value: 999999 } });
+    expect(d.verdict).toBe('allow');
+  });
+
+  it('does nothing when the action carries no valueRef at all', () => {
+    // Most actions never resolve a numeric $input - the check has to be
+    // opt-in per action, not something every click has to pay for.
+    const d = ceiling.check({ action: { kind: 'click' }, target: node('View'), currentUrl: at });
+    expect(d.verdict).toBe('allow');
+  });
+});
+
 describe('secret references', () => {
   it('resolves from the environment and registers with the redactor first', () => {
     process.env.CUA_TEST_SECRET = 'a-very-secret-value-xyz';

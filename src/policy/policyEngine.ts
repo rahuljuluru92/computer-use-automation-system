@@ -39,6 +39,15 @@ export interface PolicyConfig {
   requireApprovalLabels: string[];
   /** Control labels that are refused outright, approval or not. */
   denyLabels: string[];
+  /**
+   * A numeric `$input` field whose value exceeds `max` needs a human decision,
+   * the same way an irreversible action's label does. Keyed by field name
+   * rather than by capability: this demo has one target app and one
+   * financial field worth fencing, and scoping this to a specific capability
+   * id is exactly the kind of thing a per-capability policy file would carry
+   * in a deployment with more of them (decision #127).
+   */
+  valueLimits: Array<{ field: string; max: number }>;
 }
 
 export const DEFAULT_POLICY: PolicyConfig = {
@@ -49,6 +58,7 @@ export const DEFAULT_POLICY: PolicyConfig = {
   maxUnapprovedActionClass: 'write_reversible',
   requireApprovalLabels: [],
   denyLabels: [],
+  valueLimits: [],
 };
 
 export interface PolicyRequest {
@@ -61,6 +71,15 @@ export interface PolicyRequest {
   declaredClass?: ActionClass | undefined;
   /** True when the caller has authorised irreversible actions for this run. */
   approvalGranted?: boolean;
+  /**
+   * The raw fact, not a verdict: which `$input` field this action's value
+   * came from, and what it resolved to. Supplied by whoever calls
+   * `Executor.act()` (the only place that can materialise `step.data` against
+   * `params`), never pre-judged there - the same division of labour as
+   * `declaredClass`: the caller states what it observed, policy decides what
+   * it means, independently, inside the one chokepoint (decision #127).
+   */
+  valueRef?: { field: string; value: number } | undefined;
 }
 
 export type PolicyDecision =
@@ -117,6 +136,15 @@ export class PolicyEngine {
       return { verdict: 'require_approval', rule: 'maxUnapprovedActionClass', actionClass,
         reason: `"${label || req.action.kind}" is irreversible and this run is not approved for `
               + `irreversible actions. You never let a discovery agent move money.` };
+    }
+
+    if (req.valueRef) {
+      const limit = this.config.valueLimits.find((l) => l.field === req.valueRef!.field);
+      if (limit && req.valueRef.value > limit.max && !req.approvalGranted) {
+        return { verdict: 'require_approval', rule: `valueLimits:${limit.field}`, actionClass,
+          reason: `$input.${limit.field} is ${req.valueRef.value}, over the ${limit.max} ceiling `
+                + `for this field - a value this size needs a human decision, not a policy default.` };
+      }
     }
 
     return { verdict: 'allow', actionClass };

@@ -54,6 +54,9 @@ export interface ActRequest {
   snapshot: UiSnapshot;
   /** Marks the value as sensitive, so it is registered before it is typed. */
   sensitive?: boolean;
+  /** Which `$input` field this action's value came from, and what it resolved
+   *  to - a fact for policy to judge, not a verdict (decision #127). */
+  valueRef?: { field: string; value: number } | undefined;
 }
 
 export type ActOutcome =
@@ -138,6 +141,7 @@ export class Executor {
       destinationUrl,
       declaredClass: req.declaredClass,
       approvalGranted: this.o.approvalGranted ?? false,
+      valueRef: req.valueRef,
     });
 
     evidence.event('policy.check',

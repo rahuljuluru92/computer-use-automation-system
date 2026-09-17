@@ -1,0 +1,102 @@
+{"seq":1,"t":"2026-09-17T22:37:11.342Z","kind":"run.start","message":"Replaying cap.member.open_subaccount v1.0.0 (draft), with no model in the loop.","data":{"capability":"cap.member.open_subaccount","version":"1.0.0","inputs":["memberId","subType","nickname","deposit","fundingAccount"]}}
+{"seq":2,"t":"2026-09-17T22:37:11.400Z","kind":"observe","message":"Entered at http://localhost:4400/.","data":{"url":"http://localhost:4400/","nodes":21,"structureHash":"bda5c9c65b947054"}}
+{"seq":3,"t":"2026-09-17T22:37:11.400Z","kind":"step.begin","message":"Step 1: Open the banking console","stepId":"s1","data":{"index":1,"actionKind":"navigate","actionClass":"read"}}
+{"seq":4,"t":"2026-09-17T22:37:11.425Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s1","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":5,"t":"2026-09-17T22:37:11.433Z","kind":"action","message":"Navigated.","stepId":"s1","data":{"actionKind":"navigate","durationMs":8}}
+{"seq":6,"t":"2026-09-17T22:37:11.446Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s1","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":7,"t":"2026-09-17T22:37:11.446Z","kind":"checkpoint","message":"Checkpoint held: \"Enter operator ID\" is present","stepId":"s1","data":{"held":true}}
+{"seq":8,"t":"2026-09-17T22:37:11.458Z","kind":"step.end","message":"Step 1 ok.","stepId":"s1","data":{"status":"ok","durationMs":57}}
+{"seq":9,"t":"2026-09-17T22:37:11.458Z","kind":"step.begin","message":"Step 2: Enter operator ID","stepId":"s2","data":{"index":2,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":10,"t":"2026-09-17T22:37:11.474Z","kind":"locator.resolve","message":"Found Enter operator ID via tier 1.","stepId":"s2","data":{"locatorDescription":"Enter operator ID","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":11,"t":"2026-09-17T22:37:11.474Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s2","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":12,"t":"2026-09-17T22:37:11.499Z","kind":"action","message":"Typed into on \"Operator ID\".","stepId":"s2","data":{"actionKind":"type","durationMs":25,"target":{"role":"textbox","name":"Operator ID","frame":[]}}}
+{"seq":13,"t":"2026-09-17T22:37:11.841Z","kind":"checkpoint","message":"Checkpoint held: \"Enter operator ID\" is present","stepId":"s2","data":{"held":true}}
+{"seq":14,"t":"2026-09-17T22:37:11.865Z","kind":"step.end","message":"Step 2 ok.","stepId":"s2","data":{"status":"ok","durationMs":407}}
+{"seq":15,"t":"2026-09-17T22:37:11.865Z","kind":"step.begin","message":"Step 3: Enter operator password","stepId":"s3","data":{"index":3,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":16,"t":"2026-09-17T22:37:11.896Z","kind":"locator.resolve","message":"Found Enter operator password via tier 1.","stepId":"s3","data":{"locatorDescription":"Enter operator password","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":17,"t":"2026-09-17T22:37:11.896Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s3","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":18,"t":"2026-09-17T22:37:11.929Z","kind":"action","message":"Typed into on \"Password\".","stepId":"s3","data":{"actionKind":"type","durationMs":33,"target":{"role":"textbox","name":"Password","frame":[]}}}
+{"seq":19,"t":"2026-09-17T22:37:12.277Z","kind":"checkpoint","message":"Checkpoint held: \"Enter operator password\" is present","stepId":"s3","data":{"held":true}}
+{"seq":20,"t":"2026-09-17T22:37:12.299Z","kind":"step.end","message":"Step 3 ok.","stepId":"s3","data":{"status":"ok","durationMs":434}}
+{"seq":21,"t":"2026-09-17T22:37:12.299Z","kind":"step.begin","message":"Step 4: Sign in to the console","stepId":"s4","data":{"index":4,"actionKind":"click","actionClass":"read"}}
+{"seq":22,"t":"2026-09-17T22:37:12.328Z","kind":"locator.resolve","message":"Found Sign in to the console via tier 1.","stepId":"s4","data":{"locatorDescription":"Sign in to the console","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":23,"t":"2026-09-17T22:37:12.329Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s4","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":24,"t":"2026-09-17T22:37:12.382Z","kind":"action","message":"Clicked on \"Sign In\".","stepId":"s4","data":{"actionKind":"click","durationMs":53,"target":{"role":"button","name":"Sign In","frame":[]}}}
+{"seq":25,"t":"2026-09-17T22:37:12.414Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s4","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":26,"t":"2026-09-17T22:37:12.415Z","kind":"checkpoint","message":"Checkpoint held: \"Search for the member\" is present","stepId":"s4","data":{"held":true}}
+{"seq":27,"t":"2026-09-17T22:37:12.444Z","kind":"step.end","message":"Step 4 ok.","stepId":"s4","data":{"status":"ok","durationMs":145}}
+{"seq":28,"t":"2026-09-17T22:37:12.444Z","kind":"step.begin","message":"Step 5: Search for the member","stepId":"s5","data":{"index":5,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":29,"t":"2026-09-17T22:37:12.478Z","kind":"locator.resolve","message":"Found Search for the member via tier 1.","stepId":"s5","data":{"locatorDescription":"Search for the member","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":30,"t":"2026-09-17T22:37:12.478Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s5","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":31,"t":"2026-09-17T22:37:12.486Z","kind":"action","message":"Typed into on \"Member ID\".","stepId":"s5","data":{"actionKind":"type","durationMs":8,"target":{"role":"textbox","name":"Member ID","frame":["contentFrame"]}}}
+{"seq":32,"t":"2026-09-17T22:37:12.836Z","kind":"checkpoint","message":"Checkpoint held: \"Search for the member\" = \"12345\" (wanted \"12345\")","stepId":"s5","data":{"held":true}}
+{"seq":33,"t":"2026-09-17T22:37:12.866Z","kind":"step.end","message":"Step 5 ok.","stepId":"s5","data":{"status":"ok","durationMs":422}}
+{"seq":34,"t":"2026-09-17T22:37:12.866Z","kind":"step.begin","message":"Step 6: Search for the member","stepId":"s6","data":{"index":6,"actionKind":"click","actionClass":"read"}}
+{"seq":35,"t":"2026-09-17T22:37:12.913Z","kind":"locator.resolve","message":"Found Search for the member via tier 1.","stepId":"s6","data":{"locatorDescription":"Search for the member","winningTier":1,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":36,"t":"2026-09-17T22:37:12.914Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s6","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":37,"t":"2026-09-17T22:37:12.970Z","kind":"action","message":"Clicked on \"Search\".","stepId":"s6","data":{"actionKind":"click","durationMs":56,"target":{"role":"button","name":"Search","frame":["contentFrame"]}}}
+{"seq":38,"t":"2026-09-17T22:37:12.987Z","kind":"wait","message":"The expected change happened after 1ms.","stepId":"s6","data":{"held":true,"elapsedMs":1,"attempts":1}}
+{"seq":39,"t":"2026-09-17T22:37:12.987Z","kind":"checkpoint","message":"Checkpoint held: \"Open a new sub-account for the member\" is present","stepId":"s6","data":{"held":true}}
+{"seq":40,"t":"2026-09-17T22:37:13.013Z","kind":"step.end","message":"Step 6 ok.","stepId":"s6","data":{"status":"ok","durationMs":146}}
+{"seq":41,"t":"2026-09-17T22:37:13.013Z","kind":"step.begin","message":"Step 7: Open a new sub-account for the member","stepId":"s7","data":{"index":7,"actionKind":"click","actionClass":"write_reversible"}}
+{"seq":42,"t":"2026-09-17T22:37:13.046Z","kind":"locator.resolve","message":"Found Open a new sub-account for the member via tier 1.","stepId":"s7","data":{"locatorDescription":"Open a new sub-account for the member","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":43,"t":"2026-09-17T22:37:13.046Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s7","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":44,"t":"2026-09-17T22:37:13.099Z","kind":"action","message":"Clicked on \"Open Sub-Account\".","stepId":"s7","data":{"actionKind":"click","durationMs":53,"target":{"role":"button","name":"Open Sub-Account","frame":["contentFrame"]}}}
+{"seq":45,"t":"2026-09-17T22:37:13.115Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s7","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":46,"t":"2026-09-17T22:37:13.115Z","kind":"checkpoint","message":"Checkpoint held: \"Select sub-account type\" is present","stepId":"s7","data":{"held":true}}
+{"seq":47,"t":"2026-09-17T22:37:13.144Z","kind":"step.end","message":"Step 7 ok.","stepId":"s7","data":{"status":"ok","durationMs":131}}
+{"seq":48,"t":"2026-09-17T22:37:13.144Z","kind":"step.begin","message":"Step 8: Select sub-account type","stepId":"s8","data":{"index":8,"actionKind":"select","actionClass":"write_reversible"}}
+{"seq":49,"t":"2026-09-17T22:37:13.177Z","kind":"locator.resolve","message":"Found Select sub-account type via tier 1.","stepId":"s8","data":{"locatorDescription":"Select sub-account type","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":50,"t":"2026-09-17T22:37:13.177Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s8","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":51,"t":"2026-09-17T22:37:13.181Z","kind":"action","message":"Selected an option in on \"Sub-Account Type\".","stepId":"s8","data":{"actionKind":"select","durationMs":4,"target":{"role":"combobox","name":"Sub-Account Type","frame":["contentFrame"]}}}
+{"seq":52,"t":"2026-09-17T22:37:13.188Z","kind":"wait","message":"The expected change happened after 0ms.","stepId":"s8","data":{"held":true,"elapsedMs":0,"attempts":1}}
+{"seq":53,"t":"2026-09-17T22:37:13.188Z","kind":"checkpoint","message":"Checkpoint held: \"Enter nickname for sub-account\" is present","stepId":"s8","data":{"held":true}}
+{"seq":54,"t":"2026-09-17T22:37:13.227Z","kind":"step.end","message":"Step 8 ok.","stepId":"s8","data":{"status":"ok","durationMs":83}}
+{"seq":55,"t":"2026-09-17T22:37:13.227Z","kind":"step.begin","message":"Step 9: Enter nickname for sub-account","stepId":"s9","data":{"index":9,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":56,"t":"2026-09-17T22:37:13.260Z","kind":"locator.resolve","message":"Found Enter nickname for sub-account via tier 1.","stepId":"s9","data":{"locatorDescription":"Enter nickname for sub-account","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":57,"t":"2026-09-17T22:37:13.260Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s9","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":58,"t":"2026-09-17T22:37:13.265Z","kind":"action","message":"Typed into on \"Nickname\".","stepId":"s9","data":{"actionKind":"type","durationMs":5,"target":{"role":"textbox","name":"Nickname","frame":["contentFrame"]}}}
+{"seq":59,"t":"2026-09-17T22:37:13.613Z","kind":"checkpoint","message":"Checkpoint held: \"Enter nickname for sub-account\" = \"Rainy Day Fund\" (wanted \"Rainy Day Fund\")","stepId":"s9","data":{"held":true}}
+{"seq":60,"t":"2026-09-17T22:37:13.651Z","kind":"step.end","message":"Step 9 ok.","stepId":"s9","data":{"status":"ok","durationMs":424}}
+{"seq":61,"t":"2026-09-17T22:37:13.652Z","kind":"step.begin","message":"Step 10: Enter initial deposit amount","stepId":"s10","data":{"index":10,"actionKind":"type","actionClass":"write_reversible"}}
+{"seq":62,"t":"2026-09-17T22:37:13.698Z","kind":"locator.resolve","message":"Found Enter initial deposit amount via tier 1.","stepId":"s10","data":{"locatorDescription":"Enter initial deposit amount","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":63,"t":"2026-09-17T22:37:13.699Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s10","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":64,"t":"2026-09-17T22:37:13.707Z","kind":"action","message":"Typed into on \"Initial Deposit\".","stepId":"s10","data":{"actionKind":"type","durationMs":8,"target":{"role":"textbox","name":"Initial Deposit","frame":["contentFrame"]}}}
+{"seq":65,"t":"2026-09-17T22:37:14.073Z","kind":"checkpoint","message":"Checkpoint held: \"Enter initial deposit amount\" = \"500\" (wanted \"500\")","stepId":"s10","data":{"held":true}}
+{"seq":66,"t":"2026-09-17T22:37:14.100Z","kind":"step.end","message":"Step 10 ok.","stepId":"s10","data":{"status":"ok","durationMs":448}}
+{"seq":67,"t":"2026-09-17T22:37:14.100Z","kind":"step.begin","message":"Step 11: Select the funding account","stepId":"s11","data":{"index":11,"actionKind":"select","actionClass":"write_reversible"}}
+{"seq":68,"t":"2026-09-17T22:37:14.148Z","kind":"locator.resolve","message":"Found Select the funding account via tier 1.","stepId":"s11","data":{"locatorDescription":"Select the funding account","winningTier":1,"agreement":4,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":69,"t":"2026-09-17T22:37:14.148Z","kind":"policy.check","message":"Policy allows this write_reversible action.","stepId":"s11","data":{"verdict":"allow","actionClass":"write_reversible"}}
+{"seq":70,"t":"2026-09-17T22:37:14.152Z","kind":"action","message":"Selected an option in on \"Funding Account\".","stepId":"s11","data":{"actionKind":"select","durationMs":4,"target":{"role":"combobox","name":"Funding Account","frame":["contentFrame"]}}}
+{"seq":71,"t":"2026-09-17T22:37:14.159Z","kind":"wait","message":"The expected change happened after 1ms.","stepId":"s11","data":{"held":true,"elapsedMs":1,"attempts":1}}
+{"seq":72,"t":"2026-09-17T22:37:14.159Z","kind":"checkpoint","message":"Checkpoint held: \"Proceed to confirm sub-account opening\" is present","stepId":"s11","data":{"held":true}}
+{"seq":73,"t":"2026-09-17T22:37:14.196Z","kind":"step.end","message":"Step 11 ok.","stepId":"s11","data":{"status":"ok","durationMs":95}}
+{"seq":74,"t":"2026-09-17T22:37:14.196Z","kind":"step.begin","message":"Step 12: Proceed to confirm sub-account opening","stepId":"s12","data":{"index":12,"actionKind":"click","actionClass":"read"}}
+{"seq":75,"t":"2026-09-17T22:37:14.229Z","kind":"locator.resolve","message":"Found Proceed to confirm sub-account opening via tier 1.","stepId":"s12","data":{"locatorDescription":"Proceed to confirm sub-account opening","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":76,"t":"2026-09-17T22:37:14.229Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s12","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":77,"t":"2026-09-17T22:37:14.260Z","kind":"action","message":"Clicked on \"Continue\".","stepId":"s12","data":{"actionKind":"click","durationMs":31,"target":{"role":"button","name":"Continue","frame":["contentFrame"]}}}
+{"seq":78,"t":"2026-09-17T22:37:14.384Z","kind":"wait","message":"The expected change happened after 119ms.","stepId":"s12","data":{"held":true,"elapsedMs":119,"attempts":2}}
+{"seq":79,"t":"2026-09-17T22:37:14.384Z","kind":"checkpoint","message":"Checkpoint held: \"Confirm and open the sub-account\" is present","stepId":"s12","data":{"held":true}}
+{"seq":80,"t":"2026-09-17T22:37:14.414Z","kind":"step.end","message":"Step 12 ok.","stepId":"s12","data":{"status":"ok","durationMs":218}}
+{"seq":81,"t":"2026-09-17T22:37:14.414Z","kind":"step.begin","message":"Step 13: Confirm and open the sub-account","stepId":"s13","data":{"index":13,"actionKind":"click","actionClass":"write_irreversible"}}
+{"seq":82,"t":"2026-09-17T22:37:14.447Z","kind":"locator.resolve","message":"Found Confirm and open the sub-account via tier 1.","stepId":"s13","data":{"locatorDescription":"Confirm and open the sub-account","winningTier":1,"agreement":3,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":83,"t":"2026-09-17T22:37:14.447Z","kind":"policy.check","message":"Policy allows this write_irreversible action.","stepId":"s13","data":{"verdict":"allow","actionClass":"write_irreversible"}}
+{"seq":84,"t":"2026-09-17T22:37:14.476Z","kind":"action","message":"Clicked on \"Confirm and Open Account\".","stepId":"s13","data":{"actionKind":"click","durationMs":28,"target":{"role":"button","name":"Confirm and Open Account","frame":["contentFrame"]}}}
+{"seq":85,"t":"2026-09-17T22:37:14.598Z","kind":"wait","message":"The expected change happened after 116ms.","stepId":"s13","data":{"held":true,"elapsedMs":116,"attempts":2}}
+{"seq":86,"t":"2026-09-17T22:37:14.598Z","kind":"checkpoint","message":"Checkpoint held: \"Confirm the sub-account was created successfully\" reads \"Sub-account created successfully.\" (wanted /Sub-account created successfully\\./)","stepId":"s13","data":{"held":true}}
+{"seq":87,"t":"2026-09-17T22:37:14.612Z","kind":"step.end","message":"Step 13 ok.","stepId":"s13","data":{"status":"ok","durationMs":198}}
+{"seq":88,"t":"2026-09-17T22:37:14.613Z","kind":"step.begin","message":"Step 14: Record the reference number for the sub-account opening","stepId":"s14","data":{"index":14,"actionKind":"extract","actionClass":"read"}}
+{"seq":89,"t":"2026-09-17T22:37:14.629Z","kind":"locator.resolve","message":"Found value of referenceNumber via tier 3.","stepId":"s14","data":{"locatorDescription":"value of referenceNumber","winningTier":3,"agreement":1,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":90,"t":"2026-09-17T22:37:14.629Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s14","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":91,"t":"2026-09-17T22:37:14.629Z","kind":"action","message":"Read on \"SUB-MU640TX1\".","stepId":"s14","data":{"actionKind":"extract","durationMs":0,"target":{"role":"cell","name":"SUB-MU640TX1","frame":["contentFrame"]}}}
+{"seq":92,"t":"2026-09-17T22:37:14.988Z","kind":"checkpoint","message":"Checkpoint held: \"value of referenceNumber\" is present","stepId":"s14","data":{"held":true}}
+{"seq":93,"t":"2026-09-17T22:37:14.994Z","kind":"extract","message":"Read referenceNumber.","stepId":"s14","data":{"name":"referenceNumber","sensitivity":"none"}}
+{"seq":94,"t":"2026-09-17T22:37:15.016Z","kind":"step.end","message":"Step 14 ok.","stepId":"s14","data":{"status":"ok","durationMs":403}}
+{"seq":95,"t":"2026-09-17T22:37:15.016Z","kind":"step.begin","message":"Step 15: Record the new sub-account number","stepId":"s15","data":{"index":15,"actionKind":"extract","actionClass":"read"}}
+{"seq":96,"t":"2026-09-17T22:37:15.047Z","kind":"locator.resolve","message":"Found value of accountNumber via tier 3.","stepId":"s15","data":{"locatorDescription":"value of accountNumber","winningTier":3,"agreement":2,"degraded":false,"missedTiers":[],"candidateCount":1,"durationMs":0}}
+{"seq":97,"t":"2026-09-17T22:37:15.047Z","kind":"policy.check","message":"Policy allows this read action.","stepId":"s15","data":{"verdict":"allow","actionClass":"read"}}
+{"seq":98,"t":"2026-09-17T22:37:15.047Z","kind":"action","message":"Read on \"0010-2721\".","stepId":"s15","data":{"actionKind":"extract","durationMs":0,"target":{"role":"cell","name":"0010-2721","frame":["contentFrame"]}}}
+{"seq":99,"t":"2026-09-17T22:37:15.406Z","kind":"checkpoint","message":"Checkpoint held: \"value of accountNumber\" is present","stepId":"s15","data":{"held":true}}
+{"seq":100,"t":"2026-09-17T22:37:15.410Z","kind":"extract","message":"Read accountNumber.","stepId":"s15","data":{"name":"accountNumber","sensitivity":"none"}}
+{"seq":101,"t":"2026-09-17T22:37:15.432Z","kind":"step.end","message":"Step 15 ok.","stepId":"s15","data":{"status":"ok","durationMs":416}}
+{"seq":102,"t":"2026-09-17T22:37:15.432Z","kind":"run.end","message":"Completed 15 steps and extracted 2 output(s).","data":{"outputs":["referenceNumber","accountNumber"]}}
