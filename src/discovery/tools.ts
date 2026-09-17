@@ -540,6 +540,10 @@ export class ToolRunner {
     const synth = synthesizeBundle(found.node, snapshot, {
       description: `value of ${name}`,
       params: this.o.params,
+      // This node's own text is the value about to be read - a strategy keyed
+      // on it is certain to be wrong on the next render, not merely likely to
+      // go stale eventually (decision #126).
+      forExtraction: true,
     });
     if (!synth.ok) {
       return fail(`That value cannot be described for replay: ${synth.reason}.`, 'unlocatable');

@@ -37,7 +37,7 @@ import type { CapabilityArtifact } from '../core/schema.ts';
 import { ToolRunner } from '../discovery/tools.ts';
 import { discover } from '../discovery/loop.ts';
 import { AnthropicPlanner } from '../discovery/planner.ts';
-import { systemPrompt, promptVersion, type TaskInput } from '../discovery/prompt.ts';
+import { systemPrompt, promptVersion, type TaskInput, type PromptVariant } from '../discovery/prompt.ts';
 import { compile, type CompileInput } from '../discovery/compiler.ts';
 
 export interface DiscoverCommandOptions {
@@ -52,6 +52,20 @@ export interface DiscoverCommandOptions {
   model?: string | undefined;
   label?: string | undefined;
   json: boolean;
+  /**
+   * A human watching this recording explicitly authorises it to cross the
+   * irreversible-action line for this one session - `PolicyEngine.check()`
+   * refuses it by default ("you never let a discovery agent move money"),
+   * which otherwise makes an irreversible flow's happy path unrecordable: the
+   * model would hit `needs_approval` at the commit step and have to call
+   * `request_human`, which `compile()` cannot turn into a capability.
+   * Independent of, and never a substitute for, the approval the *shipped*
+   * capability still requires at replay time - this only ever affects the
+   * discovery session it was passed to.
+   */
+  approveIrreversible?: boolean | undefined;
+  /** Selects `prompts/discovery-outcome.v1.md` over the default prompt. */
+  promptVariant?: PromptVariant | undefined;
 }
 
 /** The operator credentials the target needs, and where replay will read them. */
@@ -112,13 +126,14 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
   };
   const secretParams = password ? ['operatorPassword'] : [];
 
+  const promptVariant: PromptVariant = opts.promptVariant ?? 'default';
   const redactor = buildRedactor({
     secrets: { MERIDIAN_PASSWORD: password, MERIDIAN_USERNAME: username },
   });
   const evidence = new EvidenceWriter({
     runId: opts.label ?? newRunId('discovery'),
     redactor,
-    meta: { goal: opts.goal, target: opts.target, promptVersion: promptVersion() },
+    meta: { goal: opts.goal, target: opts.target, promptVersion: promptVersion(promptVariant) },
   });
 
   const declared: TaskInput[] = [
@@ -136,7 +151,7 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
   const planner = new AnthropicPlanner(model ? { model } : {});
   evidence.event('run.start',
     `Discovering: ${opts.goal}`,
-    { target: opts.target, model: planner.model, promptVersion: promptVersion() });
+    { target: opts.target, model: planner.model, promptVersion: promptVersion(promptVariant) });
 
   const surface = await WebSurface.launch({ headless: process.env.CUA_HEADED !== '1' });
   let run;
@@ -147,6 +162,7 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
       policy: new PolicyEngine({ ...loadPolicy(), allowedOrigins: [baseUrl] }),
       lease,
       evidence,
+      ...(opts.approveIrreversible ? { approvalGranted: true } : {}),
     });
     const runner = new ToolRunner({
       executor, surface, evidence, params, secretParams, secretEnv: CREDENTIALS,
@@ -156,7 +172,7 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
       planner,
       runner,
       evidence,
-      system: systemPrompt({ goal: opts.goal, startUrl: opts.target, inputs: declared }),
+      system: systemPrompt({ goal: opts.goal, startUrl: opts.target, inputs: declared }, promptVariant),
       ...((opts.maxTurns ?? opts.maxWallClockMs) ? { budget: {
         ...(opts.maxTurns ? { maxTurns: opts.maxTurns } : {}),
         ...(opts.maxWallClockMs ? { maxWallClockMs: opts.maxWallClockMs } : {}),
@@ -192,7 +208,7 @@ export async function runDiscoverCommand(opts: DiscoverCommandOptions): Promise<
     },
     provenance: {
       model: planner.model,
-      promptVersion: promptVersion(),
+      promptVersion: promptVersion(promptVariant),
       discoveryRunId: evidence.runId,
     },
     params,

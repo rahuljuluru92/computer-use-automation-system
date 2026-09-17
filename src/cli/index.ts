@@ -29,11 +29,21 @@ cua - computer-use capability system
 
   cua discover --goal <text> --target <url> [--input <json>] [--id <cap.x.y>]
                [--version <semver>] [--model <id>] [--max-steps <n>] [--max-wall-clock-ms <ms>]
+               [--approve-irreversible] [--outcome-scenario]
       Drive a live surface with a model until the goal is met, then compile and
       self-verify a capability artifact. Requires ANTHROPIC_API_KEY.
       Writes nothing unless the compiled artifact replays successfully.
       Default budget: 40 turns or 5 minutes, whichever comes first - an
       unfamiliar site the model has to explore may need more of either.
+      --approve-irreversible: policy refuses an irreversible action during
+      discovery by default ("you never let a discovery agent move money").
+      Pass this only when a human is watching this one recording and means to
+      let it complete an irreversible flow's happy path. Never implied at
+      replay time, which is gated independently.
+      --outcome-scenario: use the discovery-outcome prompt variant, which
+      tells the model this run exists to record a refusal and to declare it
+      immediately rather than try to succeed anyway. For a run kept only for
+      its declare_outcome call, not for compile()'s primary run.
 
   cua replay --artifact <path> [--input <json>] [--tenant <id>] [--chaos <mode>] [--label <name>]
              [--operator <url>]
@@ -94,6 +104,8 @@ async function main(argv: string[]): Promise<number> {
       schema: { type: 'boolean' },
       result: { type: 'boolean' },
       json: { type: 'boolean' },
+      'approve-irreversible': { type: 'boolean' },
+      'outcome-scenario': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
     },
   });
@@ -152,6 +164,8 @@ async function main(argv: string[]): Promise<number> {
         maxWallClockMs: values['max-wall-clock-ms'] ? Number(values['max-wall-clock-ms']) : undefined,
         label: values.label,
         json: values.json ?? false,
+        approveIrreversible: values['approve-irreversible'] ?? false,
+        promptVariant: values['outcome-scenario'] ? 'outcome' : 'default',
       });
     }
 

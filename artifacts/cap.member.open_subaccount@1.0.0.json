@@ -1,0 +1,2406 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "cap.member.open_subaccount",
+  "version": "1.0.0",
+  "status": "draft",
+  "title": "Open a member sub-account",
+  "description": "Open a new sub-account for a member, funded from one of their existing accounts, and record the reference number and new account number the console gives back once it is opened.",
+  "target": {
+    "surface": "web",
+    "product": {
+      "vendor": "Meridian",
+      "app": "Core Servicing Console"
+    },
+    "entry": {
+      "kind": "url",
+      "template": "http://localhost:4400"
+    }
+  },
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "deposit": {
+        "type": "string",
+        "description": "the opening deposit amount"
+      },
+      "fundingAccount": {
+        "type": "string",
+        "description": "the existing account to fund it from"
+      },
+      "memberId": {
+        "type": "string",
+        "description": "the member to open a sub-account for"
+      },
+      "nickname": {
+        "type": "string",
+        "description": "a label for the new sub-account"
+      },
+      "subType": {
+        "type": "string",
+        "description": "Savings, Money Market, or Certificate"
+      }
+    },
+    "required": [
+      "deposit",
+      "fundingAccount",
+      "memberId",
+      "nickname",
+      "subType"
+    ],
+    "additionalProperties": false
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "referenceNumber": {
+        "type": "string"
+      },
+      "accountNumber": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "referenceNumber",
+      "accountNumber"
+    ],
+    "additionalProperties": false
+  },
+  "outcomes": [
+    {
+      "code": "validation_error_funding_limit",
+      "description": "The console refused to open the new sub-account: \"Initial Deposit exceeds the daily funding limit for this member. (Policy: FUND-LIM-02)\" was shown when attempting to fund the new $500 Savings sub-account from account 0001-4477 for member 12345.",
+      "severity": "info",
+      "terminal": true,
+      "detect": {
+        "kind": "text_matches",
+        "locator": {
+          "description": "The console refused to open the new sub-account: \"Initial Deposit exceeds the daily funding limit for this member. (Policy: FUND-LIM-02)\" was shown when attempting to fund the new $500 Savings sub-account from account 0001-4477 for member 12345.",
+          "frame": {
+            "path": [
+              "contentFrame"
+            ]
+          },
+          "strategies": [
+            {
+              "tier": 1,
+              "strategy": {
+                "kind": "role_name",
+                "role": "listitem",
+                "name": "Initial Deposit exceeds the daily funding limit for this member. (Policy: FUND-LIM-02)",
+                "exact": true
+              },
+              "confidence": 0.95,
+              "rationale": "role=listitem name=\"Initial Deposit exceeds the daily funding limit for this member. (Policy: FUND-LIM-02)\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+            },
+            {
+              "tier": 4,
+              "strategy": {
+                "kind": "text",
+                "pattern": "^Initial Deposit exceeds the daily funding limit for this member\\. \\(Policy: FUND-LIM-02\\)$",
+                "role": "listitem"
+              },
+              "confidence": 0.55,
+              "rationale": "Matches its own visible text exactly (^Initial Deposit exceeds the daily funding limit for this member\\. \\(Policy: FUND-LIM-02\\)$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+            }
+          ],
+          "requireUnique": true,
+          "minAgreement": 2,
+          "allowDegraded": true
+        },
+        "pattern": "Initial Deposit exceeds the daily funding limit for this member\\. \\(Policy: FUND-LIM-02\\)"
+      },
+      "returns": {}
+    }
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "intent": "Open the banking console",
+      "action": {
+        "kind": "navigate",
+        "urlTemplate": "http://localhost:4400"
+      },
+      "actionClass": "read",
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter operator ID",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Operator ID",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Operator ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Operator ID",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Operator ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Operator ID$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Operator ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter operator ID",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Operator ID",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Operator ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Operator ID",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Operator ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Operator ID$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Operator ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s2",
+      "intent": "Enter operator ID",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter operator ID",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Operator ID",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Operator ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Operator ID",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.75,
+            "rationale": "The textbox labelled \"Operator ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Operator ID$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Operator ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$secret.MERIDIAN_USERNAME",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter operator ID",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Operator ID",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Operator ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Operator ID",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Operator ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Operator ID$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Operator ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s3",
+      "intent": "Enter operator password",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter operator password",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Password",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Password\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Password",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.75,
+            "rationale": "The textbox labelled \"Password\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Password$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Password$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$secret.MERIDIAN_PASSWORD",
+        "sensitivity": "secret"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter operator password",
+            "frame": {
+              "path": []
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Password",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Password\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Password",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Password\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Password$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Password$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s4",
+      "intent": "Sign in to the console",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "Sign in to the console",
+        "frame": {
+          "path": []
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Sign In",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Sign In\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Sign In$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Sign In$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "textbox",
+                "name": "Password"
+              },
+              "dx": 32,
+              "dy": 40.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 32,41 px from \"Password\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Search for the member",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Member ID",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Member ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Member ID",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Member ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Member ID$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Member ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "numeric, 5 digits"
+                  },
+                  "dx": 76,
+                  "dy": 14.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 76,15 px from \"numeric, 5 digits\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Search for the member",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Member ID",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Member ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Member ID",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Member ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Member ID$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Member ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "numeric, 5 digits"
+                  },
+                  "dx": 76,
+                  "dy": 14.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 76,15 px from \"numeric, 5 digits\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s5",
+      "intent": "Search for the member",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Search for the member",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Member ID",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Member ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Member ID",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.75,
+            "rationale": "The textbox labelled \"Member ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Member ID$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Member ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "cell",
+                "name": "numeric, 5 digits"
+              },
+              "dx": 76,
+              "dy": 14.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 76,15 px from \"numeric, 5 digits\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$input.memberId",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Search for the member",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Member ID",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Member ID\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Member ID",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Member ID\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Member ID$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Member ID$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "numeric, 5 digits"
+                  },
+                  "dx": 76,
+                  "dy": 14.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 76,15 px from \"numeric, 5 digits\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "$input.memberId"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s6",
+      "intent": "Search for the member",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "Search for the member",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Search",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Search\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Search$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Search$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Open a new sub-account for the member",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Open Sub-Account",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Open Sub-Account\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Open Sub-Account$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Open Sub-Account$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "0003-2256"
+                  },
+                  "dx": 65.5,
+                  "dy": 51.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 66,52 px from \"0003-2256\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Open a new sub-account for the member",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Open Sub-Account",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Open Sub-Account\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Open Sub-Account$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Open Sub-Account$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "0003-2256"
+                  },
+                  "dx": 65.5,
+                  "dy": 51.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 66,52 px from \"0003-2256\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s7",
+      "intent": "Open a new sub-account for the member",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Open a new sub-account for the member",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Open Sub-Account",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Open Sub-Account\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Open Sub-Account$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Open Sub-Account$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "cell",
+                "name": "0003-2256"
+              },
+              "dx": 65.5,
+              "dy": 51.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 66,52 px from \"0003-2256\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Select sub-account type",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "combobox",
+                  "name": "Sub-Account Type",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=combobox name=\"Sub-Account Type\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Sub-Account Type",
+                  "controlRole": "combobox"
+                },
+                "confidence": 0.75,
+                "rationale": "The combobox labelled \"Sub-Account Type\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Sub-Account Type$",
+                  "role": "combobox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Sub-Account Type$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "textbox",
+                    "name": "Nickname"
+                  },
+                  "dx": 52,
+                  "dy": -21.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 52,-21 px from \"Nickname\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Select sub-account type",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "combobox",
+                  "name": "Sub-Account Type",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=combobox name=\"Sub-Account Type\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Sub-Account Type",
+                  "controlRole": "combobox"
+                },
+                "confidence": 0.75,
+                "rationale": "The combobox labelled \"Sub-Account Type\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Sub-Account Type$",
+                  "role": "combobox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Sub-Account Type$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "textbox",
+                    "name": "Nickname"
+                  },
+                  "dx": 52,
+                  "dy": -21.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 52,-21 px from \"Nickname\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s8",
+      "intent": "Select sub-account type",
+      "action": {
+        "kind": "select"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Select sub-account type",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "combobox",
+              "name": "Sub-Account Type",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=combobox name=\"Sub-Account Type\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Sub-Account Type",
+              "controlRole": "combobox"
+            },
+            "confidence": 0.75,
+            "rationale": "The combobox labelled \"Sub-Account Type\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Sub-Account Type$",
+              "role": "combobox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Sub-Account Type$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "textbox",
+                "name": "Nickname"
+              },
+              "dx": 52,
+              "dy": -21.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 52,-21 px from \"Nickname\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$input.subType",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter nickname for sub-account",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Nickname",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Nickname\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Nickname",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Nickname\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Nickname$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Nickname$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Enter nickname for sub-account",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Nickname",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Nickname\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Nickname",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Nickname\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Nickname$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Nickname$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s9",
+      "intent": "Enter nickname for sub-account",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter nickname for sub-account",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Nickname",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Nickname\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Nickname",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.75,
+            "rationale": "The textbox labelled \"Nickname\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Nickname$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Nickname$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$input.nickname",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Enter nickname for sub-account",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Nickname",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Nickname\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Nickname",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Nickname\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Nickname$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Nickname$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "$input.nickname"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s10",
+      "intent": "Enter initial deposit amount",
+      "action": {
+        "kind": "type",
+        "clearFirst": true
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Enter initial deposit amount",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "textbox",
+              "name": "Initial Deposit",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=textbox name=\"Initial Deposit\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Initial Deposit",
+              "controlRole": "textbox"
+            },
+            "confidence": 0.75,
+            "rationale": "The textbox labelled \"Initial Deposit\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Initial Deposit$",
+              "role": "textbox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Initial Deposit$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "combobox",
+                "name": "Funding Account"
+              },
+              "dx": 47,
+              "dy": -20.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 47,-20 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$input.deposit",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "value_equals",
+          "locator": {
+            "description": "Enter initial deposit amount",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "textbox",
+                  "name": "Initial Deposit",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=textbox name=\"Initial Deposit\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Initial Deposit",
+                  "controlRole": "textbox"
+                },
+                "confidence": 0.75,
+                "rationale": "The textbox labelled \"Initial Deposit\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Initial Deposit$",
+                  "role": "textbox"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Initial Deposit$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "combobox",
+                    "name": "Funding Account"
+                  },
+                  "dx": 47,
+                  "dy": -20.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 47,-20 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "value": "$input.deposit"
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s11",
+      "intent": "Select the funding account",
+      "action": {
+        "kind": "select"
+      },
+      "actionClass": "write_reversible",
+      "target": {
+        "description": "Select the funding account",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "combobox",
+              "name": "Funding Account",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=combobox name=\"Funding Account\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Funding Account",
+              "controlRole": "combobox"
+            },
+            "confidence": 0.75,
+            "rationale": "The combobox labelled \"Funding Account\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Funding Account$",
+              "role": "combobox"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Funding Account$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "cell",
+                "name": "-- Select --"
+              },
+              "dx": 97.5,
+              "dy": 15.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 98,16 px from \"-- Select --\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "data": {
+        "value": "$input.fundingAccount",
+        "sensitivity": "none"
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Proceed to confirm sub-account opening",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Continue",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Continue\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Continue$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Continue$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "combobox",
+                    "name": "Funding Account"
+                  },
+                  "dx": 36.5,
+                  "dy": 42.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 37,43 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Proceed to confirm sub-account opening",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Continue",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Continue\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Continue$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Continue$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "combobox",
+                    "name": "Funding Account"
+                  },
+                  "dx": 36.5,
+                  "dy": 42.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 37,43 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s12",
+      "intent": "Proceed to confirm sub-account opening",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "Proceed to confirm sub-account opening",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Continue",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Continue\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Continue$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Continue$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "combobox",
+                "name": "Funding Account"
+              },
+              "dx": 36.5,
+              "dy": 42.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 37,43 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Confirm and open the sub-account",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Confirm and Open Account",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Confirm and Open Account\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Confirm and Open Account$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Confirm and Open Account$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "Funding Account"
+                  },
+                  "dx": 96.5,
+                  "dy": 44.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 97,45 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "Confirm and open the sub-account",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "button",
+                  "name": "Confirm and Open Account",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=button name=\"Confirm and Open Account\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Confirm and Open Account$",
+                  "role": "button"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Confirm and Open Account$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "Funding Account"
+                  },
+                  "dx": 96.5,
+                  "dy": 44.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 97,45 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s13",
+      "intent": "Confirm and open the sub-account",
+      "action": {
+        "kind": "click"
+      },
+      "actionClass": "write_irreversible",
+      "target": {
+        "description": "Confirm and open the sub-account",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 1,
+            "strategy": {
+              "kind": "role_name",
+              "role": "button",
+              "name": "Confirm and Open Account",
+              "exact": true
+            },
+            "confidence": 0.95,
+            "rationale": "role=button name=\"Confirm and Open Account\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+          },
+          {
+            "tier": 4,
+            "strategy": {
+              "kind": "text",
+              "pattern": "^Confirm and Open Account$",
+              "role": "button"
+            },
+            "confidence": 0.55,
+            "rationale": "Matches its own visible text exactly (^Confirm and Open Account$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "cell",
+                "name": "Funding Account"
+              },
+              "dx": 96.5,
+              "dy": 44.5
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 97,45 px from \"Funding Account\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "value of referenceNumber",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Reference Number",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.75,
+                "rationale": "The cell labelled \"Reference Number\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "0010-4166"
+                  },
+                  "dx": 78.5,
+                  "dy": -15
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 79,-15 px from \"0010-4166\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "checkpoint": [
+        {
+          "kind": "text_matches",
+          "locator": {
+            "description": "Confirm the sub-account was created successfully",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 1,
+                "strategy": {
+                  "kind": "role_name",
+                  "role": "status",
+                  "name": "Sub-account created successfully.",
+                  "exact": true
+                },
+                "confidence": 0.95,
+                "rationale": "role=status name=\"Sub-account created successfully.\" is unique in the recorded snapshot. Survives re-skinning and id churn for as long as the control keeps its accessible name."
+              },
+              {
+                "tier": 4,
+                "strategy": {
+                  "kind": "text",
+                  "pattern": "^Sub-account created successfully\\.$",
+                  "role": "status"
+                },
+                "confidence": 0.55,
+                "rationale": "Matches its own visible text exactly (^Sub-account created successfully\\.$). Cheap and surprisingly durable for buttons, but it cannot tell two identically-worded controls apart."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "columnheader",
+                    "name": "Sub-Account Opened"
+                  },
+                  "dx": 309,
+                  "dy": 49.5
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 309,50 px from \"Sub-Account Opened\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "pattern": "Sub-account created successfully\\."
+        }
+      ],
+      "extract": [],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s14",
+      "intent": "Record the reference number for the sub-account opening",
+      "action": {
+        "kind": "extract"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "value of referenceNumber",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Reference Number",
+              "controlRole": "cell"
+            },
+            "confidence": 0.75,
+            "rationale": "The cell labelled \"Reference Number\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "cell",
+                "name": "0010-4166"
+              },
+              "dx": 78.5,
+              "dy": -15
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 79,-15 px from \"0010-4166\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "value of referenceNumber",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Reference Number",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.75,
+                "rationale": "The cell labelled \"Reference Number\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "0010-4166"
+                  },
+                  "dx": 78.5,
+                  "dy": -15
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 79,-15 px from \"0010-4166\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [
+        {
+          "name": "referenceNumber",
+          "from": {
+            "description": "value of referenceNumber",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Reference Number",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.75,
+                "rationale": "The cell labelled \"Reference Number\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "0010-4166"
+                  },
+                  "dx": 78.5,
+                  "dy": -15
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 79,-15 px from \"0010-4166\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "parse": {
+            "kind": "text",
+            "trim": true
+          },
+          "sensitivity": "none"
+        }
+      ],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    },
+    {
+      "id": "s15",
+      "intent": "Record the new sub-account number",
+      "action": {
+        "kind": "extract"
+      },
+      "actionClass": "read",
+      "target": {
+        "description": "value of accountNumber",
+        "frame": {
+          "path": [
+            "contentFrame"
+          ]
+        },
+        "strategies": [
+          {
+            "tier": 3,
+            "strategy": {
+              "kind": "label_anchored",
+              "label": "Account Number",
+              "controlRole": "cell"
+            },
+            "confidence": 0.75,
+            "rationale": "The cell labelled \"Account Number\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+          },
+          {
+            "tier": 6,
+            "strategy": {
+              "kind": "anchor_offset",
+              "anchor": {
+                "role": "cell",
+                "name": "Savings"
+              },
+              "dx": 78.5,
+              "dy": -12
+            },
+            "confidence": 0.3,
+            "rationale": "Geometry only: 79,-12 px from \"Savings\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+          }
+        ],
+        "requireUnique": true,
+        "minAgreement": 2,
+        "allowDegraded": true
+      },
+      "preconditions": [],
+      "waitFor": [],
+      "checkpoint": [
+        {
+          "kind": "node_present",
+          "locator": {
+            "description": "value of accountNumber",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Account Number",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.75,
+                "rationale": "The cell labelled \"Account Number\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "Savings"
+                  },
+                  "dx": 78.5,
+                  "dy": -12
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 79,-12 px from \"Savings\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          }
+        }
+      ],
+      "extract": [
+        {
+          "name": "accountNumber",
+          "from": {
+            "description": "value of accountNumber",
+            "frame": {
+              "path": [
+                "contentFrame"
+              ]
+            },
+            "strategies": [
+              {
+                "tier": 3,
+                "strategy": {
+                  "kind": "label_anchored",
+                  "label": "Account Number",
+                  "controlRole": "cell"
+                },
+                "confidence": 0.75,
+                "rationale": "The cell labelled \"Account Number\". Durable while the form's visible wording holds; breaks on copy changes rather than on markup changes."
+              },
+              {
+                "tier": 6,
+                "strategy": {
+                  "kind": "anchor_offset",
+                  "anchor": {
+                    "role": "cell",
+                    "name": "Savings"
+                  },
+                  "dx": 78.5,
+                  "dy": -12
+                },
+                "confidence": 0.3,
+                "rationale": "Geometry only: 79,-12 px from \"Savings\". Carries the no-accessibility-tree case; viewport-relative, so only this delta is meaningful, and it is never trusted alone."
+              }
+            ],
+            "requireUnique": true,
+            "minAgreement": 2,
+            "allowDegraded": true
+          },
+          "parse": {
+            "kind": "text",
+            "trim": true
+          },
+          "sensitivity": "none"
+        }
+      ],
+      "onOutcome": [],
+      "recovery": [],
+      "budget": {
+        "timeoutMs": 8000,
+        "retries": 2
+      }
+    }
+  ],
+  "recovery": [],
+  "policy": {
+    "maxSteps": 40,
+    "maxWallClockMs": 90000,
+    "allowedActionClasses": [
+      "read",
+      "write_reversible",
+      "write_irreversible"
+    ]
+  },
+  "escalation": {
+    "timeoutMs": 300000,
+    "maxResumes": 2,
+    "abandon": {
+      "kind": "entry"
+    }
+  },
+  "tenancy": {
+    "canonical": true,
+    "overlays": {}
+  },
+  "provenance": {
+    "discoveryRunId": "20260917T221348Z-discovery-88e38c8a",
+    "model": "claude-sonnet-5",
+    "promptVersion": "discovery.v1+sha256:3686038d",
+    "recordedAt": "2026-09-17T22:13:48.217Z",
+    "compilerVersion": "1.0.0",
+    "selfVerified": {
+      "passed": true,
+      "at": "2026-09-17T22:14:08.555Z",
+      "runId": "20260917T221348Z-verify-2a7a6199"
+    }
+  },
+  "reliability": {
+    "runs": 1,
+    "passRate": 1,
+    "p50DurationMs": 9138,
+    "p95DurationMs": 9138,
+    "degradedResolutions": 0,
+    "lastVerifiedAt": "2026-09-17T22:14:08.555Z"
+  },
+  "integrity": {
+    "hash": "sha256:1bed453e26aaa539ec655151563b3ec1fb49f25719b267dcfece6d8ea423a1f5"
+  }
+}

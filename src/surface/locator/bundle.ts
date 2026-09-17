@@ -49,6 +49,24 @@ export interface SynthesizeOptions {
    * the literal text "$input.memberId".
    */
   params?: Record<string, unknown>;
+  /**
+   * This node's own text is what `extract` is about to read as an output, not
+   * wording the page merely happens to display next to it - so a strategy that
+   * discriminates by that text (tier 1's own name, tier 4's own text) is not
+   * volatile in the decision #50 sense of "eventually goes stale"; it is
+   * certain to be wrong on the very next render, because a fresh value is the
+   * entire reason the step exists. Found live: a reference number generated
+   * per request verified at tier 1 during discovery (its own text was the
+   * node's only name) and then could not resolve on a cold replay, and worse,
+   * poisoned quorum for the tier-3 label-anchored strategy that *did* still
+   * work, because decision #50's confidence discount does not stop a doomed
+   * strategy from being counted as a quorum witness. Skips generating tier 1
+   * and tier 4 candidates entirely for an extraction target, rather than
+   * generating and merely discounting them - table/label/geometry tiers,
+   * which key on context around the node rather than the node's own text, are
+   * unaffected (decision #126).
+   */
+  forExtraction?: boolean;
 }
 
 export interface RejectedStrategy {
@@ -123,10 +141,10 @@ export function synthesizeBundle(
   // verifies wins that tier. Candidates within a tier are ordered by how well
   // they tend to generalise, not by how easy they were to produce.
   const byTier: Array<[number, LocatorStrategy[]]> = [
-    [1, roleNameCandidates(node, params)],
+    [1, opts.forExtraction ? [] : roleNameCandidates(node, params)],
     [2, tableCellCandidates(node, snapshot, params)],
     [3, labelAnchoredCandidates(node)],
-    [4, textCandidates(node)],
+    [4, opts.forExtraction ? [] : textCandidates(node)],
     [6, anchorOffsetCandidates(node, snapshot)],
   ];
 

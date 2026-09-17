@@ -28,8 +28,12 @@ function build(
   policy: Partial<PolicyConfig> = {},
   params: Record<string, unknown> = {},
   secrets: string[] = [],
+  approvalGranted?: boolean,
 ): void {
-  const h = buildHarness({ policy, params, secrets, root: ROOT });
+  const h = buildHarness({
+    policy, params, secrets, root: ROOT,
+    ...(approvalGranted !== undefined ? { approvalGranted } : {}),
+  });
   surface = h.surface;
   runner = h.runner;
 }
@@ -241,6 +245,31 @@ describe('declare_outcome', () => {
     expect(r.ok).toBe(false);
     expect(r.text).toMatch(/No control/);
     expect(runner.terminal).toBeUndefined();
+  });
+});
+
+describe('irreversible actions during discovery, unless a human grants it for this run', () => {
+  // "You never let a discovery agent move money" (src/policy/policyEngine.ts) -
+  // this holds during recording exactly as it holds during replay, unless the
+  // person watching this one session explicitly says otherwise (--approve-
+  // irreversible on the CLI, `approvalGranted` here).
+  it('refuses a require_approval-labelled click by default, even mid-recording', async () => {
+    build({ requireApprovalLabels: ['View'] });
+    await runner.run('observe', {});
+    const r = await runner.run('click', { ref: savingsView(1), intent: 'open the savings account' });
+
+    expect(r.ok).toBe(false);
+    expect(r.text).toMatch(/needs human approval/);
+    expect(runner.steps).toHaveLength(0);
+  });
+
+  it('allows it once a human has explicitly granted approval for this recording', async () => {
+    build({ requireApprovalLabels: ['View'] }, {}, [], true);
+    await runner.run('observe', {});
+    const r = await runner.run('click', { ref: savingsView(1), intent: 'open the savings account' });
+
+    expect(r.ok).toBe(true);
+    expect(runner.steps).toHaveLength(1);
   });
 });
 

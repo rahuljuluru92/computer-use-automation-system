@@ -1,0 +1,16 @@
+{
+  "runId": "20260917T221357Z-verify-099eed76",
+  "verifying": "cap.member.open_subaccount",
+  "version": "1.0.0",
+  "scenario": {
+    "armUrl": "http://localhost:4400/_chaos?mode=validation_error"
+  },
+  "status": "business_outcome",
+  "outcome": "validation_error_funding_limit",
+  "events": 80,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:14:08.534Z"
+}

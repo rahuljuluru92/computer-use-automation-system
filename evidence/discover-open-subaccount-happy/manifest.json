@@ -1,0 +1,23 @@
+{
+  "runId": "discover-open-subaccount-happy",
+  "goal": "Open a new sub-account for a member, funded from one of their existing accounts, and record the reference number and new account number the console gives back once it is opened.",
+  "target": "http://localhost:4400",
+  "promptVersion": "discovery.v1+sha256:3686038d",
+  "discovery": {
+    "turns": 19,
+    "toolCalls": 25,
+    "llmCalls": 19,
+    "inputTokens": 38,
+    "outputTokens": 2461,
+    "durationMs": 46524,
+    "policyDenials": 0,
+    "oscillationWarnings": 0
+  },
+  "terminal": "finish",
+  "events": 70,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:13:15.659Z"
+}

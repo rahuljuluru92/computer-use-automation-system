@@ -135,6 +135,39 @@ describe('synthesis: what it produces is valid and honest', () => {
     expect(label!.rationale).toMatch(/Discounted/);
   });
 
+  it('never keys an extraction target on its own text, only on context around it', () => {
+    // decision #126, found live: a freshly-generated reference number verified
+    // at tier 1 (role_name, its own text) during discovery, then could not
+    // resolve on a cold replay where a *different* fresh value was generated -
+    // and worse, the doomed tier-1 and tier-4 candidates (both keyed on that
+    // same self-text) counted as quorum witnesses against the tier-3
+    // label-anchored strategy that still worked correctly on its own.
+    // "Current Balance" is static test data here, so it is not itself the
+    // scenario that broke - the point is the *mechanism* must not depend on
+    // that: it has to hold for a value that changes on every render too.
+    const s = snap('member-detail');
+    const node = nodeByRef(s, 'f3e42'); // the "$4,210.55" cell
+
+    const withoutFlag = synthesizeBundle(node, s, { description: 'value of savingsBalance' });
+    expect(withoutFlag.ok).toBe(true);
+    if (withoutFlag.ok) {
+      // Confirms the flag actually changes something, rather than asserting a
+      // property that would hold either way.
+      expect(withoutFlag.bundle.strategies.some((st) => st.strategy.kind === 'role_name')).toBe(true);
+    }
+
+    const forExtraction = synthesizeBundle(node, s, {
+      description: 'value of savingsBalance', forExtraction: true,
+    });
+    expect(forExtraction.ok).toBe(true);
+    if (!forExtraction.ok) return;
+
+    expect(forExtraction.bundle.strategies.some((st) => st.strategy.kind === 'role_name')).toBe(false);
+    expect(forExtraction.bundle.strategies.some((st) => st.strategy.kind === 'text')).toBe(false);
+    // Context-based tiers are unaffected - there is still something to ship.
+    expect(forExtraction.bundle.strategies.length).toBeGreaterThan(0);
+  });
+
   it('refuses, rather than guessing, when nothing identifies the node', () => {
     const bare: UiNode = {
       ref: 'x1', role: 'generic', name: '', state: {}, frameChain: [],

@@ -1,0 +1,16 @@
+{
+  "runId": "20260917T221348Z-verify-2a7a6199",
+  "verifying": "cap.member.open_subaccount",
+  "version": "1.0.0",
+  "status": "success",
+  "outputs": [
+    "referenceNumber",
+    "accountNumber"
+  ],
+  "events": 102,
+  "redaction": {
+    "registeredValues": 2,
+    "hits": []
+  },
+  "writtenAt": "2026-09-17T22:13:57.498Z"
+}

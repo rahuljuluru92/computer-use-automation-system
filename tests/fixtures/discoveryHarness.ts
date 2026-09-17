@@ -73,6 +73,8 @@ export function buildHarness(opts: {
   secrets?: string[];
   fixture?: string;
   root?: string;
+  /** Mirrors `--approve-irreversible`: a human is watching this one recording. */
+  approvalGranted?: boolean;
 } = {}): Harness {
   const surface = new FakeSurface(snap(opts.fixture ?? 'member-detail'));
   const evidence = new EvidenceWriter({
@@ -89,6 +91,7 @@ export function buildHarness(opts: {
     }),
     lease: new SessionLease(evidence.runId),
     evidence,
+    ...(opts.approvalGranted !== undefined ? { approvalGranted: opts.approvalGranted } : {}),
   });
   const runner = new ToolRunner({
     executor,

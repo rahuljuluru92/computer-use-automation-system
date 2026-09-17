@@ -38,23 +38,41 @@ export interface TaskSpec {
   notes?: string;
 }
 
-const PROMPT_FILE = new URL('../../prompts/discovery.v1.md', import.meta.url);
-const PROMPT_NAME = 'discovery.v1';
+/**
+ * `outcome` is a distinct, separately versioned prompt - not the default text
+ * with a string appended at runtime - because `provenance.promptVersion` has
+ * to identify what actually drove the run. A run-time addendum would drive
+ * the run just as much as the base text does but leave no trace in the hash
+ * (decision #58). Used only for a discovery run kept for a declared business
+ * outcome (decision #124); the default variant's bytes, and therefore its
+ * hash, are completely unaffected by this file's existence.
+ */
+export type PromptVariant = 'default' | 'outcome';
 
-let cached: { text: string; version: string } | undefined;
+const PROMPT_FILES: Record<PromptVariant, URL> = {
+  default: new URL('../../prompts/discovery.v1.md', import.meta.url),
+  outcome: new URL('../../prompts/discovery-outcome.v1.md', import.meta.url),
+};
+const PROMPT_NAMES: Record<PromptVariant, string> = {
+  default: 'discovery.v1',
+  outcome: 'discovery-outcome.v1',
+};
 
-function load(): { text: string; version: string } {
-  if (!cached) {
-    const text = readFileSync(PROMPT_FILE, 'utf8');
-    const digest = createHash('sha256').update(text).digest('hex').slice(0, 8);
-    cached = { text, version: `${PROMPT_NAME}+sha256:${digest}` };
-  }
-  return cached;
+const cache = new Map<PromptVariant, { text: string; version: string }>();
+
+function load(variant: PromptVariant): { text: string; version: string } {
+  const hit = cache.get(variant);
+  if (hit) return hit;
+  const text = readFileSync(PROMPT_FILES[variant], 'utf8');
+  const digest = createHash('sha256').update(text).digest('hex').slice(0, 8);
+  const entry = { text, version: `${PROMPT_NAMES[variant]}+sha256:${digest}` };
+  cache.set(variant, entry);
+  return entry;
 }
 
 /** Goes into `provenance.promptVersion`. Identifies bytes, not intentions. */
-export function promptVersion(): string {
-  return load().version;
+export function promptVersion(variant: PromptVariant = 'default'): string {
+  return load(variant).version;
 }
 
 /**
@@ -66,8 +84,8 @@ export function promptVersion(): string {
  * to type a password it has never seen. Nothing here is a filter over a value
  * that was already in the prompt; the value never arrives.
  */
-export function systemPrompt(task: TaskSpec): string {
-  const { text } = load();
+export function systemPrompt(task: TaskSpec, variant: PromptVariant = 'default'): string {
+  const { text } = load(variant);
   return `${text}\n${taskSection(task)}`;
 }
 
